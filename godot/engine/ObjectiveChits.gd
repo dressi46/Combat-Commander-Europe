@@ -76,13 +76,13 @@ static func setup(state: GameState, spec: Dictionary, rng: RandomNumberGenerator
 				"letter": String(chit["id"]), "owner": owner, "revealed": owner == -1,
 			})
 			if owner == -1:
-				lines.append("Chit Obiettivo [aperto]: %s" % _describe(chit))
+				lines.append(L10n.t("Chit Obiettivo [aperto]: %s") % _describe(chit))
 			else:
-				lines.append("%s pesca un chit Obiettivo SEGRETO." % Domain.FACTION_NAMES.get(owner, "?"))
+				lines.append(L10n.t("%s pesca un chit Obiettivo SEGRETO.") % L10n.t(Domain.FACTION_NAMES.get(owner, "?")))
 	recompute(state)
 	for o in state.objectives:
 		if o.vp > 0:
-			lines.append("Obiettivo #%d vale %d VP (chit aperti)" % [o.id, o.vp])
+			lines.append(L10n.t("Obiettivo #%d vale %d VP (chit aperti)") % [o.id, o.vp])
 	return lines
 
 
@@ -157,8 +157,8 @@ static func reveal_all(state: GameState, faction: int = -1) -> Array:
 			continue
 		e["revealed"] = true
 		var chit := _find(String(e["letter"]))
-		lines.append("Rivelato chit segreto di %s: %s" % [
-			Domain.FACTION_NAMES.get(int(e["owner"]), "?"),
+		lines.append(L10n.t("Rivelato chit segreto di %s: %s") % [
+			L10n.t(Domain.FACTION_NAMES.get(int(e["owner"]), "?")),
 			_describe(chit) if not chit.is_empty() else String(e["letter"])])
 	recompute(state)
 	return lines
@@ -178,12 +178,12 @@ static func draw_one(state: GameState, rng: RandomNumberGenerator, lines: Array)
 		if not used.has(cid) and not state.chit_excluded.has(cid):
 			bag.append(c)
 	if bag.is_empty():
-		lines.append("Sacchetto dei chit vuoto: nessuna pescata.")
+		lines.append(L10n.t("Sacchetto dei chit vuoto: nessuna pescata."))
 		return ""
 	var chit: Dictionary = bag[rng.randi_range(0, bag.size() - 1)]
 	state.objective_chits.append({ "letter": String(chit["id"]), "owner": -1, "revealed": true })
 	recompute(state)
-	lines.append("Chit %s [aperto]: %s" % [chit["id"], _describe(chit)])
+	lines.append(L10n.t("Chit %s [aperto]: %s") % [chit["id"], _describe(chit)])
 	return String(chit["id"])
 
 
@@ -194,7 +194,7 @@ static func apply(state: GameState, chit_id: String, lines: Array) -> bool:
 		return false
 	state.objective_chits.append({ "letter": chit_id, "owner": -1, "revealed": true })
 	recompute(state)
-	lines.append("Chit %s: %s" % [chit_id, _describe(chit)])
+	lines.append(L10n.t("Chit %s: %s") % [chit_id, _describe(chit)])
 	return true
 
 
@@ -220,13 +220,13 @@ static func _add_value(state: GameState, chit: Dictionary) -> void:
 
 static func _describe(chit: Dictionary) -> String:
 	match String(chit["type"]):
-		"obj": return "%s — Obiettivo #%d +%d VP" % [chit["id"], int(chit["target"]), int(chit["vp"])]
-		"all": return "%s — ogni Obiettivo +%d VP" % [chit["id"], int(chit["vp"])]
+		"obj": return L10n.t("%s — Obiettivo #%d +%d VP") % [chit["id"], int(chit["target"]), int(chit["vp"])]
+		"all": return L10n.t("%s — ogni Obiettivo +%d VP") % [chit["id"], int(chit["vp"])]
 		"rule":
 			match String(chit["rule"]):
-				"double_exit": return "%s — VP d'uscita RADDOPPIATI" % chit["id"]
-				"double_elim": return "%s — VP da eliminazione RADDOPPIATI" % chit["id"]
-				"control_all_sd": return "%s — chi controlla TUTTI gli obiettivi vince (verificato prima di ogni Morte Subitanea)" % chit["id"]
+				"double_exit": return L10n.t("%s — VP d'uscita RADDOPPIATI") % chit["id"]
+				"double_elim": return L10n.t("%s — VP da eliminazione RADDOPPIATI") % chit["id"]
+				"control_all_sd": return L10n.t("%s — chi controlla TUTTI gli obiettivi vince (verificato prima di ogni Morte Subitanea)") % chit["id"]
 	return String(chit.get("id", "?"))
 
 

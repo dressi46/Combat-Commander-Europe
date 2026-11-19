@@ -103,7 +103,7 @@ func _build() -> void:
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 6)
 	root.add_child(bar)
-	var menu := _btn("MENU", "Torna al menu degli scenari", 70)
+	var menu := _btn(L10n.t("MENU"), L10n.t("Torna al menu degli scenari"), 70)
 	menu.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/Menu.tscn"))
 	bar.add_child(menu)
 	title_lbl = Tema.title("", 24)
@@ -112,10 +112,10 @@ func _build() -> void:
 	title_lbl.custom_minimum_size.x = 200
 	title_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	bar.add_child(title_lbl)
-	btn_3d = _btn("Vista 3D", "Passa dalla mappa 2D alla vista 3D e viceversa", 96)
+	btn_3d = _btn(L10n.t("Vista 3D"), L10n.t("Passa dalla mappa 2D alla vista 3D e viceversa"), 96)
 	btn_3d.pressed.connect(_toggle_3d)
 	bar.add_child(btn_3d)
-	var recenter := _btn("Centra", "Reinquadra la mappa", 74)
+	var recenter := _btn(L10n.t("Centra"), L10n.t("Reinquadra la mappa"), 74)
 	recenter.pressed.connect(func() -> void:
 		board.reset_view()
 		if view3d != null and view3d.visible:
@@ -124,13 +124,13 @@ func _build() -> void:
 				m3._reset_camera()
 				m3._update_camera())
 	bar.add_child(recenter)
-	btn_speed = _btn("", "Velocità con cui scorrono le azioni", 118)
+	btn_speed = _btn("", L10n.t("Velocità con cui scorrono le azioni"), 118)
 	btn_speed.pressed.connect(_cycle_speed)
 	bar.add_child(btn_speed)
-	btn_pause = _btn("Pausa", "Ferma lo scorrere delle azioni dell'avversario", 78)
+	btn_pause = _btn(L10n.t("Pausa"), L10n.t("Ferma lo scorrere delle azioni dell'avversario"), 78)
 	btn_pause.pressed.connect(_toggle_pause)
 	bar.add_child(btn_pause)
-	var help := _btn("Come si gioca", "Sequenza di gioco e regole speciali dello scenario", 126)
+	var help := _btn(L10n.t("Come si gioca"), L10n.t("Sequenza di gioco e regole speciali dello scenario"), 126)
 	help.pressed.connect(func() -> void: help_panel.visible = not help_panel.visible)
 	bar.add_child(help)
 
@@ -182,7 +182,7 @@ func _build() -> void:
 	guide.add_theme_font_size_override("normal_font_size", 19)
 	guide.add_theme_font_size_override("bold_font_size", 19)
 	gv.add_child(guide)
-	skip_btn = _btn("Mostra subito (SPAZIO)", "Salta l'attesa e mostra subito l'esito")
+	skip_btn = _btn(L10n.t("Mostra subito (SPAZIO)"), L10n.t("Salta l'attesa e mostra subito l'esito"))
 	skip_btn.pressed.connect(func() -> void: Game.skip())
 	gv.add_child(skip_btn)
 	var osc := ScrollContainer.new()
@@ -200,7 +200,7 @@ func _build() -> void:
 	info.add_theme_font_size_override("bold_font_size", 16)
 	info.add_theme_color_override("default_color", Tema.DIM.lightened(0.2))
 	sv.add_child(info)
-	sv.add_child(Tema.title("CRONACA", 16))
+	sv.add_child(Tema.title(L10n.t("CRONACA"), 16))
 	log_box = _rich(120)
 	log_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	log_box.scroll_following = true
@@ -230,7 +230,7 @@ func _build() -> void:
 	hand_box.add_theme_constant_override("separation", 8)
 	hsc.add_child(hand_box)
 	_set_speed_label()
-	title_lbl.text = "%d · %s" % [Game.state.scenario_number, String(Game.state.scenario_name).to_upper()]
+	title_lbl.text = "%d · %s" % [Game.state.scenario_number, L10n.t(Game.state.scenario_name).to_upper()]
 
 
 func _build_overlays() -> void:
@@ -334,7 +334,7 @@ func _build_overlays() -> void:
 	hr.custom_minimum_size = Vector2(280, 120)
 	hr.text = _help_text()
 	hv.add_child(hr)
-	var hc := _btn("Chiudi")
+	var hc := _btn(L10n.t("Chiudi"))
 	hc.pressed.connect(func() -> void: help_panel.visible = false)
 	hv.add_child(hc)
 
@@ -346,18 +346,18 @@ func _build_overlays() -> void:
 
 
 func _help_text() -> String:
-	var t := "[b]COME SI GIOCA — in breve[/b]\n\n"
-	t += "[b]Il turno.[/b] Nel tuo turno giochi carte dalla mano come ORDINI (il numero massimo è indicato nello scenario), uno alla volta, vedendo l'esito prima di decidere il successivo. In alternativa, se non dai ordini, puoi SCARTARE carte. A fine turno ripeschi fino a riempire la mano.\n\n"
-	t += "[b]Attivare.[/b] Mossa, Fuoco e Avanzata attivano un'unità. Se attivi un COMANDANTE, lui attiva anche gli uomini entro il suo raggio di Comando (il numero nell'esagono sulla pedina): è il modo per far agire più unità con una carta sola. Ogni unità si attiva una sola volta per turno.\n\n"
-	t += "[b]Mossa.[/b] Ogni unità attivata muove un esagono alla volta spendendo Punti Movimento. A ogni esagono l'avversario può reagire col FUOCO DI OPPORTUNITÀ.\n\n"
-	t += "[b]Fuoco.[/b] Scegli il bersaglio, componi il gruppo di fuoco (il pezzo più forte dà il suo FP, ogni altro +1), aggiungi eventuali Azioni e tira: FP + dadi contro Morale + copertura + dadi di ogni difensore. Se l'attacco è più alto l'unità si rompe (se già rotta è eliminata); se è pari viene soppressa.\n\n"
-	t += "[b]Avanzata.[/b] Un solo esagono, senza subire fuoco, anche dentro un esagono nemico: lì si risolve il CORPO A CORPO (FP + dadi, chi perde è eliminato).\n\n"
-	t += "[b]Recupero e Ritirata.[/b] Il Recupero toglie le soppressioni e fa tirare le tue unità rotte per riprendersi. La Ritirata fa arretrare le unità rotte (di solito quelle nemiche) verso il loro bordo.\n\n"
-	t += "[b]Dadi e inneschi.[/b] Ogni tiro è una carta pescata dal mazzo: può far scattare TEMPO!, CECCHINO!, EVENTO! o INCEPPAMENTO!. Chi ha la carta INIZIATIVA può far ripetere un tiro cedendola all'avversario.\n\n"
-	t += "[b]Vittoria.[/b] Punti Vittoria da obiettivi, unità eliminate e unità uscite dal bordo nemico. Quando il Tempo raggiunge la Morte Subitanea, a ogni avanzamento si tira per chiudere la partita. Chi supera il proprio limite di perdite si arrende.\n"
+	var t := L10n.t("[b]COME SI GIOCA — in breve[/b]\n\n")
+	t += L10n.t("[b]Il turno.[/b] Nel tuo turno giochi carte dalla mano come ORDINI (il numero massimo è indicato nello scenario), uno alla volta, vedendo l'esito prima di decidere il successivo. In alternativa, se non dai ordini, puoi SCARTARE carte. A fine turno ripeschi fino a riempire la mano.\n\n")
+	t += L10n.t("[b]Attivare.[/b] Mossa, Fuoco e Avanzata attivano un'unità. Se attivi un COMANDANTE, lui attiva anche gli uomini entro il suo raggio di Comando (il numero nell'esagono sulla pedina): è il modo per far agire più unità con una carta sola. Ogni unità si attiva una sola volta per turno.\n\n")
+	t += L10n.t("[b]Mossa.[/b] Ogni unità attivata muove un esagono alla volta spendendo Punti Movimento. A ogni esagono l'avversario può reagire col FUOCO DI OPPORTUNITÀ.\n\n")
+	t += L10n.t("[b]Fuoco.[/b] Scegli il bersaglio, componi il gruppo di fuoco (il pezzo più forte dà il suo FP, ogni altro +1), aggiungi eventuali Azioni e tira: FP + dadi contro Morale + copertura + dadi di ogni difensore. Se l'attacco è più alto l'unità si rompe (se già rotta è eliminata); se è pari viene soppressa.\n\n")
+	t += L10n.t("[b]Avanzata.[/b] Un solo esagono, senza subire fuoco, anche dentro un esagono nemico: lì si risolve il CORPO A CORPO (FP + dadi, chi perde è eliminato).\n\n")
+	t += L10n.t("[b]Recupero e Ritirata.[/b] Il Recupero toglie le soppressioni e fa tirare le tue unità rotte per riprendersi. La Ritirata fa arretrare le unità rotte (di solito quelle nemiche) verso il loro bordo.\n\n")
+	t += L10n.t("[b]Dadi e inneschi.[/b] Ogni tiro è una carta pescata dal mazzo: può far scattare TEMPO!, CECCHINO!, EVENTO! o INCEPPAMENTO!. Chi ha la carta INIZIATIVA può far ripetere un tiro cedendola all'avversario.\n\n")
+	t += L10n.t("[b]Vittoria.[/b] Punti Vittoria da obiettivi, unità eliminate e unità uscite dal bordo nemico. Quando il Tempo raggiunge la Morte Subitanea, a ogni avanzamento si tira per chiudere la partita. Chi supera il proprio limite di perdite si arrende.\n")
 	var sr := ScenarioRules.as_bbcode(Game.state.scenario_number)
 	if sr != "":
-		t += "\n[b]REGOLE SPECIALI DELLO SCENARIO[/b]\n" + sr
+		t += L10n.t("\n[b]REGOLE SPECIALI DELLO SCENARIO[/b]\n") + sr
 	return t
 
 
@@ -375,7 +375,7 @@ func _draw_track() -> void:
 	var n := 13
 	var bw := minf(34.0, (w * 0.40) / n)
 	var x0 := 62.0
-	track.draw_string(f, Vector2(4, h * 0.5 + 6), "TEMPO", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Tema.BRASS)
+	track.draw_string(f, Vector2(4, h * 0.5 + 6), L10n.t("TEMPO"), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Tema.BRASS)
 	for i in n:
 		var r := Rect2(x0 + i * bw, 6, bw - 3, h - 12)
 		var col := Tema.PANEL_HI
@@ -390,17 +390,17 @@ func _draw_track() -> void:
 		track.draw_string(f, Vector2(r.position.x + (r.size.x - ts) * 0.5, h * 0.5 + 6), str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, tc)
 	var x := x0 + n * bw + 14
 	var seg: Array = []
-	seg.append(["rosso = Morte Subitanea", Color(0.85, 0.45, 0.4)])
+	seg.append([L10n.t("rosso = Morte Subitanea"), Color(0.85, 0.45, 0.4)])
 	var vp := s.vp_tracker
 	if vp == 0:
-		seg.append(["PV 0 (parità)", Tema.INK])
+		seg.append([L10n.t("PV 0 (parità)"), Tema.INK])
 	else:
 		var lead := Flow.AX if vp > 0 else Flow.AL
-		seg.append(["PV %d %s" % [absi(vp), fl.side_name(lead)], Tema.side_color(lead)])
-	seg.append(["Iniziativa: %s" % fl.side_name(s.initiative_holder), Tema.side_color(s.initiative_holder)])
+		seg.append([L10n.t("PV %d %s") % [absi(vp), fl.side_name(lead)], Tema.side_color(lead)])
+	seg.append([L10n.t("Iniziativa: %s") % fl.side_name(s.initiative_holder), Tema.side_color(s.initiative_holder)])
 	for side: int in [Flow.AX, Flow.AL]:
 		var thr := int(s.surrender_threshold.get(side, 0))
-		seg.append(["Perdite %s %d/%s" % [fl.side_name(side), int(s.casualties.get(side, 0)), str(thr) if thr > 0 else "-"], Tema.side_color(side)])
+		seg.append([L10n.t("Perdite %s %d/%s") % [fl.side_name(side), int(s.casualties.get(side, 0)), str(thr) if thr > 0 else "-"], Tema.side_color(side)])
 	var total := 0.0
 	for sg in seg:
 		total += f.get_string_size(String(sg[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, 17).x + 22
@@ -428,20 +428,20 @@ func _refresh() -> void:
 		c.queue_free()
 	skip_btn.visible = Game.busy and not fl.over
 	if fl.over:
-		who_lbl.text = "PARTITA FINITA"
-		guide.text = "Vincono i [b]%s[/b].\n%s" % [fl.side_name(fl.winner), fl.end_reason]
+		who_lbl.text = L10n.t("PARTITA FINITA")
+		guide.text = L10n.t("Vincono i [b]%s[/b].\n%s") % [fl.side_name(fl.winner), fl.end_reason]
 	elif p.is_empty():
 		var who := int(fl.pending.get("who", fl.s.active_faction))
-		who_lbl.text = "%s IN AZIONE" % fl.side_name(who).to_upper()
+		who_lbl.text = L10n.t("%s IN AZIONE") % fl.side_name(who).to_upper()
 		who_lbl.add_theme_color_override("font_color", Tema.side_color(who))
-		guide.text = "Segui in Cronaca e sulla mappa che cosa succede."
+		guide.text = L10n.t("Segui in Cronaca e sulla mappa che cosa succede.")
 		if Game.is_human(who):
-			guide.text = "Risoluzione in corso..."
+			guide.text = L10n.t("Risoluzione in corso...")
 	else:
 		var who2 := int(p["who"])
-		who_lbl.text = "TOCCA A TE — %s" % fl.side_name(who2).to_upper()
+		who_lbl.text = L10n.t("TOCCA A TE — %s") % fl.side_name(who2).to_upper()
 		if fl.s.active_faction != who2 and not String(p["kind"]).begins_with("setup"):
-			who_lbl.text = "REAGISCI — %s" % fl.side_name(who2).to_upper()
+			who_lbl.text = L10n.t("REAGISCI — %s") % fl.side_name(who2).to_upper()
 		who_lbl.add_theme_color_override("font_color", Tema.side_color(who2))
 		guide.text = String(p["title"])
 		_build_options(p)
@@ -461,9 +461,9 @@ func _build_options(p: Dictionary) -> void:
 		elif o.has("unit"):
 			unit_n += 1
 	if hex_n > 0:
-		opts_box.add_child(_hint("Tocca sulla mappa uno degli esagoni evidenziati (%d)." % hex_n))
+		opts_box.add_child(_hint(L10n.t("Tocca sulla mappa uno degli esagoni evidenziati (%d).") % hex_n))
 	if unit_n > 0 and kind in ["activate", "pick_mover", "sniper", "ambush_victim", "spotter", "deploy", "setup"]:
-		opts_box.add_child(_hint("Tocca sulla mappa una delle pedine col bordo dorato, oppure scegli dall'elenco."))
+		opts_box.add_child(_hint(L10n.t("Tocca sulla mappa una delle pedine col bordo dorato, oppure scegli dall'elenco.")))
 	for i in opts.size():
 		var o: Dictionary = opts[i]
 		# Gli esagoni si scelgono sulla mappa; le carte dalla mano (tranne le
@@ -488,11 +488,11 @@ func _build_options(p: Dictionary) -> void:
 		opts_box.add_child(b)
 	if kind == "turn":
 		var blocked: Dictionary = p.get("blocked", {})
-		opts_box.add_child(_hint("Tocca una carta in mano per vederla in grande e giocarla. Le carte col bordo dorato sono giocabili ora; di quelle scurite ti dico il perché."))
+		opts_box.add_child(_hint(L10n.t("Tocca una carta in mano per vederla in grande e giocarla. Le carte col bordo dorato sono giocabili ora; di quelle scurite ti dico il perché.")))
 		if not blocked.is_empty() and blocked.size() == Game.flow.hand(int(p["who"])).size():
-			opts_box.add_child(_hint("Nessuna carta è giocabile come Ordine in questo momento: scarta per pescarne di nuove."))
+			opts_box.add_child(_hint(L10n.t("Nessuna carta è giocabile come Ordine in questo momento: scarta per pescarne di nuove.")))
 	elif kind == "discard":
-		opts_box.add_child(_hint("Tocca le carte in mano per segnarle da scartare."))
+		opts_box.add_child(_hint(L10n.t("Tocca le carte in mano per segnarle da scartare.")))
 
 
 func _hint(t: String) -> Label:
@@ -532,7 +532,7 @@ func _refresh_hand(p: Dictionary) -> void:
 		cv.face_down = Game.mode == Game.Mode.DEMO
 		cv.tapped.connect(_on_card_tapped)
 		hand_box.add_child(cv)
-	foe_lbl.text = "%s\nin mano %d carte · mazzo %d\n\n%s (tu)\nmazzo %d · scarti %d\nOrdini: %d di %d" % [
+	foe_lbl.text = L10n.t("%s\nin mano %d carte · mazzo %d\n\n%s (tu)\nmazzo %d · scarti %d\nOrdini: %d di %d") % [
 		fl.side_name(foe).to_upper(), fl.hand(foe).size(), fl.deck(foe).size(),
 		fl.side_name(me).to_upper(), fl.deck(me).size(), fl.pile(me).size(),
 		fl.orders_done if fl.s.active_faction == me else 0, int(fl.orders_max[me])]
@@ -588,12 +588,12 @@ func _refresh_preview(p: Dictionary) -> void:
 	if mine.is_empty():
 		var why := String((p.get("blocked", {}) as Dictionary).get(_sel_card, ""))
 		if why == "":
-			why = "Ora non c'è modo di giocare questa carta. Le Azioni si giocano quando il gioco te le propone (durante un fuoco, una mossa, una difesa...)."
+			why = L10n.t("Ora non c'è modo di giocare questa carta. Le Azioni si giocano quando il gioco te le propone (durante un fuoco, una mossa, una difesa...).")
 		preview_lbl.text = why
 	else:
-		preview_lbl.text = "Tocca di nuovo la carta o il pulsante per giocarla."
+		preview_lbl.text = L10n.t("Tocca di nuovo la carta o il pulsante per giocarla.")
 		for oi: int in mine:
-			var b := _btn("GIOCA — %s" % String(p["options"][oi].get("label", "")))
+			var b := _btn(L10n.t("GIOCA — %s") % String(p["options"][oi].get("label", "")))
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			b.custom_minimum_size = Vector2(236, 40)
 			b.add_theme_stylebox_override("normal", Tema.box(Tema.BRASS.darkened(0.55), Tema.BRASS, 2, 4, 8))
@@ -631,7 +631,7 @@ func _on_event(ev: Dictionary) -> void:
 		played_card.setup(ev["card"], -1)
 		played_card.queue_redraw()
 		var who := int(ev.get("who", -1))
-		played_lbl.text = "%s: carta giocata" % (Game.flow.side_name(who) if who >= 0 else "")
+		played_lbl.text = L10n.t("%s: carta giocata") % (Game.flow.side_name(who) if who >= 0 else "")
 		played_box.visible = true
 		_played_until = Time.get_ticks_msec() + 2600
 
@@ -659,36 +659,36 @@ func _show_hex_info(q: int, r: int) -> void:
 	var hd: GameState.HexData = s.hex_at(q, r)
 	if hd == null:
 		return
-	var t := "[b]%s[/b] · %s · copertura %+d" % [Domain.qr_to_label(q, r),
-		String(Domain.TERRAIN_NAMES.get(hd.terrain, "?")), Rules.cover_at(s, q, r, false)]
+	var t := L10n.t("[b]%s[/b] · %s · copertura %+d") % [Domain.qr_to_label(q, r),
+		L10n.t(Domain.TERRAIN_NAMES.get(hd.terrain, "?")), Rules.cover_at(s, q, r, false)]
 	if hd.has_road:
-		t += " · strada"
+		t += L10n.t(" · strada")
 	if hd.elevation > 0:
-		t += " · quota %d" % hd.elevation
+		t += L10n.t(" · quota %d") % hd.elevation
 	if hd.has_foxhole:
-		t += " · buche"
+		t += L10n.t(" · buche")
 	if hd.fortification != Domain.Fort.NONE:
-		t += " · " + String(Domain.FORT_NAMES.get(hd.fortification, ""))
+		t += " · " + L10n.t(Domain.FORT_NAMES.get(hd.fortification, ""))
 	if hd.has_smoke:
-		t += " · fumo"
+		t += L10n.t(" · fumo")
 	for u in s.units_at(q, r):
 		if u.is_weapon():
 			continue
-		t += "\n[b]%s[/b] — FP %d · gittata %d · mov. %d · morale %d" % [u.unit_name, u.fp, u.range, u.move, u.morale]
+		t += L10n.t("\n[b]%s[/b] — FP %d · gittata %d · mov. %d · morale %d") % [u.display_name, u.fp, u.range, u.move, u.morale]
 		if u.is_leader():
-			t += " · comando %d" % u.command
+			t += L10n.t(" · comando %d") % u.command
 		var st: Array = []
 		if not u.efficient:
-			st.append("rotta")
+			st.append(L10n.t("rotta"))
 		if u.suppressed:
-			st.append("soppressa")
+			st.append(L10n.t("soppressa"))
 		if u.activated:
-			st.append("già attivata")
+			st.append(L10n.t("già attivata"))
 		if not st.is_empty():
 			t += " (" + ", ".join(st) + ")"
 		var w := s.weapon_carried_by(u.id)
 		if w != null:
-			t += "\n     con %s — FP %d · gittata %d%s" % [w.unit_name, w.fp, w.range, "" if w.efficient else " (guasta)"]
+			t += L10n.t("\n     con %s — FP %d · gittata %d%s") % [w.display_name, w.fp, w.range, "" if w.efficient else L10n.t(" (guasta)")]
 	info.text = t
 
 
@@ -703,7 +703,7 @@ func _on_stack(indices: Array) -> void:
 	var v := VBoxContainer.new()
 	stack_pop.add_child(v)
 	var l := Label.new()
-	l.text = "Più scelte in questo esagono:"
+	l.text = L10n.t("Più scelte in questo esagono:")
 	v.add_child(l)
 	for i: int in indices:
 		var b := _btn(String(p["options"][i].get("label", "?")))
@@ -731,16 +731,16 @@ func _toggle_3d() -> void:
 		view3d.visible = false
 	view3d.visible = not view3d.visible
 	board.visible = not view3d.visible
-	btn_3d.text = "Vista 2D" if view3d.visible else "Vista 3D"
+	btn_3d.text = L10n.t("Vista 2D") if view3d.visible else L10n.t("Vista 3D")
 
 
 func _set_speed_label() -> void:
-	var name := "normale"
+	var name := L10n.t("normale")
 	if Game.speed < 0.8:
-		name = "lento"
+		name = L10n.t("lento")
 	elif Game.speed > 1.5:
-		name = "veloce"
-	btn_speed.text = "Ritmo: %s" % name
+		name = L10n.t("veloce")
+	btn_speed.text = L10n.t("Ritmo: %s") % name
 
 
 func _cycle_speed() -> void:
@@ -756,7 +756,7 @@ func _cycle_speed() -> void:
 
 func _toggle_pause() -> void:
 	Game.set_paused(not Game.paused)
-	btn_pause.text = "Riprendi" if Game.paused else "Pausa"
+	btn_pause.text = L10n.t("Riprendi") if Game.paused else L10n.t("Pausa")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -794,12 +794,12 @@ func _on_game_over(w: int) -> void:
 	pn.add_child(v)
 	var fl := Game.flow
 	var mine := Game.mode == Game.Mode.VS_AI
-	var head := "VITTORIA!" if (mine and w == Game.human) else ("SCONFITTA" if mine else "FINE PARTITA")
+	var head := L10n.t("VITTORIA!") if (mine and w == Game.human) else (L10n.t("SCONFITTA") if mine else L10n.t("FINE PARTITA"))
 	var t := Tema.title(head, 44, Tema.BRASS if (not mine or w == Game.human) else Tema.RED)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
 	var l := Label.new()
-	l.text = "Vincono i %s.\n%s" % [fl.side_name(w), fl.end_reason]
+	l.text = L10n.t("Vincono i %s.\n%s") % [fl.side_name(w), fl.end_reason]
 	l.custom_minimum_size.x = 460
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -808,14 +808,14 @@ func _on_game_over(w: int) -> void:
 	hb.alignment = BoxContainer.ALIGNMENT_CENTER
 	hb.add_theme_constant_override("separation", 12)
 	v.add_child(hb)
-	var again := _btn("Rigioca lo scenario", "", 190)
+	var again := _btn(L10n.t("Rigioca lo scenario"), "", 190)
 	again.pressed.connect(func() -> void:
 		Game.start_new_game(Game.human, fl.s.scenario_number, Game.difficulty, Game.mode)
 		get_tree().reload_current_scene())
 	hb.add_child(again)
-	var look := _btn("Guarda la mappa", "", 160)
+	var look := _btn(L10n.t("Guarda la mappa"), "", 160)
 	look.pressed.connect(func() -> void: overlay.visible = false)
 	hb.add_child(look)
-	var back := _btn("Menu", "", 110)
+	var back := _btn(L10n.t("Menu"), "", 110)
 	back.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/Menu.tscn"))
 	hb.add_child(back)

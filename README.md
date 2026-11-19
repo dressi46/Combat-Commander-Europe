@@ -3,7 +3,17 @@
 Versione digitale del gioco da tavolo tattico **Combat Commander: Europe** (GMT Games),
 in **Godot 4.6**, con esportazione web. Progetto amatoriale a uso personale.
 
-Gioca online: https://tannoiser2.github.io/Combat-Commander-Europe/
+## Español e inglés
+
+Abre el proyecto de la carpeta `godot` con Godot 4.6.3. En el menú principal, **Configuración → Idioma** cambia el idioma y guarda la preferencia. **Un solo jugador** permite jugar contra la IA o ver una demostración. **Multijugador** inicia una partida de dos jugadores en el mismo dispositivo.
+
+In English, open **Settings → Language**. Choose **Single player** for AI play or a demonstration, or **Multiplayer** for two players sharing one device.
+
+Para añadir otro idioma, copia `godot/assets/i18n/en.json` con el código del idioma, traduce los valores y registra su nombre en `languages.json`. Conserva las claves, el orden de los marcadores como `%s` y `%d`, y las etiquetas de formato. El juego muestra la traducción inglesa cuando falta una entrada.
+
+Puedes añadir imágenes de cartas por idioma y mazo. Por ejemplo, `godot/assets/cards_es/german/01.webp` sustituye la cara de la carta alemana 1 en español. Godot importa las imágenes al abrir el proyecto. Cuando falta una ilustración, el juego dibuja la carta con los datos del mazo.
+
+Versión original en línea: https://tannoiser2.github.io/Combat-Commander-Europe/
 
 ## Com'è fatto (dalla v0.50 «Rifondazione»)
 

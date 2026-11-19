@@ -223,7 +223,7 @@ func _draw() -> void:
 		var o: Dictionary = hex_opts[key]
 		var h: Vector2i = o["hex"]
 		var col := COL_PICK
-		if kind in ["fire_target", "fire_mods", "arty_target"] or (kind == "advance" and String(o.get("label", "")).contains("CORPO")):
+		if kind in ["fire_target", "fire_mods", "arty_target"] or (kind == "advance" and bool(o.get("melee", false))):
 			col = COL_TARGET
 		elif kind == "move":
 			col = COL_STEP
@@ -233,7 +233,7 @@ func _draw() -> void:
 		draw_colored_polygon(_corners(h.x, h.y, 0.96), col)
 		draw_polyline(_closed(_corners(h.x, h.y, 0.96)), Color(col.r, col.g, col.b, 0.95), 2.5)
 		if o.has("cost"):
-			_txt("%d PM" % int(o["cost"]), hex_center(h.x, h.y) + Vector2(0, _hs() * 0.55), _hs() * 0.30, Color(1, 1, 1))
+			_txt(L10n.t("%d PM") % int(o["cost"]), hex_center(h.x, h.y) + Vector2(0, _hs() * 0.55), _hs() * 0.30, Color(1, 1, 1))
 	# Esagono di riferimento della decisione (bersaglio / esagono entrato).
 	if p.has("hex"):
 		var ph: Vector2i = p["hex"]
@@ -277,12 +277,12 @@ func _draw_ground(s: GameState) -> void:
 				draw_texture_rect(tex, Rect2(pos, Vector2(sz, sz)), false, Color(1, 1, 1, 0.95))
 			else:
 				draw_rect(Rect2(pos, Vector2(sz, sz * 0.6)), Color(0.5, 0.1, 0.1, 0.9))
-				_txt("MINE", pos + Vector2(sz * 0.5, sz * 0.3), hs * 0.24, Color(1, 1, 1))
+				_txt(L10n.t("MINE"), pos + Vector2(sz * 0.5, sz * 0.3), hs * 0.24, Color(1, 1, 1))
 		if hd.has_smoke:
 			for k in 5:
 				var a := k * 1.26 + _t * 0.25
 				draw_circle(c + Vector2(cos(a), sin(a)) * hs * 0.32, hs * 0.38, Color(0.92, 0.92, 0.92, 0.33))
-			_txt("FUMO", c + Vector2(0, -hs * 0.62), hs * 0.24, Color(1, 1, 1))
+			_txt(L10n.t("FUMO"), c + Vector2(0, -hs * 0.62), hs * 0.24, Color(1, 1, 1))
 
 
 func _draw_objectives(s: GameState) -> void:
@@ -299,7 +299,7 @@ func _draw_objectives(s: GameState) -> void:
 		var owner := "nessuno"
 		if o.controller >= 0 and Game.flow != null:
 			owner = Game.flow.side_name(o.controller)
-		var t := "Ob.%d  %s  %d PV" % [o.id, owner, o.vp]
+		var t := L10n.t("Ob.%d  %s  %d PV") % [o.id, owner, o.vp]
 		var w := _font_bold.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, int(maxf(9.0, hs * 0.24))).x
 		draw_rect(Rect2(tag.x - w * 0.5 - 4, tag.y - hs * 0.15, w + 8, hs * 0.32), Color(0.08, 0.08, 0.08, 0.82))
 		_txt(t, tag, hs * 0.24, col, true, false)
@@ -340,13 +340,13 @@ func _draw_units(s: GameState, p: Dictionary, unit_opts: Dictionary, pulse: floa
 				if opt.has("on"):
 					var colx := COL_ON if is_on else COL_OFF
 					draw_rect(rect.grow(3), colx, false, 4.0 if is_on else 2.5)
-					_badge(rect.position + Vector2(sz * 0.5, -hs * 0.02), "DENTRO" if is_on else "FUORI", colx)
+					_badge(rect.position + Vector2(sz * 0.5, -hs * 0.02), L10n.t("DENTRO") if is_on else L10n.t("FUORI"), colx)
 				else:
 					var g := COL_GOLD
 					g.a = 0.55 + 0.45 * pulse
 					draw_rect(rect.grow(3 + 2 * pulse), g, false, 4.0)
 					if kind == "activate" and u.is_leader() and u.command > 0:
-						_badge(rect.position + Vector2(sz * 0.5, -hs * 0.02), "COMANDA %d" % u.command, COL_GOLD)
+						_badge(rect.position + Vector2(sz * 0.5, -hs * 0.02), L10n.t("COMANDA %d") % u.command, COL_GOLD)
 
 
 func _badge(center: Vector2, t: String, col: Color) -> void:
@@ -366,17 +366,17 @@ func _draw_counter(s: GameState, u: Unit, rect: Rect2, hs: float) -> void:
 		draw_texture_rect(tex, rect, false)
 	else:
 		draw_rect(rect, COL_AX if u.faction == Flow.AX else COL_AL)
-		_txt(u.unit_name, rect.get_center(), hs * 0.2, Color(1, 1, 1))
+		_txt(u.display_name, rect.get_center(), hs * 0.2, Color(1, 1, 1))
 	draw_rect(rect, COL_AX.darkened(0.5) if u.faction == Flow.AX else COL_AL.darkened(0.5), false, 2.0)
 	if u.activated:
 		draw_rect(rect, Color(0, 0, 0, 0.30))
 	var tags: Array = []
 	if not u.efficient:
-		tags.append(["ROTTA", Color(0.85, 0.12, 0.1)])
+		tags.append([L10n.t("ROTTA"), Color(0.85, 0.12, 0.1)])
 	if u.suppressed:
-		tags.append(["SOPPRESSA", Color(0.9, 0.65, 0.1)])
+		tags.append([L10n.t("SOPPRESSA"), Color(0.9, 0.65, 0.1)])
 	if u.veteran:
-		tags.append(["VETERANA", Color(0.2, 0.55, 0.9)])
+		tags.append([L10n.t("VETERANA"), Color(0.2, 0.55, 0.9)])
 	for i in tags.size():
 		var isz := int(maxf(8.0, hs * 0.2))
 		var y := rect.position.y + rect.size.y * 0.42 + i * isz * 1.25
@@ -392,10 +392,10 @@ func _draw_counter(s: GameState, u: Unit, rect: Rect2, hs: float) -> void:
 			draw_texture_rect(wt, wr, false, Color(1, 1, 1) if w.efficient else Color(0.6, 0.45, 0.45))
 		else:
 			draw_rect(wr, Color(0.85, 0.82, 0.7))
-			_txt("RADIO" if w.unit_name.contains("Radio") else "ARMA", wr.get_center(), hs * 0.17, Color(0.1, 0.1, 0.1), true, false)
+			_txt(L10n.t("RADIO") if w.unit_name.contains("Radio") else L10n.t("ARMA"), wr.get_center(), hs * 0.17, Color(0.1, 0.1, 0.1), true, false)
 		draw_rect(wr, Color(0.1, 0.1, 0.1), false, 1.5)
 		if not w.efficient:
-			_txt("GUASTA", wr.get_center(), hs * 0.17, Color(1, 0.4, 0.3))
+			_txt(L10n.t("GUASTA"), wr.get_center(), hs * 0.17, Color(1, 0.4, 0.3))
 
 
 func _draw_fx() -> void:

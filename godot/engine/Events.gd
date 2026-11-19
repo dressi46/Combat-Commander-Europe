@@ -36,15 +36,15 @@ static func fire(state: GameState, card: Card, faction: int) -> Array[String]:
 		"PRIGIONIERI DI GUERRA":   _prisoners(state, faction, lines)
 		"POLVERE":                 _dust(state, card, lines)
 		"INCENDIO":                _blaze(state, card, lines)
-		"OBIETTIVO DELLA MISSIONE": _draw_objective_chit(state, lines, "Obiettivo della missione")
-		"OBIETTIVO STRATEGICO":    _draw_objective_chit(state, lines, "Obiettivo strategico")
+		"OBIETTIVO DELLA MISSIONE": _draw_objective_chit(state, lines, L10n.t("Obiettivo della missione"))
+		"OBIETTIVO STRATEGICO":    _draw_objective_chit(state, lines, L10n.t("Obiettivo strategico"))
 		"RICOGNIZIONE":            _recon(state, faction, lines)
 		"ZAPPATORI":
-			lines.append("Zappatori: nessuna mina o filo spinato da rimuovere.")
+			lines.append(L10n.t("Zappatori: nessuna mina o filo spinato da rimuovere."))
 		"SCONTRO SENZA PERDITE":
-			lines.append("Scontro senza perdite: nessun effetto.")
+			lines.append(L10n.t("Scontro senza perdite: nessun effetto."))
 		_:
-			lines.append("Evento «%s»: effetto non ancora simulato." % card.event_name)
+			lines.append(L10n.t("Evento «%s»: effetto non ancora simulato.") % L10n.t(card.event_name))
 	return lines
 
 
@@ -54,10 +54,10 @@ static func fire(state: GameState, card: Card, faction: int) -> Array[String]:
 static func _hit(state: GameState, u: Unit, lines: Array[String], label: String) -> void:
 	if u.efficient:
 		u.break_unit()
-		lines.append("%s: %s rotta" % [label, u.unit_name])
+		lines.append(L10n.t("%s: %s rotta") % [label, u.display_name])
 	else:
 		state.eliminate_unit(u.id)
-		lines.append("%s: %s eliminata" % [label, u.unit_name])
+		lines.append(L10n.t("%s: %s eliminata") % [label, u.display_name])
 
 
 # ─── Eventi ──────────────────────────────────────────────────────────────────
@@ -67,10 +67,10 @@ static func _air_support(state: GameState, card: Card, lines: Array[String]) -> 
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	var men := state.men_at(qr.x, qr.y)
 	if men.is_empty():
-		lines.append("Supporto aereo su %s: nessuna unità colpita." % card.random_hex_label)
+		lines.append(L10n.t("Supporto aereo su %s: nessuna unità colpita.") % card.random_hex_label)
 		return
 	for u in men:
-		_hit(state, u, lines, "Supporto aereo")
+		_hit(state, u, lines, L10n.t("Supporto aereo"))
 
 
 ## E69 Macerie: l'esagono indicato diventa terreno Macerie (Rubble).
@@ -78,17 +78,17 @@ static func _rubble(state: GameState, card: Card, lines: Array[String]) -> void:
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	var hd: GameState.HexData = state.hex_at(qr.x, qr.y)
 	if hd == null:
-		lines.append("Macerie: esagono non valido.")
+		lines.append(L10n.t("Macerie: esagono non valido."))
 		return
 	hd.terrain = Domain.TerrainType.RUBBLE
-	lines.append("Macerie: %s ridotto in macerie." % card.random_hex_label)
+	lines.append(L10n.t("Macerie: %s ridotto in macerie.") % card.random_hex_label)
 
 
 ## E72 Shock da combattimento: rompe l'unità più vicina all'esagono indicato.
 static func _shell_shock(state: GameState, card: Card, lines: Array[String]) -> void:
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	if qr.x < 0:
-		lines.append("Shock da combattimento: esagono non valido.")
+		lines.append(L10n.t("Shock da combattimento: esagono non valido."))
 		return
 	var best: Unit = null
 	var best_d := 99999
@@ -100,9 +100,9 @@ static func _shell_shock(state: GameState, card: Card, lines: Array[String]) -> 
 			best_d = d
 			best = u
 	if best != null:
-		_hit(state, best, lines, "Shock da combattimento")
+		_hit(state, best, lines, L10n.t("Shock da combattimento"))
 	else:
-		lines.append("Shock da combattimento: nessuna unità in campo.")
+		lines.append(L10n.t("Shock da combattimento: nessuna unità in campo."))
 
 
 ## E62 Ucciso in azione: elimina un'unità rotta (prima un nemico di chi pesca).
@@ -112,9 +112,9 @@ static func _kia(state: GameState, faction: int, lines: Array[String]) -> void:
 		target = _find_broken(state, faction, false)
 	if target != null:
 		state.eliminate_unit(target.id)
-		lines.append("Ucciso in azione: %s eliminata." % target.unit_name)
+		lines.append(L10n.t("Ucciso in azione: %s eliminata.") % target.display_name)
 	else:
-		lines.append("Ucciso in azione: nessuna unità rotta in campo.")
+		lines.append(L10n.t("Ucciso in azione: nessuna unità rotta in campo."))
 
 
 static func _find_broken(state: GameState, faction: int, enemy: bool) -> Unit:
@@ -134,7 +134,7 @@ static func _infiltration(state: GameState, faction: int, lines: Array[String]) 
 			if cover < 1:
 				u.suppress()
 				hit += 1
-	lines.append("Infiltrazione: %d unità nemiche allo scoperto soppresse." % hit)
+	lines.append(L10n.t("Infiltrazione: %d unità nemiche allo scoperto soppresse.") % hit)
 
 
 ## E75 Fuoco di soppressione: rompe i nemici in gittata e LOS di una MG amica.
@@ -153,7 +153,7 @@ static func _suppressing_fire(state: GameState, faction: int, lines: Array[Strin
 				e.suppress()
 				hit += 1
 				break
-	lines.append("Fuoco di soppressione: %d unità nemiche soppresse." % hit)
+	lines.append(L10n.t("Fuoco di soppressione: %d unità nemiche soppresse.") % hit)
 
 
 ## E51 Acquattarsi: le squadre di chi pesca fuori dal raggio di Comando si rompono.
@@ -164,7 +164,7 @@ static func _cower(state: GameState, faction: int, lines: Array[String]) -> void
 			if not Rules.has_command_at(state, u.q, u.r, faction):
 				u.suppress()
 				hit += 1
-	lines.append("Acquattarsi: %d squadre fuori comando soppresse." % hit)
+	lines.append(L10n.t("Acquattarsi: %d squadre fuori comando soppresse.") % hit)
 
 
 ## E44 Temprati dalla guerra: una unità di chi pesca diventa veterana (+1 morale).
@@ -173,9 +173,9 @@ static func _battle_harden(state: GameState, faction: int, lines: Array[String])
 		if u.is_man() and not u.veteran:
 			u.veteran = true
 			u.morale += 1
-			lines.append("Temprati dalla guerra: %s veterana (morale %d)." % [u.unit_name, u.morale])
+			lines.append(L10n.t("Temprati dalla guerra: %s veterana (morale %d).") % [u.display_name, u.morale])
 			return
-	lines.append("Temprati dalla guerra: nessuna unità idonea.")
+	lines.append(L10n.t("Temprati dalla guerra: nessuna unità idonea."))
 
 
 ## E64 Medico: ripristina (rally) un'unità rotta — di norma una amica di chi
@@ -186,9 +186,9 @@ static func _medic(state: GameState, faction: int, lines: Array[String]) -> void
 		target = _find_broken(state, faction, true)    # altrimenti una nemica
 	if target != null:
 		target.recover()
-		lines.append("Medico: %s ripristinata." % target.unit_name)
+		lines.append(L10n.t("Medico: %s ripristinata.") % target.display_name)
 	else:
-		lines.append("Medico: nessuna unità rotta da ripristinare.")
+		lines.append(L10n.t("Medico: nessuna unità rotta da ripristinare."))
 
 
 ## E63 Malfunzionamento: l'arma efficiente più vicina all'esagono casuale della
@@ -196,7 +196,7 @@ static func _medic(state: GameState, faction: int, lines: Array[String]) -> void
 static func _malfunction(state: GameState, card: Card, lines: Array[String]) -> void:
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	if qr.x < 0:
-		lines.append("Malfunzionamento: esagono non valido.")
+		lines.append(L10n.t("Malfunzionamento: esagono non valido."))
 		return
 	var best: Unit = null
 	var best_d := 99999
@@ -208,9 +208,9 @@ static func _malfunction(state: GameState, card: Card, lines: Array[String]) -> 
 				best = u
 	if best != null:
 		best.break_unit()
-		lines.append("Malfunzionamento: %s si inceppa." % best.unit_name)
+		lines.append(L10n.t("Malfunzionamento: %s si inceppa.") % best.display_name)
 	else:
-		lines.append("Malfunzionamento: nessun'arma efficiente in campo.")
+		lines.append(L10n.t("Malfunzionamento: nessun'arma efficiente in campo."))
 
 
 ## E48 Brezza: rimuove tutti i marcatori di Fumo dalla mappa. (La posa di Incendi,
@@ -222,7 +222,7 @@ static func _breeze(state: GameState, lines: Array[String]) -> void:
 		if hd.has_smoke:
 			hd.has_smoke = false
 			removed += 1
-	lines.append("Brezza: rimossi %d fumi (incendi non simulati)." % removed)
+	lines.append(L10n.t("Brezza: rimossi %d fumi (incendi non simulati).") % removed)
 
 
 ## E58 Eroe: se la fazione di chi pesca non ha già un Eroe in campo, ne compare
@@ -231,7 +231,7 @@ static func _breeze(state: GameState, lines: Array[String]) -> void:
 static func _hero(state: GameState, faction: int, lines: Array[String]) -> void:
 	for u in state.units_of(faction):
 		if u.hero:
-			lines.append("Eroe: già in campo.")
+			lines.append(L10n.t("Eroe: già in campo."))
 			return
 	var host: Unit = null
 	for u in state.units_of(faction):
@@ -239,7 +239,7 @@ static func _hero(state: GameState, faction: int, lines: Array[String]) -> void:
 			host = u
 			break
 	if host == null:
-		lines.append("Eroe: nessun esagono amico dove apparire.")
+		lines.append(L10n.t("Eroe: nessun esagono amico dove apparire."))
 		return
 	var id := "HERO-%s" % Domain.FACTION_SHORT.get(faction, "U")
 	var h := Unit.new(id, faction, Domain.UnitType.LEADER, Domain.UnitClass.ELITE, "Eroe")
@@ -252,7 +252,7 @@ static func _hero(state: GameState, faction: int, lines: Array[String]) -> void:
 	h.q = host.q
 	h.r = host.r
 	state.units[id] = h
-	lines.append("Eroe: un Eroe appare in (%d,%d)!" % [h.q, h.r])
+	lines.append(L10n.t("Eroe: un Eroe appare in (%d,%d)!") % [h.q, h.r])
 
 
 ## E60 Interdizione: ogni giocatore perde una carta dalla propria mano, che va
@@ -267,7 +267,7 @@ static func _interdiction(state: GameState, lines: Array[String]) -> void:
 		var discard := state.german_discard if fac == Domain.Faction.GERMAN else state.russian_discard
 		Cards.discard_from_hand(hand, discard, hand.size() - 1)
 		n += 1
-	lines.append("Interdizione: ogni giocatore scarta una carta (%d in tutto)." % n)
+	lines.append(L10n.t("Interdizione: ogni giocatore scarta una carta (%d in tutto).") % n)
 
 
 ## E55 Trinceramento: il giocatore posa una buca su un esagono occupato da una
@@ -279,9 +279,9 @@ static func _entrench_event(state: GameState, faction: int, lines: Array[String]
 		var hd: GameState.HexData = state.hex_at(u.q, u.r)
 		if hd != null and not hd.has_foxhole and hd.fortification == Domain.Fort.NONE:
 			hd.has_foxhole = true
-			lines.append("Trinceramento: buca creata in (%d,%d)." % [u.q, u.r])
+			lines.append(L10n.t("Trinceramento: buca creata in (%d,%d).") % [u.q, u.r])
 			return
-	lines.append("Trinceramento: nessun esagono idoneo.")
+	lines.append(L10n.t("Trinceramento: nessun esagono idoneo."))
 
 
 ## E56 Promozione sul campo (semplificata): se non già in campo, compare il
@@ -289,11 +289,11 @@ static func _entrench_event(state: GameState, faction: int, lines: Array[String]
 static func _field_promotion(state: GameState, faction: int, lines: Array[String]) -> void:
 	var id := "PRIVATE-%s" % Domain.FACTION_SHORT.get(faction, "U")
 	if state.units.has(id):
-		lines.append("Promozione sul campo: il Soldato è già in campo.")
+		lines.append(L10n.t("Promozione sul campo: il Soldato è già in campo."))
 		return
 	var broken := state.broken_men_of(faction)
 	if broken.is_empty():
-		lines.append("Promozione sul campo: nessuna unità rotta su cui promuovere.")
+		lines.append(L10n.t("Promozione sul campo: nessuna unità rotta su cui promuovere."))
 		return
 	var host: Unit = broken[0]
 	var p := Unit.new(id, faction, Domain.UnitType.LEADER, Domain.UnitClass.ELITE, "Soldato")
@@ -305,7 +305,7 @@ static func _field_promotion(state: GameState, faction: int, lines: Array[String
 	p.q = host.q
 	p.r = host.r
 	state.units[id] = p
-	lines.append("Promozione sul campo: un Soldato (Comando 2) appare in (%d,%d)." % [p.q, p.r])
+	lines.append(L10n.t("Promozione sul campo: un Soldato (Comando 2) appare in (%d,%d).") % [p.q, p.r])
 
 
 ## E49 Comando e Controllo: il giocatore guadagna 1 VP per ogni obiettivo che
@@ -320,7 +320,7 @@ static func _command_control(state: GameState, faction: int, lines: Array[String
 			state.bonus_vp += n
 		else:
 			state.bonus_vp -= n
-	lines.append("Comando e Controllo: %d obiettivi controllati -> +%d VP." % [n, n])
+	lines.append(L10n.t("Comando e Controllo: %d obiettivi controllati -> +%d VP.") % [n, n])
 
 
 ## E54 Impeto: il giocatore sposta il suo segnalino Resa di una casella più in
@@ -328,11 +328,11 @@ static func _command_control(state: GameState, faction: int, lines: Array[String
 static func _elan(state: GameState, faction: int, lines: Array[String]) -> void:
 	var cur := int(state.surrender_threshold.get(faction, 0))
 	if cur <= 0:
-		lines.append("Impeto: nessuna soglia di resa da spostare.")
+		lines.append(L10n.t("Impeto: nessuna soglia di resa da spostare."))
 		return
 	state.surrender_threshold[faction] = cur + 1
-	lines.append("Impeto: soglia di resa di %s ora %d." % [
-		Domain.FACTION_NAMES.get(faction, "?"), cur + 1])
+	lines.append(L10n.t("Impeto: soglia di resa di %s ora %d.") % [
+		L10n.t(Domain.FACTION_NAMES.get(faction, "?")), cur + 1])
 
 
 ## E66 Prigionieri di guerra: il giocatore deve eliminare una propria unità rotta
@@ -340,10 +340,10 @@ static func _elan(state: GameState, faction: int, lines: Array[String]) -> void:
 static func _prisoners(state: GameState, faction: int, lines: Array[String]) -> void:
 	for u in state.broken_men_of(faction):
 		if _enemy_near(state, u, faction):
-			lines.append("Prigionieri di guerra: %s catturata ed eliminata." % u.unit_name)
+			lines.append(L10n.t("Prigionieri di guerra: %s catturata ed eliminata.") % u.display_name)
 			state.eliminate_unit(u.id)
 			return
-	lines.append("Prigionieri di guerra: nessuna unità rotta a contatto col nemico.")
+	lines.append(L10n.t("Prigionieri di guerra: nessuna unità rotta a contatto col nemico."))
 
 
 ## Vero se c'è un'unità nemica nello stesso esagono o adiacente a `u`.
@@ -365,10 +365,10 @@ static func _blaze(state: GameState, card: Card, lines: Array[String]) -> void:
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	var hd: GameState.HexData = state.hex_at(qr.x, qr.y)
 	if hd == null:
-		lines.append("Incendio: esagono non valido.")
+		lines.append(L10n.t("Incendio: esagono non valido."))
 		return
 	if hd.has_blaze:
-		lines.append("Incendio: %s è già in fiamme." % card.random_hex_label)
+		lines.append(L10n.t("Incendio: %s è già in fiamme.") % card.random_hex_label)
 		return
 	hd.has_blaze = true
 	hd.has_smoke = false
@@ -388,7 +388,7 @@ static func _blaze(state: GameState, card: Card, lines: Array[String]) -> void:
 		else:
 			state.eliminate_unit(u.id)
 			killed += 1
-	lines.append("Incendio: %s in fiamme; %d unità spostate, %d eliminate." % [
+	lines.append(L10n.t("Incendio: %s in fiamme; %d unità spostate, %d eliminate.") % [
 		card.random_hex_label, moved, killed])
 
 
@@ -414,10 +414,10 @@ static func _dust(state: GameState, card: Card, lines: Array[String]) -> void:
 	var qr := Domain.label_to_qr(card.random_hex_label)
 	var hd: GameState.HexData = state.hex_at(qr.x, qr.y)
 	if hd == null:
-		lines.append("Polvere: esagono non valido.")
+		lines.append(L10n.t("Polvere: esagono non valido."))
 		return
 	hd.has_smoke = true
-	lines.append("Polvere: nube di polvere (fumo) in %s." % card.random_hex_label)
+	lines.append(L10n.t("Polvere: nube di polvere (fumo) in %s.") % card.random_hex_label)
 
 
 ## E67 Ricognizione: l'AVVERSARIO di chi innesca deve rivelare un chit
@@ -429,14 +429,14 @@ static func _recon(state: GameState, faction: int, lines: Array[String]) -> void
 		if int(e["owner"]) == opp and not bool(e["revealed"]):
 			hidden.append(e)
 	if hidden.is_empty():
-		lines.append("Ricognizione: %s non ha chit segreti da rivelare." % Domain.FACTION_NAMES.get(opp, "?"))
+		lines.append(L10n.t("Ricognizione: %s non ha chit segreti da rivelare.") % L10n.t(Domain.FACTION_NAMES.get(opp, "?")))
 		return
 	var pick: Dictionary = hidden[randi() % hidden.size()]
 	pick["revealed"] = true
 	ObjectiveChits.recompute(state)
 	var chit := ObjectiveChits._find(String(pick["letter"]))
-	lines.append("Ricognizione: %s rivela il chit segreto %s." % [
-		Domain.FACTION_NAMES.get(opp, "?"),
+	lines.append(L10n.t("Ricognizione: %s rivela il chit segreto %s.") % [
+		L10n.t(Domain.FACTION_NAMES.get(opp, "?")),
 		ObjectiveChits._describe(chit) if not chit.is_empty() else String(pick["letter"])])
 
 
@@ -445,12 +445,12 @@ static func _recon(state: GameState, faction: int, lines: Array[String]) -> void
 ## fluiscono al controllore corrente tramite il normale calcolo.
 static func _draw_objective_chit(state: GameState, lines: Array[String], label: String) -> void:
 	if state.objectives.is_empty():
-		lines.append("%s: nessun obiettivo sulla mappa." % label)
+		lines.append(L10n.t("%s: nessun obiettivo sulla mappa.") % label)
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	var letter := ObjectiveChits.draw_one(state, rng, lines)
-	lines.append("%s: estratto chit %s." % [label, letter])
+	lines.append(L10n.t("%s: estratto chit %s.") % [label, letter])
 
 
 ## E50 Commissario: il giocatore russo sceglie una sua unità rotta e tira (dadi
@@ -460,15 +460,15 @@ static func _commissar(state: GameState, card: Card, lines: Array[String]) -> vo
 	# Stand-in: il giocatore "russo" è lo slot Alleati (Domain.Faction.RUSSIAN).
 	var broken := state.broken_men_of(Domain.Faction.RUSSIAN)
 	if broken.is_empty():
-		lines.append("Commissario: nessuna unità russa rotta.")
+		lines.append(L10n.t("Commissario: nessuna unità russa rotta."))
 		return
 	var target: Unit = broken[0]
 	var roll := card.dice_white + card.dice_red
 	if roll > target.morale:
 		state.eliminate_unit(target.id)
-		lines.append("Commissario: %s — tiro %d > morale %d -> ELIMINATA." % [
-			target.unit_name, roll, target.morale])
+		lines.append(L10n.t("Commissario: %s — tiro %d > morale %d -> ELIMINATA.") % [
+			target.display_name, roll, target.morale])
 	else:
 		target.recover()
-		lines.append("Commissario: %s — tiro %d <= morale %d -> ripristinata." % [
-			target.unit_name, roll, target.morale])
+		lines.append(L10n.t("Commissario: %s — tiro %d <= morale %d -> ripristinata.") % [
+			target.display_name, roll, target.morale])

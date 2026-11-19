@@ -104,7 +104,7 @@ static func new_game(scenario_num: int, human: int = AX, seed_value: int = 0) ->
 
 ## Avvia (o riprende) il ciclo dei turni. Ritorna appena c'è la prima decisione.
 func start() -> void:
-	say("[b]Scenario %d — %s[/b]" % [s.scenario_number, s.scenario_name], "turn")
+	say(L10n.t("[b]Scenario %d — %s[/b]") % [s.scenario_number, L10n.t(s.scenario_name)], "turn")
 	_run()
 
 
@@ -123,14 +123,14 @@ func _run() -> void:
 ## Schieramento iniziale del giocatore: può spostare le sue unità dentro la
 ## zona prevista dalla scheda, farle ridisporre in automatico, o confermare.
 func _setup(f: int) -> void:
-	say("Schieramento dei %s: disponi le tue unità nella zona evidenziata." % side_name(f), "turn", { "who": f })
+	say(L10n.t("Schieramento dei %s: disponi le tue unità nella zona evidenziata.") % side_name(f), "turn", { "who": f })
 	while not over:
 		var opts: Array = []
 		for u in men(f):
-			opts.append({ "id": "unit", "unit": u.id, "label": "Sposta %s" % uname(u) })
-		opts.append({ "id": "auto", "label": "Ridisponi tutto in automatico" })
-		opts.append({ "id": "confirm", "label": "Pronto: inizia la partita" })
-		var a := await ask(f, "setup", "SCHIERAMENTO · tocca una tua unità per spostarla dentro la zona, oppure conferma lo schieramento proposto.", opts, {})
+			opts.append({ "id": "unit", "unit": u.id, "label": L10n.t("Sposta %s") % uname(u) })
+		opts.append({ "id": "auto", "label": L10n.t("Ridisponi tutto in automatico") })
+		opts.append({ "id": "confirm", "label": L10n.t("Pronto: inizia la partita") })
+		var a := await ask(f, "setup", L10n.t("SCHIERAMENTO · tocca una tua unità per spostarla dentro la zona, oppure conferma lo schieramento proposto."), opts, {})
 		match String(a.get("id", "confirm")):
 			"auto":
 				s.setup_zone = setup_zone.duplicate()
@@ -146,15 +146,15 @@ func _setup(f: int) -> void:
 						continue
 					if s.soldier_icons_at(h.x, h.y) + u.soldier_icons() <= 7 and not enemy_in(h, f):
 						o2.append({ "id": "hex", "hex": h, "label": lbl(h) })
-				o2.append({ "id": "no", "label": "Lascia %s dov'è" % u.unit_name })
-				var b := await ask(f, "setup_place", "SCHIERAMENTO · tocca l'esagono della zona in cui mettere %s." % u.unit_name, o2, { "unit": u.id })
+				o2.append({ "id": "no", "label": L10n.t("Lascia %s dov'è") % u.display_name })
+				var b := await ask(f, "setup_place", L10n.t("SCHIERAMENTO · tocca l'esagono della zona in cui mettere %s.") % u.display_name, o2, { "unit": u.id })
 				if b.get("id") == "hex":
 					s.set_unit_pos(u, b["hex"].x, b["hex"].y)
 			_:
 				break
 	update_objectives()
 	events.clear()
-	say("[b]Scenario %d — %s[/b]: schieramento completato." % [s.scenario_number, s.scenario_name], "turn")
+	say(L10n.t("[b]Scenario %d — %s[/b]: schieramento completato.") % [s.scenario_number, L10n.t(s.scenario_name)], "turn")
 
 
 func _refit_weapons(f: int) -> void:
@@ -200,7 +200,7 @@ func nation(f: int) -> String:
 	return s.axis_nation if f == AX else s.allied_nation
 
 func side_name(f: int) -> String:
-	return String(NATION_PLURAL.get(nation(f), "Asse" if f == AX else "Alleati"))
+	return L10n.t(NATION_PLURAL.get(nation(f), "Asse" if f == AX else "Alleati"))
 
 func hand(f: int) -> Array[Card]:
 	return s.german_hand if f == AX else s.russian_hand
@@ -221,7 +221,7 @@ func lbl(h: Vector2i) -> String:
 	return Domain.qr_to_label(h.x, h.y)
 
 func uname(u: Unit) -> String:
-	return "%s (%s)" % [u.unit_name, Domain.qr_to_label(u.q, u.r)]
+	return "%s (%s)" % [u.display_name, Domain.qr_to_label(u.q, u.r)]
 
 func in_map(h: Vector2i) -> bool:
 	return h.x >= 0 and h.x < s.map_cols and h.y >= 0 and h.y < s.map_rows
@@ -277,7 +277,7 @@ func add_vp(f: int, n: int, why: String = "") -> void:
 		return
 	s.bonus_vp += n if f == AX else -n
 	update_objectives()
-	say("%s: %+d PV%s." % [side_name(f), n, (" (" + why + ")") if why != "" else ""], "vp")
+	say(L10n.t("%s: %+d PV%s.") % [side_name(f), n, (" (" + why + ")") if why != "" else ""], "vp")
 
 
 ## Bilancia PV dal punto di vista del lato `f` (positiva = `f` è avanti).
@@ -347,7 +347,7 @@ func draw_card(f: int) -> Card:
 	pile(f).append(c)
 	if d.is_empty() and not _pending_time.has(f):
 		_pending_time.append(f)
-		say("%s: mazzo esaurito — il Tempo avanzerà." % side_name(f), "time")
+		say(L10n.t("%s: mazzo esaurito — il Tempo avanzerà.") % side_name(f), "time")
 	return c
 
 
@@ -392,7 +392,7 @@ func roll(f: int, what: String, judge: Callable = Callable(), ctx: Dictionary = 
 		var b := c.dice_red if c != null else _rng.randi_range(1, 6)
 		var total := a * b if product else a + b
 		res = { "a": a, "b": b, "sum": total, "card": c }
-		say("%s tira per %s: [b]%d%s%d = %d[/b]%s" % [
+		say(L10n.t("%s tira per %s: [b]%d%s%d = %d[/b]%s") % [
 			side_name(f), what, a, "×" if product else "+", b, total, _trigger_tag(c, ctx)],
 			"roll", { "dice": [a, b], "who": f })
 		if over:
@@ -402,13 +402,13 @@ func roll(f: int, what: String, judge: Callable = Callable(), ctx: Dictionary = 
 		if unhappy != holder:
 			break
 		var ans := await ask(holder, "reroll",
-			"Hai la carta Iniziativa: vuoi far RIPETERE questo tiro (%s: %d)? La carta passa all'avversario." % [what, total],
-			[{ "id": "keep", "label": "Tieni il tiro" }, { "id": "reroll", "label": "Ripeti il tiro (cedi l'Iniziativa)" }],
+			L10n.t("Hai la carta Iniziativa: vuoi far RIPETERE questo tiro (%s: %d)? La carta passa all'avversario.") % [what, total],
+			[{ "id": "keep", "label": L10n.t("Tieni il tiro") }, { "id": "reroll", "label": L10n.t("Ripeti il tiro (cedi l'Iniziativa)") }],
 			{ "roll": res, "what": what })
 		if ans.get("id", "keep") != "reroll":
 			break
 		s.initiative_holder = opp(holder)
-		say("[b]%s usa l'Iniziativa[/b]: il tiro è annullato e si ripete. L'Iniziativa passa a %s." % [
+		say(L10n.t("[b]%s usa l'Iniziativa[/b]: il tiro è annullato e si ripete. L'Iniziativa passa a %s.") % [
 			side_name(holder), side_name(opp(holder))], "init")
 	if not ctx.get("no_trigger", false):
 		await _apply_trigger(res["card"], f, ctx)
@@ -419,11 +419,11 @@ func _trigger_tag(c: Card, ctx: Dictionary) -> String:
 	if c == null or ctx.get("no_trigger", false):
 		return ""
 	match String(c.consequence):
-		"time": return "  [color=#e0b040]TEMPO![/color]"
-		"sniper": return "  [color=#e06060]CECCHINO![/color]"
-		"event": return "  [color=#70b0e0]EVENTO![/color]"
+		"time": return L10n.t("  [color=#e0b040]TEMPO![/color]")
+		"sniper": return L10n.t("  [color=#e06060]CECCHINO![/color]")
+		"event": return L10n.t("  [color=#70b0e0]EVENTO![/color]")
 		"jam":
-			return "  [color=#e08040]INCEPPAMENTO![/color]" if ctx.get("fire_weapons", null) != null else ""
+			return L10n.t("  [color=#e08040]INCEPPAMENTO![/color]") if ctx.get("fire_weapons", null) != null else ""
 	return ""
 
 
@@ -441,7 +441,7 @@ func _apply_trigger(c: Card, f: int, ctx: Dictionary) -> void:
 		"jam":
 			if ctx.has("fire_weapons"):
 				for w: Unit in ctx["fire_weapons"]:
-					_break_weapon(w, "Inceppamento")
+					_break_weapon(w, L10n.t("Inceppamento"))
 	await _process_time()
 
 
@@ -450,10 +450,10 @@ func _break_weapon(w: Unit, why: String) -> void:
 		return
 	if w.efficient:
 		w.efficient = false
-		say("%s: %s si guasta." % [why, w.unit_name], "bad")
+		say(L10n.t("%s: %s si guasta.") % [why, w.display_name], "bad")
 	else:
 		s.units.erase(w.id)
-		say("%s: %s, già guasta, è eliminata." % [why, w.unit_name], "bad")
+		say(L10n.t("%s: %s, già guasta, è eliminata.") % [why, w.display_name], "bad")
 
 
 ## Esagono Casuale: si rivela la carta successiva e si legge il suo esagono.
@@ -474,17 +474,17 @@ func _sniper(f: int) -> void:
 		if u.is_man() and u.faction != f and HexGrid.distance(h.x, h.y, u.q, u.r) <= 1:
 			cands.append(u)
 	if cands.is_empty():
-		say("Cecchino in %s: nessun nemico a tiro." % lbl(h), "fate", { "hex": h })
+		say(L10n.t("Cecchino in %s: nessun nemico a tiro.") % lbl(h), "fate", { "hex": h, "fx": "sniper" })
 		return
 	var opts: Array = []
 	for u: Unit in cands:
 		opts.append({ "id": "unit", "unit": u.id, "label": uname(u) })
-	opts.append({ "id": "none", "label": "Non colpire nessuno" })
-	var a := await ask(f, "sniper", "CECCHINO in %s: scegli un'unità nemica nell'esagono o adiacente da ROMPERE." % lbl(h), opts, { "hex": h })
+	opts.append({ "id": "none", "label": L10n.t("Non colpire nessuno") })
+	var a := await ask(f, "sniper", L10n.t("CECCHINO in %s: scegli un'unità nemica nell'esagono o adiacente da ROMPERE.") % lbl(h), opts, { "hex": h })
 	if a.get("id") == "unit":
 		var v: Unit = s.unit_by_id(a["unit"])
-		say("[b]Cecchino![/b] %s viene colpita." % uname(v), "fate", { "hex": h })
-		await hit(v, "Cecchino")
+		say(L10n.t("[b]Cecchino![/b] %s viene colpita.") % uname(v), "fate", { "hex": h, "fx": "sniper" })
+		await hit(v, L10n.t("Cecchino"))
 		check_end()
 
 
@@ -492,7 +492,7 @@ func _event(f: int) -> void:
 	var c := draw_card(f)
 	if c == null:
 		return
-	say("[b]Evento — %s[/b] (per %s)" % [c.event_name.capitalize(), side_name(f)], "fate")
+	say(L10n.t("[b]Evento — %s[/b] (per %s)") % [L10n.t(c.event_name).capitalize(), side_name(f)], "fate")
 	if await _event_native(c, f):
 		check_end()
 		return
@@ -524,24 +524,24 @@ func hit(u: Unit, why: String = "") -> void:
 		var c := find_action(u.faction, "FERITE LEGGERE")
 		if c != null:
 			var a := await ask(u.faction, "light_wounds",
-				"%s sta per %s: giochi FERITE LEGGERE? (perdi 1 PV; la Squadra diventa un Team %s)" % [
-					uname(u), "rompersi" if u.efficient else "essere ELIMINATA",
-					"efficiente" if u.efficient else "rotto"],
-				[{ "id": "play", "card": hand(u.faction).find(c), "label": "Gioca Ferite Leggere" },
-				 { "id": "no", "label": "No" }], { "unit": u.id })
+				L10n.t("%s sta per %s: giochi FERITE LEGGERE? (perdi 1 PV; la Squadra diventa un Team %s)") % [
+					uname(u), L10n.t("rompersi") if u.efficient else L10n.t("essere ELIMINATA"),
+					L10n.t("efficiente") if u.efficient else L10n.t("rotto")],
+				[{ "id": "play", "card": hand(u.faction).find(c), "label": L10n.t("Gioca Ferite Leggere") },
+				 { "id": "no", "label": L10n.t("No") }], { "unit": u.id })
 			if a.get("id") == "play":
 				_discard_from_hand(u.faction, c)
 				_light_wounds(u)
 				return
 	if u.efficient:
 		u.efficient = false
-		say("%s è [b]rotta[/b]%s." % [uname(u), (" — " + why) if why != "" else ""], "bad", { "unit": u.id, "fx": "break" })
+		say(L10n.t("%s è [b]rotta[/b]%s.") % [uname(u), (" — " + why) if why != "" else ""], "bad", { "unit": u.id, "fx": "break" })
 	else:
 		kill(u, why)
 
 
 func _light_wounds(sq: Unit) -> void:
-	add_vp(sq.faction, -1, "Ferite Leggere")
+	add_vp(sq.faction, -1, L10n.t("Ferite Leggere"))
 	var t := make_team(sq.faction, "Elite" if sq.unit_class == Domain.UnitClass.ELITE else "Line", sq.q, sq.r)
 	t.activated = sq.activated
 	t.suppressed = sq.suppressed
@@ -554,7 +554,7 @@ func _light_wounds(sq: Unit) -> void:
 	s.units.erase(sq.id)
 	if _moving_ids.has(sq.id):
 		_moving_ids.append(t.id)
-	say("Ferite Leggere: %s si riduce a un Team." % uname(sq), "good", { "unit": t.id })
+	say(L10n.t("Ferite Leggere: %s si riduce a un Team.") % uname(sq), "good", { "unit": t.id })
 
 
 func make_team(f: int, quality: String, q: int, r: int) -> Unit:
@@ -580,8 +580,8 @@ func kill(u: Unit, why: String = "") -> void:
 	if u == null or not s.units.has(u.id):
 		return
 	var v := GameState.elimination_vp(u) * (2 if s.chit_double_elim else 1)
-	say("%s è [b]ELIMINATA[/b]%s%s." % [uname(u), (" — " + why) if why != "" else "",
-		(" (+%d PV a %s)" % [v, side_name(opp(u.faction))]) if v > 0 else ""],
+	say(L10n.t("%s è [b]ELIMINATA[/b]%s%s.") % [uname(u), (" — " + why) if why != "" else "",
+		(L10n.t(" (+%d PV a %s)") % [v, side_name(opp(u.faction))]) if v > 0 else ""],
 		"kill", { "unit": u.id, "fx": "kill", "hex": u.pos() })
 	s.eliminate_unit(u.id)
 	update_objectives()
@@ -604,7 +604,7 @@ func update_objectives() -> void:
 		elif al > 0 and ax == 0:
 			obj.controller = AL
 		if obj.controller != before and not events.is_empty():
-			say("Obiettivo %d: ora controllato da %s." % [obj.id, side_name(obj.controller)], "vp", { "hex": Vector2i(obj.q, obj.r) })
+			say(L10n.t("Obiettivo %d: ora controllato da %s.") % [obj.id, side_name(obj.controller)], "vp", { "hex": Vector2i(obj.q, obj.r) })
 		if obj.controller == AX:
 			bal += obj.vp
 		elif obj.controller == AL:
@@ -621,11 +621,11 @@ func check_end() -> void:
 	if not (ax_lost or al_lost):
 		return
 	if ax_lost and al_lost:
-		_finish(s.initiative_holder, "Entrambi i lati sono crollati: decide la carta Iniziativa.")
+		_finish(s.initiative_holder, L10n.t("Entrambi i lati sono crollati: decide la carta Iniziativa."))
 	elif ax_lost:
-		_finish(AL, "%s: %s." % [side_name(AX), "resa (troppe perdite)" if s.has_surrendered(AX) else "nessuna unità rimasta"])
+		_finish(AL, "%s: %s." % [side_name(AX), L10n.t("resa (troppe perdite)") if s.has_surrendered(AX) else L10n.t("nessuna unità rimasta")])
 	else:
-		_finish(AX, "%s: %s." % [side_name(AL), "resa (troppe perdite)" if s.has_surrendered(AL) else "nessuna unità rimasta"])
+		_finish(AX, "%s: %s." % [side_name(AL), L10n.t("resa (troppe perdite)") if s.has_surrendered(AL) else L10n.t("nessuna unità rimasta")])
 
 
 func _finish_on_points(why: String) -> void:
@@ -638,8 +638,8 @@ func _finish_on_points(why: String) -> void:
 		w = AX
 	elif s.vp_tracker < 0:
 		w = AL
-	_finish(w, "%s Punti Vittoria finali: %d a favore di %s%s." % [why, absi(s.vp_tracker), side_name(w),
-		" (parità: decide l'Iniziativa)" if s.vp_tracker == 0 else ""])
+	_finish(w, L10n.t("%s Punti Vittoria finali: %d a favore di %s%s.") % [why, absi(s.vp_tracker), side_name(w),
+		L10n.t(" (parità: decide l'Iniziativa)") if s.vp_tracker == 0 else ""])
 
 
 func _finish(w: int, why: String) -> void:
@@ -650,7 +650,7 @@ func _finish(w: int, why: String) -> void:
 	end_reason = why
 	pending = {}
 	s.phase = Domain.Phase.GAME_OVER
-	say("[b]FINE PARTITA — vincono i %s.[/b] %s" % [side_name(w), why], "end")
+	say(L10n.t("[b]FINE PARTITA — vincono i %s.[/b] %s") % [side_name(w), why], "end")
 
 
 # ═══ Turno ═══════════════════════════════════════════════════════════════════
@@ -662,24 +662,24 @@ func _turn(f: int) -> void:
 	_opfire_ids.clear()
 	_moving_ids.clear()
 	orders_done = 0
-	say("[b]Turno %d — tocca ai %s[/b] (fino a %d Ordini)" % [turn_count, side_name(f), int(orders_max[f])], "turn", { "who": f })
+	say(L10n.t("[b]Turno %d — tocca ai %s[/b] (fino a %d Ordini)") % [turn_count, side_name(f), int(orders_max[f])], "turn", { "who": f })
 	while not over:
 		var opts: Array = []
 		var blocked := {}
 		var h := hand(f)
 		for i in h.size():
-			var why := "Hai già dato tutti gli Ordini del turno." if orders_done >= int(orders_max[f]) else order_block(f, h[i])
+			var why := L10n.t("Hai già dato tutti gli Ordini del turno.") if orders_done >= int(orders_max[f]) else order_block(f, h[i])
 			if why == "":
-				opts.append({ "id": "order", "card": i, "label": "Ordine: %s" % Domain.ORDER_LABELS.get(h[i].order, "?") })
+				opts.append({ "id": "order", "card": i, "label": L10n.t("Ordine: %s") % L10n.t(Domain.ORDER_LABELS.get(h[i].order, "?")) })
 			else:
 				blocked[i] = why
 		if orders_done == 0:
-			opts.append({ "id": "discard", "label": "Scarta carte (al posto degli Ordini)" })
-		opts.append({ "id": "end", "label": "Fine turno" if orders_done > 0 else "Passa senza scartare" })
+			opts.append({ "id": "discard", "label": L10n.t("Scarta carte (al posto degli Ordini)") })
+		opts.append({ "id": "end", "label": L10n.t("Fine turno") if orders_done > 0 else L10n.t("Passa senza scartare") })
 		var a := await ask(f, "turn",
-			"Gioca una carta come ORDINE (%d di %d usati), oppure termina il turno." % [orders_done, int(orders_max[f])]
+			L10n.t("Gioca una carta come ORDINE (%d di %d usati), oppure termina il turno.") % [orders_done, int(orders_max[f])]
 			if orders_done > 0 else
-			"Il tuo turno: gioca una carta come ORDINE (fino a %d), oppure scarta." % int(orders_max[f]),
+			L10n.t("Il tuo turno: gioca una carta come ORDINE (fino a %d), oppure scarta.") % int(orders_max[f]),
 			opts, { "blocked": blocked })
 		match String(a.get("id", "end")):
 			"order":
@@ -703,36 +703,36 @@ func _turn(f: int) -> void:
 func order_block(f: int, c: Card) -> String:
 	match c.order:
 		Domain.OrderType.PASS:
-			return "Ordini Contraddittori: questa carta non vale come Ordine."
+			return L10n.t("Ordini Contraddittori: questa carta non vale come Ordine.")
 		Domain.OrderType.MOVE, Domain.OrderType.FIRE, Domain.OrderType.ADVANCE:
 			if activation_options(f, c.order).is_empty():
 				match c.order:
-					Domain.OrderType.FIRE: return "Nessuna tua unità non ancora attivata ha un nemico in vista e a tiro."
-					Domain.OrderType.MOVE: return "Nessuna tua unità non ancora attivata può muovere."
-					_: return "Nessuna tua unità non ancora attivata può avanzare."
+					Domain.OrderType.FIRE: return L10n.t("Nessuna tua unità non ancora attivata ha un nemico in vista e a tiro.")
+					Domain.OrderType.MOVE: return L10n.t("Nessuna tua unità non ancora attivata può muovere.")
+					_: return L10n.t("Nessuna tua unità non ancora attivata può avanzare.")
 		Domain.OrderType.RECOVER:
 			if s.rally_used.has(f):
-				return "Sei già stato attivato per un Recupero o una Ritirata in questo turno."
+				return L10n.t("Sei già stato attivato per un Recupero o una Ritirata in questo turno.")
 			if s.broken_men_of(f).is_empty() and s.suppressed_men_of(f).is_empty():
-				return "Non hai unità rotte o soppresse."
+				return L10n.t("Non hai unità rotte o soppresse.")
 		Domain.OrderType.ROUT:
 			if _rout_targets(f).is_empty():
-				return "Nessun giocatore con unità rotte può essere bersaglio della Ritirata."
+				return L10n.t("Nessun giocatore con unità rotte può essere bersaglio della Ritirata.")
 		Domain.OrderType.ARTY:
 			var r := radio_of(f)
 			if r == null:
-				return "Non hai una Radio in gioco."
+				return L10n.t("Non hai una Radio in gioco.")
 			if r.efficient and _spotters(f).is_empty():
-				return "Serve un comandante efficiente non ancora attivato che faccia da osservatore."
+				return L10n.t("Serve un comandante efficiente non ancora attivato che faccia da osservatore.")
 		Domain.OrderType.ARTY_DENIED:
 			if radio_of(opp(f)) == null:
-				return "Il nemico non ha una Radio in gioco."
+				return L10n.t("Il nemico non ha una Radio in gioco.")
 	return ""
 
 
 func _play_order(f: int, c: Card) -> void:
 	_discard_from_hand(f, c)
-	say("[b]%s: ordine di %s[/b]" % [side_name(f), String(Domain.ORDER_LABELS.get(c.order, "?")).to_upper()], "order", { "card": c, "who": f })
+	say(L10n.t("[b]%s: ordine di %s[/b]") % [side_name(f), L10n.t(Domain.ORDER_LABELS.get(c.order, "?")).to_upper()], "order", { "card": c, "who": f })
 	match c.order:
 		Domain.OrderType.MOVE: await _order_move(f)
 		Domain.OrderType.FIRE: await _order_fire(f)
@@ -757,9 +757,9 @@ func _discard_turn(f: int) -> void:
 		var h := hand(f)
 		for i in h.size():
 			if sel.has(i) or sel.size() < limit:
-				opts.append({ "id": "toggle", "card": i, "on": sel.has(i), "label": "%s carta %d" % ["Tieni" if sel.has(i) else "Scarta", i + 1] })
-		opts.append({ "id": "confirm", "label": "Conferma: scarta %d carte" % sel.size() })
-		var a := await ask(f, "discard", "Scegli le carte da scartare (massimo %d per i %s), poi conferma." % [limit, side_name(f)],
+				opts.append({ "id": "toggle", "card": i, "on": sel.has(i), "label": L10n.t("%s carta %d") % [L10n.t("Tieni") if sel.has(i) else L10n.t("Scarta"), i + 1] })
+		opts.append({ "id": "confirm", "label": L10n.t("Conferma: scarta %d carte") % sel.size() })
+		var a := await ask(f, "discard", L10n.t("Scegli le carte da scartare (massimo %d per i %s), poi conferma.") % [limit, side_name(f)],
 			opts, { "selected_cards": sel.duplicate() })
 		if a.get("id") == "toggle":
 			var i := int(a["card"])
@@ -774,7 +774,7 @@ func _discard_turn(f: int) -> void:
 		cards.append(hand(f)[i])
 	for c: Card in cards:
 		_discard_from_hand(f, c)
-	say("%s passano e scartano %d carte." % [side_name(f), cards.size()], "order", { "who": f })
+	say(L10n.t("%s passano e scartano %d carte.") % [side_name(f), cards.size()], "order", { "who": f })
 	if cards.is_empty():
 		return
 	# Reazioni dell'avversario allo scarto: Unità Nascosta (A35.4), Demolizioni (A31).
@@ -790,15 +790,15 @@ func _discard_turn(f: int) -> void:
 		if not hexes.is_empty():
 			var opts: Array = []
 			for hx: Vector2i in hexes:
-				opts.append({ "id": "hex", "hex": hx, "label": "Demolisci la fortificazione in %s" % lbl(hx) })
-			opts.append({ "id": "no", "label": "Non giocare Demolizioni" })
-			var a := await ask(d, "demolitions", "L'avversario ha scartato: puoi giocare DEMOLIZIONI su una fortificazione in un esagono con una tua unità.", opts, { "card": hand(d).find(dc) })
+				opts.append({ "id": "hex", "hex": hx, "label": L10n.t("Demolisci la fortificazione in %s") % lbl(hx) })
+			opts.append({ "id": "no", "label": L10n.t("Non giocare Demolizioni") })
+			var a := await ask(d, "demolitions", L10n.t("L'avversario ha scartato: puoi giocare DEMOLIZIONI su una fortificazione in un esagono con una tua unità."), opts, { "card": hand(d).find(dc) })
 			if a.get("id") == "hex":
 				_discard_from_hand(d, dc)
 				var hd2: GameState.HexData = s.hex_at(a["hex"].x, a["hex"].y)
 				hd2.has_foxhole = false
 				hd2.fortification = Domain.Fort.NONE
-				say("Demolizioni: fortificazione in %s eliminata." % lbl(a["hex"]), "order", { "hex": a["hex"] })
+				say(L10n.t("Demolizioni: fortificazione in %s eliminata.") % lbl(a["hex"]), "order", { "hex": a["hex"] })
 
 
 # ═══ Tabelle di Supporto ═════════════════════════════════════════════════════
@@ -838,19 +838,19 @@ func support_items(f: int, roll_sum: int, with_radio: bool) -> Array:
 
 ## Tira sulla Tabella di Supporto e fa scegliere una voce. {} se non c'è nulla.
 func _support_roll(f: int, why: String, with_radio: bool) -> Dictionary:
-	var r := await roll(f, "la Tabella di Supporto (%s)" % why, Callable(), { "no_trigger": true })
+	var r := await roll(f, L10n.t("la Tabella di Supporto (%s)") % why, Callable(), { "no_trigger": true })
 	if over:
 		return {}
 	var items := support_items(f, int(r["sum"]), with_radio)
 	if items.is_empty():
-		say("   Tabella di Supporto, colonna %d: niente di disponibile nel %d." % [int(r["sum"]), scenario_year()], "fate")
+		say(L10n.t("   Tabella di Supporto, colonna %d: niente di disponibile nel %d.") % [int(r["sum"]), scenario_year()], "fate")
 		return {}
 	if items.size() == 1:
 		return items[0]
 	var o: Array = []
 	for it: Dictionary in items:
-		o.append({ "id": "item", "item": it, "label": String(it["nome"]) })
-	var a := await ask(f, "support", "TABELLA DI SUPPORTO · colonna %d, anno %d: scegli che cosa ricevere." % [int(r["sum"]), scenario_year()], o, {})
+		o.append({ "id": "item", "item": it, "label": L10n.support(it) })
+	var a := await ask(f, "support", L10n.t("TABELLA DI SUPPORTO · colonna %d, anno %d: scegli che cosa ricevere.") % [int(r["sum"]), scenario_year()], o, {})
 	return a.get("item", items[0])
 
 
@@ -905,22 +905,22 @@ func _hidden_unit(d: int) -> void:
 			spots.append(h)
 	if spots.is_empty():
 		return
-	var a := await ask(d, "hidden_unit", "L'avversario ha scartato: giochi UNITA' NASCOSTA? Tiri sulla Tabella di Supporto e fai comparire un'unità nella tua zona di schieramento, in un esagono vuoto con copertura.",
-		[{ "id": "play", "card": hand(d).find(c), "label": "Gioca Unità Nascosta" }, { "id": "no", "label": "No" }], {})
+	var a := await ask(d, "hidden_unit", L10n.t("L'avversario ha scartato: giochi UNITA' NASCOSTA? Tiri sulla Tabella di Supporto e fai comparire un'unità nella tua zona di schieramento, in un esagono vuoto con copertura."),
+		[{ "id": "play", "card": hand(d).find(c), "label": L10n.t("Gioca Unità Nascosta") }, { "id": "no", "label": L10n.t("No") }], {})
 	if a.get("id") != "play":
 		return
 	_discard_from_hand(d, c)
-	say("[b]%s: Unità Nascosta![/b]" % side_name(d), "order", { "card": c, "who": d })
-	var it := await _support_roll(d, "Unità Nascosta", false)
+	say(L10n.t("[b]%s: Unità Nascosta![/b]") % side_name(d), "order", { "card": c, "who": d })
+	var it := await _support_roll(d, L10n.t("Unità Nascosta"), false)
 	if it.is_empty() or over:
 		return
 	var o: Array = []
 	for h: Vector2i in spots:
 		o.append({ "id": "hex", "hex": h, "label": lbl(h) })
-	var b := await ask(d, "place_unit", "UNITA' NASCOSTA · %s: scegli l'esagono (vuoto, con copertura, nella tua zona) in cui farla comparire." % String(it["nome"]), o, {})
+	var b := await ask(d, "place_unit", L10n.t("UNITA' NASCOSTA · %s: scegli l'esagono (vuoto, con copertura, nella tua zona) in cui farla comparire.") % L10n.support(it), o, {})
 	var h2: Vector2i = b.get("hex", spots[0])
 	_spawn_support(d, it, h2)
-	say("Compare %s in %s." % [String(it["nome"]), lbl(h2)], "good", { "hex": h2, "who": d })
+	say(L10n.t("Compare %s in %s.") % [L10n.support(it), lbl(h2)], "good", { "hex": h2, "who": d })
 	update_objectives()
 
 
@@ -954,7 +954,7 @@ func _refill(f: int) -> void:
 		hand(f).append(d.pop_back())
 		if d.is_empty() and not _pending_time.has(f):
 			_pending_time.append(f)
-			say("%s: mazzo esaurito — il Tempo avanza." % side_name(f), "time")
+			say(L10n.t("%s: mazzo esaurito — il Tempo avanza.") % side_name(f), "time")
 			await _process_time()
 
 
@@ -985,7 +985,7 @@ func _overstack(f: int) -> void:
 				v = stack[stack.size() - 1]
 			stack.erase(v)
 			total -= v.soldier_icons()
-			kill(v, "sovraccarico: più di 7 figure nell'esagono a fine turno")
+			kill(v, L10n.t("sovraccarico: più di 7 figure nell'esagono a fine turno"))
 
 
 # ═══ Attivazione (O14.1) ═════════════════════════════════════════════════════
@@ -1048,16 +1048,16 @@ func _choose_activation(f: int, order: int, th: Vector2i = Vector2i(-1, -1)) -> 
 	var group: Array[Unit] = []
 	if cands.is_empty():
 		return group
-	var oname := String(Domain.ORDER_LABELS.get(order, "?")).to_upper()
+	var oname := L10n.t(Domain.ORDER_LABELS.get(order, "?")).to_upper()
 	if th.x >= 0:
-		oname = "FUOCO DI OPPORTUNITÀ"
+		oname = L10n.t("FUOCO DI OPPORTUNITÀ")
 	var opts: Array = []
 	for u in cands:
 		var n := followers_of(u).size()
 		opts.append({ "id": "unit", "unit": u.id,
-			"label": ("%s — COMANDANTE: può attivare altre %d unità" % [uname(u), n]) if n > 0 else uname(u) })
+			"label": (L10n.t("%s — COMANDANTE: può attivare altre %d unità") % [uname(u), n]) if n > 0 else uname(u) })
 	var a := await ask(f, "activate",
-		"%s · passo 1: scegli CHI ATTIVARE. Un comandante (bordo dorato) attiva anche gli uomini entro il suo raggio di Comando; ogni altra unità si attiva da sola." % oname,
+		L10n.t("%s · passo 1: scegli CHI ATTIVARE. Un comandante (bordo dorato) attiva anche gli uomini entro il suo raggio di Comando; ogni altra unità si attiva da sola.") % oname,
 		opts, { "order": order })
 	var lead: Unit = s.unit_by_id(String(a.get("unit", "")))
 	if lead == null:
@@ -1073,10 +1073,10 @@ func _choose_activation(f: int, order: int, th: Vector2i = Vector2i(-1, -1)) -> 
 			var o2: Array = []
 			for u in fol:
 				o2.append({ "id": "toggle", "unit": u.id, "on": sel.has(u.id),
-					"label": "%s %s" % ["Escludi" if sel.has(u.id) else "Includi", uname(u)] })
-			o2.append({ "id": "confirm", "label": "Conferma: %s + %d unità" % [lead.unit_name, sel.size()] })
+					"label": "%s %s" % [L10n.t("Escludi") if sel.has(u.id) else L10n.t("Includi"), uname(u)] })
+			o2.append({ "id": "confirm", "label": L10n.t("Conferma: %s + %d unità") % [lead.display_name, sel.size()] })
 			var b := await ask(f, "group",
-				"%s · passo 2: %s comanda entro un raggio di %d. Tocca gli uomini per includerli o escluderli, poi CONFERMA." % [oname, lead.unit_name, lead.command],
+				L10n.t("%s · passo 2: %s comanda entro un raggio di %d. Tocca gli uomini per includerli o escluderli, poi CONFERMA.") % [oname, lead.display_name, lead.command],
 				o2, { "leader": lead.id, "radius": lead.command, "selected": sel.duplicate(), "order": order })
 			if b.get("id") == "toggle":
 				var id := String(b["unit"])
@@ -1092,8 +1092,8 @@ func _choose_activation(f: int, order: int, th: Vector2i = Vector2i(-1, -1)) -> 
 	var names: Array = []
 	for u in group:
 		u.activated = true
-		names.append(u.unit_name)
-	say("Attivati: %s." % ", ".join(names), "order", { "units": group.map(func(x: Unit) -> String: return x.id), "who": f })
+		names.append(u.display_name)
+	say(L10n.t("Attivati: %s.") % ", ".join(names), "order", { "units": group.map(func(x: Unit) -> String: return x.id), "who": f })
 	return group
 
 
@@ -1132,7 +1132,7 @@ func _order_move(f: int) -> void:
 		for id in todo:
 			var u: Unit = s.unit_by_id(id)
 			if u != null and useful(u, Domain.OrderType.MOVE):
-				opts.append({ "id": "unit", "unit": id, "label": "Muovi %s (%d PM)" % [uname(u), Rules.move_allowance(s, u)] })
+				opts.append({ "id": "unit", "unit": id, "label": L10n.t("Muovi %s (%d PM)") % [uname(u), Rules.move_allowance(s, u)] })
 		if opts.is_empty():
 			break
 		var u2: Unit = null
@@ -1140,8 +1140,8 @@ func _order_move(f: int) -> void:
 			u2 = s.unit_by_id(String(opts[0]["unit"]))
 		else:
 			if moved_any:
-				opts.append({ "id": "end", "label": "Termina la Mossa" })
-			var a := await ask(f, "pick_mover", "MOSSA · scegli quale unità attivata muove adesso.", opts, { "order": Domain.OrderType.MOVE })
+				opts.append({ "id": "end", "label": L10n.t("Termina la Mossa") })
+			var a := await ask(f, "pick_mover", L10n.t("MOSSA · scegli quale unità attivata muove adesso."), opts, { "order": Domain.OrderType.MOVE })
 			if a.get("id") != "unit":
 				break
 			u2 = s.unit_by_id(String(a["unit"]))
@@ -1160,10 +1160,10 @@ func _order_move(f: int) -> void:
 				var o2: Array = []
 				for m: Unit in mates:
 					o2.append({ "id": "toggle", "unit": m.id, "on": sel.has(m.id),
-						"label": "%s %s" % ["Lascia indietro" if sel.has(m.id) else "Porta anche", uname(m)] })
-				o2.append({ "id": "confirm", "label": ("Muovi %s da sola" % u2.unit_name) if sel.is_empty() else ("Muovi insieme: %s + %d" % [u2.unit_name, sel.size()]) })
+						"label": "%s %s" % [L10n.t("Lascia indietro") if sel.has(m.id) else L10n.t("Porta anche"), uname(m)] })
+				o2.append({ "id": "confirm", "label": (L10n.t("Muovi %s da sola") % u2.display_name) if sel.is_empty() else (L10n.t("Muovi insieme: %s + %d") % [u2.display_name, sel.size()]) })
 				var b := await ask(f, "move_together",
-					"MOSSA · nello stesso esagono ci sono altre unità attivate: possono MUOVERE INSIEME a %s (restano unite e vanno al passo della più lenta)." % u2.unit_name,
+					L10n.t("MOSSA · nello stesso esagono ci sono altre unità attivate: possono MUOVERE INSIEME a %s (restano unite e vanno al passo della più lenta).") % u2.display_name,
 					o2, { "unit": u2.id, "selected": sel.duplicate() })
 				if b.get("id") == "toggle":
 					var id2 := String(b["unit"])
@@ -1208,30 +1208,30 @@ func _move_stack(f: int, stack: Array) -> bool:
 					break
 				c = maxi(c, cm)
 			if c >= 0:
-				opts.append({ "id": "step", "hex": nb, "cost": c, "label": "%s (%d PM)" % [lbl(nb), c] })
+				opts.append({ "id": "step", "hex": nb, "cost": c, "label": L10n.t("%s (%d PM)") % [lbl(nb), c] })
 		if left >= 1 and at_edge(opp(f), u.pos()):
 			var v := 0
 			for m: Unit in stack:
 				v += GameState.elimination_vp(m) * (2 if s.chit_double_exit else 1)
-			opts.append({ "id": "exit", "label": "Esci dalla mappa (+%d PV)" % v })
+			opts.append({ "id": "exit", "label": L10n.t("Esci dalla mappa (+%d PV)") % v })
 		var sg := find_action(f, "GRANATE FUMOGENE")
 		if sg != null:
 			for m: Unit in stack:
 				if m.move_boxed:
-					opts.append({ "id": "smoke", "card": hand(f).find(sg), "by": m.id, "label": "Azione: Granate Fumogene" })
+					opts.append({ "id": "smoke", "card": hand(f).find(sg), "by": m.id, "label": L10n.t("Azione: Granate Fumogene") })
 					break
 		var af := find_action(f, "FUOCO D'ASSALTO")
 		if af != null and not _assault_pieces(u).is_empty():
-			opts.append({ "id": "assault", "card": hand(f).find(af), "label": "Azione: Fuoco d'Assalto" })
+			opts.append({ "id": "assault", "card": hand(f).find(af), "label": L10n.t("Azione: Fuoco d'Assalto") })
 		if opts.is_empty():
 			break
-		var who := u.unit_name
+		var who := u.display_name
 		if stack.size() == 2:
-			who = "%s con %s" % [u.unit_name, (stack[1] as Unit).unit_name]
+			who = L10n.t("%s con %s") % [u.display_name, (stack[1] as Unit).display_name]
 		elif stack.size() > 2:
-			who = "%s con altre %d unità" % [u.unit_name, stack.size() - 1]
-		opts.append({ "id": "stop", "label": "Ferma qui %s" % who })
-		var a := await ask(f, "move", "MOSSA · %s: %d PM rimasti. Tocca un esagono adiacente evidenziato per avanzare di un passo." % [who, maxi(left, 0)],
+			who = L10n.t("%s con altre %d unità") % [u.display_name, stack.size() - 1]
+		opts.append({ "id": "stop", "label": L10n.t("Ferma qui %s") % who })
+		var a := await ask(f, "move", L10n.t("MOSSA · %s: %d PM rimasti. Tocca un esagono adiacente evidenziato per avanzare di un passo.") % [who, maxi(left, 0)],
 			opts, { "unit": u.id, "left": left, "selected": stack.map(func(x: Unit) -> String: return x.id) })
 		match String(a.get("id", "stop")):
 			"step":
@@ -1244,7 +1244,7 @@ func _move_stack(f: int, stack: Array) -> bool:
 				# T93: +1 al Movimento da quando si entra in un esagono con Strada.
 				if road_bonus == 0 and s.hex_at(to.x, to.y).has_road:
 					road_bonus = 1
-				say("%s muove in %s (%d PM spesi)." % [who, lbl(to), spent], "move", { "unit": u.id, "from": from, "to": to, "who": f })
+				say(L10n.t("%s muove in %s (%d PM spesi).") % [who, lbl(to), spent], "move", { "unit": u.id, "from": from, "to": to, "who": f })
 				update_objectives()
 				for m: Unit in stack:
 					if s.units.has(m.id):
@@ -1270,13 +1270,13 @@ func _move_stack(f: int, stack: Array) -> bool:
 
 func _exit_unit(f: int, u: Unit) -> void:
 	var from := u.pos()
-	var nm := u.unit_name
+	var nm := u.display_name
 	var v := s.exit_unit_for_vp(u.id)
 	_moving_ids.erase(u.id)
-	say("%s esce dalla mappa: +%d PV ai %s. Rientrerà come rinforzo." % [nm, v, side_name(f)], "vp", { "hex": from, "who": f })
+	say(L10n.t("%s esce dalla mappa: +%d PV ai %s. Rientrerà come rinforzo.") % [nm, v, side_name(f)], "vp", { "hex": from, "who": f })
 	update_objectives()
 	if s.men_of(f).is_empty():
-		_finish_on_points("L'ultima unità dei %s ha lasciato la mappa." % side_name(f))
+		_finish_on_points(L10n.t("L'ultima unità dei %s ha lasciato la mappa.") % side_name(f))
 
 
 func _smoke_grenades(f: int, u: Unit, c: Card) -> void:
@@ -1286,14 +1286,14 @@ func _smoke_grenades(f: int, u: Unit, c: Card) -> void:
 	for h: Vector2i in around:
 		var hd: GameState.HexData = s.hex_at(h.x, h.y)
 		if hd != null and not hd.has_blaze and not Rules.is_water_hex(s, h.x, h.y):
-			opts.append({ "id": "hex", "hex": h, "label": "Fumo in %s" % lbl(h) })
-	opts.append({ "id": "no", "label": "Annulla" })
-	var a := await ask(f, "smoke", "GRANATE FUMOGENE: scegli dove mettere il fumo (esagono dell'unità o adiacente).", opts, { "unit": u.id })
+			opts.append({ "id": "hex", "hex": h, "label": L10n.t("Fumo in %s") % lbl(h) })
+	opts.append({ "id": "no", "label": L10n.t("Annulla") })
+	var a := await ask(f, "smoke", L10n.t("GRANATE FUMOGENE: scegli dove mettere il fumo (esagono dell'unità o adiacente)."), opts, { "unit": u.id })
 	if a.get("id") != "hex":
 		return
 	_discard_from_hand(f, c)
 	s.hex_at(a["hex"].x, a["hex"].y).has_smoke = true
-	say("%s lancia Granate Fumogene in %s." % [u.unit_name, lbl(a["hex"])], "order", { "hex": a["hex"], "fx": "smoke", "who": f })
+	say(L10n.t("%s lancia Granate Fumogene in %s.") % [u.display_name, lbl(a["hex"])], "order", { "hex": a["hex"], "fx": "smoke", "who": f })
 
 
 func _assault_pieces(u: Unit) -> Array[Unit]:
@@ -1313,7 +1313,7 @@ func _assault_fire(f: int, _u: Unit, c: Card) -> void:
 	if pool.is_empty():
 		return
 	_discard_from_hand(f, c)
-	say("%s giocano Fuoco d'Assalto." % side_name(f), "order", { "who": f })
+	say(L10n.t("%s giocano Fuoco d'Assalto.") % side_name(f), "order", { "who": f })
 	await _fire_once(f, pool, Vector2i(-1, -1), {})
 
 
@@ -1328,22 +1328,22 @@ func _mines_on(u: Unit, from: Vector2i, to: Vector2i) -> void:
 
 func _mine_attack(u: Unit, h: Vector2i) -> void:
 	var own := u.faction
-	var atk := await roll(opp(own), "l'attacco delle Mine in %s" % lbl(h), func(t: int) -> int: return own if t >= 8 else -1)
+	var atk := await roll(opp(own), L10n.t("l'attacco delle Mine in %s") % lbl(h), func(t: int) -> int: return own if t >= 8 else -1)
 	if not s.units.has(u.id):
 		return
 	var total: int = 6 + int(atk["sum"])
 	var m := morale_of(u)
-	var dr := await roll(own, "la difesa di %s dalle Mine" % u.unit_name,
+	var dr := await roll(own, L10n.t("la difesa di %s dalle Mine") % u.display_name,
 		func(t: int) -> int: return own if m + t <= total else opp(own))
 	if not s.units.has(u.id):
 		return
 	var dt: int = m + int(dr["sum"])
 	if dt < total:
-		await hit(u, "Mine (%d contro %d)" % [total, dt])
+		await hit(u, L10n.t("Mine (%d contro %d)") % [total, dt])
 	elif dt == total:
-		await hit(u, "Mine (pari, in movimento)")
+		await hit(u, L10n.t("Mine (pari, in movimento)"))
 	else:
-		say("%s supera le Mine (%d contro %d)." % [u.unit_name, dt, total], "good")
+		say(L10n.t("%s supera le Mine (%d contro %d).") % [u.display_name, dt, total], "good")
 
 
 ## Finestra di reazione dell'avversario dopo che `units` sono entrate in `h`.
@@ -1359,36 +1359,36 @@ func _react_to_entry(f: int, units: Array, h: Vector2i, kind: String) -> void:
 		if is_defender(d) and not hd.has_foxhole and hd.fortification == Domain.Fort.NONE and not Rules.is_water_hex(s, h.x, h.y):
 			var mc := find_action(d, "MINE NASCOSTE")
 			if mc != null:
-				opts.append({ "id": "mines", "card": hand(d).find(mc), "label": "Azione: Mine Nascoste in %s" % lbl(h) })
+				opts.append({ "id": "mines", "card": hand(d).find(mc), "label": L10n.t("Azione: Mine Nascoste in %s") % lbl(h) })
 			var wc := find_action(d, "FILO SPINATO NASCOSTO")
 			if wc != null:
-				opts.append({ "id": "wire", "card": hand(d).find(wc), "label": "Azione: Filo Spinato Nascosto in %s" % lbl(h) })
+				opts.append({ "id": "wire", "card": hand(d).find(wc), "label": L10n.t("Azione: Filo Spinato Nascosto in %s") % lbl(h) })
 		if kind == "move" and not fired:
 			if not _opfire_ready(d, h).is_empty():
-				opts.append({ "id": "opfire", "label": "Fuoco di Opportunità (unità già attivate, gratis)" })
+				opts.append({ "id": "opfire", "label": L10n.t("Fuoco di Opportunità (unità già attivate, gratis)") })
 			var fc := find_order(d, Domain.OrderType.FIRE)
 			if fc != null and not activation_options(d, Domain.OrderType.FIRE, h).is_empty():
-				opts.append({ "id": "opfire_card", "card": hand(d).find(fc), "label": "Gioca FUOCO: Fuoco di Opportunità" })
+				opts.append({ "id": "opfire_card", "card": hand(d).find(fc), "label": L10n.t("Gioca FUOCO: Fuoco di Opportunità") })
 		if opts.is_empty():
 			return
-		opts.append({ "id": "pass", "label": "Lascia passare" })
-		var a := await ask(d, "react", "REAZIONE · %s entra in %s. Vuoi reagire?" % [alive[0].unit_name, lbl(h)],
+		opts.append({ "id": "pass", "label": L10n.t("Lascia passare") })
+		var a := await ask(d, "react", L10n.t("REAZIONE · %s entra in %s. Vuoi reagire?") % [alive[0].display_name, lbl(h)],
 			opts, { "hex": h, "unit": alive[0].id })
 		match String(a.get("id", "pass")):
 			"mines":
 				_discard_from_hand(d, hand(d)[int(a["card"])])
 				hd.fortification = Domain.Fort.MINES
-				say("[b]Mine Nascoste![/b] Campo minato in %s." % lbl(h), "bad", { "hex": h, "who": d })
+				say(L10n.t("[b]Mine Nascoste![/b] Campo minato in %s.") % lbl(h), "bad", { "hex": h, "who": d })
 				for u: Unit in alive:
 					if s.units.has(u.id):
 						await _mine_attack(u, h)
 			"wire":
 				_discard_from_hand(d, hand(d)[int(a["card"])])
 				hd.fortification = Domain.Fort.WIRE
-				say("[b]Filo Spinato Nascosto![/b] Reticolati in %s." % lbl(h), "bad", { "hex": h, "who": d })
+				say(L10n.t("[b]Filo Spinato Nascosto![/b] Reticolati in %s.") % lbl(h), "bad", { "hex": h, "who": d })
 			"opfire_card":
 				_discard_from_hand(d, hand(d)[int(a["card"])])
-				say("[b]%s: Fuoco di Opportunità![/b]" % side_name(d), "order", { "who": d })
+				say(L10n.t("[b]%s: Fuoco di Opportunità![/b]") % side_name(d), "order", { "who": d })
 				var g := await _choose_activation(d, Domain.OrderType.FIRE, h)
 				for u in g:
 					_opfire_ids.append(u.id)
@@ -1530,8 +1530,8 @@ func _chain(pieces: Array) -> Array:
 func piece_label(p: Unit) -> String:
 	if p.is_weapon():
 		var c := s.unit_by_id(p.carrier_id)
-		return "%s di %s (FP %d)" % [p.unit_name, c.unit_name if c != null else "?", Rules.fp_with_command(s, p)]
-	return "%s (FP %d)" % [uname(p), Rules.fp_with_command(s, p)]
+		return L10n.t("%s di %s (FP %d)") % [p.display_name, c.display_name if c != null else "?", Rules.fp_with_command(s, p)]
+	return L10n.t("%s (FP %d)") % [uname(p), Rules.fp_with_command(s, p)]
 
 
 func _choose_group(f: int, pool: Array, h: Vector2i) -> Array:
@@ -1552,15 +1552,15 @@ func _choose_group(f: int, pool: Array, h: Vector2i) -> Array:
 		var opts: Array = []
 		for p: Unit in norm:
 			opts.append({ "id": "toggle", "unit": p.id, "piece": true, "on": sel.has(p.id),
-				"label": "%s %s" % ["Togli" if sel.has(p.id) else "Aggiungi", piece_label(p)] })
+				"label": "%s %s" % [L10n.t("Togli") if sel.has(p.id) else L10n.t("Aggiungi"), piece_label(p)] })
 		for p: Unit in ords:
-			opts.append({ "id": "ordnance", "unit": p.id, "piece": true, "label": "Spara da solo: %s (deve prima colpire)" % piece_label(p) })
+			opts.append({ "id": "ordnance", "unit": p.id, "piece": true, "label": L10n.t("Spara da solo: %s (deve prima colpire)") % piece_label(p) })
 		var cur: Array = _chain(norm.filter(func(p: Unit) -> bool: return sel.has(p.id)))
 		var fp := group_fp(cur, h)
 		if not cur.is_empty() and fp >= 1:
-			opts.append({ "id": "confirm", "label": "FUOCO! %d pezzi, FP %d" % [cur.size(), fp] })
+			opts.append({ "id": "confirm", "label": L10n.t("FUOCO! %d pezzi, FP %d") % [cur.size(), fp] })
 		var a := await ask(f, "fire_group",
-			"FUOCO su %s · componi il GRUPPO DI FUOCO: il pezzo più forte dà il suo FP, ogni altro aggiunge +1. Poi conferma." % lbl(h),
+			L10n.t("FUOCO su %s · componi il GRUPPO DI FUOCO: il pezzo più forte dà il suo FP, ogni altro aggiunge +1. Poi conferma.") % lbl(h),
 			opts, { "hex": h, "selected": sel.duplicate(), "fp": fp })
 		match String(a.get("id", "")):
 			"toggle":
@@ -1601,10 +1601,10 @@ func _fire_once(f: int, pool: Array, th: Vector2i, opts: Dictionary) -> Array:
 					if p.ordnance and can_hit(p, t):
 						ofp = maxi(ofp, p.fp)
 			o.append({ "id": "hex", "hex": t, "fp": ofp,
-				"label": "%s — %s, copertura %+d" % [lbl(t), ("FP %d" % group_fp(grp, t)) if not grp.is_empty() else "solo armi a tiro curvo", cov] })
+				"label": L10n.t("%s — %s, copertura %+d") % [lbl(t), (L10n.t("FP %d") % group_fp(grp, t)) if not grp.is_empty() else L10n.t("solo armi a tiro curvo"), cov] })
 		if opts.get("can_end", false):
-			o.append({ "id": "end", "label": "Termina il Fuoco" })
-		var a := await ask(f, "fire_target", "FUOCO · scegli l'esagono BERSAGLIO fra quelli evidenziati in rosso.", o, {})
+			o.append({ "id": "end", "label": L10n.t("Termina il Fuoco") })
+		var a := await ask(f, "fire_target", L10n.t("FUOCO · scegli l'esagono BERSAGLIO fra quelli evidenziati in rosso."), o, {})
 		if a.get("id") != "hex":
 			return []
 		h = a["hex"]
@@ -1662,19 +1662,19 @@ func _fire_mods(f: int, pieces: Array, hexes: Array, opts: Dictionary) -> Array:
 		match c.action_name:
 			"FUOCO SOSTENUTO":
 				if has_mg:
-					out.append({ "id": "sustained", "card": i, "label": "Azione: Fuoco Sostenuto (+2; con un doppio l'arma si guasta)" })
+					out.append({ "id": "sustained", "card": i, "label": L10n.t("Azione: Fuoco Sostenuto (+2; con un doppio l'arma si guasta)") })
 			"FUOCO MIRATO":
 				if has_squad:
-					out.append({ "id": "plus2", "card": i, "label": "Azione: Fuoco Mirato (+2)" })
+					out.append({ "id": "plus2", "card": i, "label": L10n.t("Azione: Fuoco Mirato (+2)") })
 			"BOMBE A MANO":
 				if adjacent:
-					out.append({ "id": "plus2", "card": i, "label": "Azione: Bombe a Mano (+2)" })
+					out.append({ "id": "plus2", "card": i, "label": L10n.t("Azione: Bombe a Mano (+2)") })
 			"FUOCO INCROCIATO":
 				if moving_target:
-					out.append({ "id": "plus2", "card": i, "label": "Azione: Fuoco Incrociato (+2 su unità in movimento)" })
+					out.append({ "id": "plus2", "card": i, "label": L10n.t("Azione: Fuoco Incrociato (+2 su unità in movimento)") })
 			"BUONA MIRA":
 				if is_defender(f) and big_weapon:
-					out.append({ "id": "plus2", "card": i, "label": "Azione: Buona Mira (+2)" })
+					out.append({ "id": "plus2", "card": i, "label": L10n.t("Azione: Buona Mira (+2)") })
 			"SVENTAGLIATA DI FUOCO":
 				if hexes.size() == 1 and boxed_range:
 					for nb in HexGrid.neighbors(h.x, h.y):
@@ -1685,7 +1685,7 @@ func _fire_mods(f: int, pieces: Array, hexes: Array, opts: Dictionary) -> Array:
 							if not can_hit(p, nb):
 								all_ok = false
 						if all_ok:
-							out.append({ "id": "spray", "card": i, "hex": nb, "label": "Azione: Sventagliata — colpisci anche %s" % lbl(nb) })
+							out.append({ "id": "spray", "card": i, "hex": nb, "label": L10n.t("Azione: Sventagliata — colpisci anche %s") % lbl(nb) })
 	return out
 
 
@@ -1693,22 +1693,22 @@ func _fire_mods(f: int, pieces: Array, hexes: Array, opts: Dictionary) -> Array:
 func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 	var d := opp(f)
 	var lead: Unit = pieces[0]
-	var names: Array = pieces.map(func(p: Unit) -> String: return p.unit_name)
+	var names: Array = pieces.map(func(p: Unit) -> String: return p.display_name)
 	var from := lead.pos()
-	say("%s fa fuoco su %s con %s." % [side_name(f), lbl(h), ", ".join(names)], "fire",
+	say(L10n.t("%s fa fuoco su %s con %s.") % [side_name(f), lbl(h), ", ".join(names)], "fire",
 		{ "from": from, "to": h, "who": f, "fx": "fire", "pieces": pieces.map(func(p: Unit) -> String: return p.id) })
 	if lead.ordnance:
 		var dist := HexGrid.distance(lead.q, lead.r, h.x, h.y)
 		var hind := hindrance(lead, h)
 		var need := dist + hind
-		var tr := await roll(f, "colpire il bersaglio (serve più di %d)" % need,
+		var tr := await roll(f, L10n.t("colpire il bersaglio (serve più di %d)") % need,
 			func(t: int) -> int: return f if t <= need else d, { "product": true })
 		if over:
 			return
 		if int(tr["sum"]) <= need:
-			say("%s manca il bersaglio." % lead.unit_name, "miss")
+			say(L10n.t("%s manca il bersaglio.") % lead.display_name, "miss")
 			return
-		say("%s è sul bersaglio!" % lead.unit_name, "fire")
+		say(L10n.t("%s è sul bersaglio!") % lead.display_name, "fire")
 	var fp := group_fp(pieces, h)
 	var bonus := 0
 	var hexes: Array = [h]
@@ -1717,8 +1717,8 @@ func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 		var o := _fire_mods(f, pieces, hexes, opts)
 		if o.is_empty():
 			break
-		o.append({ "id": "go", "label": "Tira i dadi (FP %d)" % (fp + bonus) })
-		var a := await ask(f, "fire_mods", "FUOCO su %s · FP %d. Puoi rinforzare l'attacco con un'AZIONE dalla mano, poi tira i dadi." % [lbl(h), fp + bonus],
+		o.append({ "id": "go", "label": L10n.t("Tira i dadi (FP %d)") % (fp + bonus) })
+		var a := await ask(f, "fire_mods", L10n.t("FUOCO su %s · FP %d. Puoi rinforzare l'attacco con un'AZIONE dalla mano, poi tira i dadi.") % [lbl(h), fp + bonus],
 			o, { "hex": h, "fp": fp + bonus })
 		if a.get("id", "go") == "go":
 			break
@@ -1727,21 +1727,21 @@ func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 		match String(a["id"]):
 			"spray":
 				hexes.append(a["hex"])
-				say("Azione: Sventagliata di Fuoco — colpito anche %s." % lbl(a["hex"]), "order", { "card": c, "who": f })
+				say(L10n.t("Azione: Sventagliata di Fuoco — colpito anche %s.") % lbl(a["hex"]), "order", { "card": c, "who": f })
 			"sustained":
 				sustained = true
 				bonus += 2
-				say("Azione: Fuoco Sostenuto (+2).", "order", { "card": c, "who": f })
+				say(L10n.t("Azione: Fuoco Sostenuto (+2)."), "order", { "card": c, "who": f })
 			_:
 				bonus += 2
-				say("Azione: %s (+2)." % c.action_name.capitalize(), "order", { "card": c, "who": f })
+				say(L10n.t("Azione: %s (+2).") % L10n.t(c.action_name).capitalize(), "order", { "card": c, "who": f })
 	if over:
 		return
 	if fp + bonus < 1:
-		say("Il fuoco è troppo ostacolato: nessun attacco.", "miss")
+		say(L10n.t("Il fuoco è troppo ostacolato: nessun attacco."), "miss")
 		return
 	var weapons: Array = pieces.filter(func(p: Unit) -> bool: return p.is_weapon())
-	var ar := await roll(f, "l'attacco (FP %d)" % (fp + bonus),
+	var ar := await roll(f, L10n.t("l'attacco (FP %d)") % (fp + bonus),
 		func(t: int) -> int: return d if t >= 9 else (f if t <= 5 else -1), { "fire_weapons": weapons })
 	if over:
 		return
@@ -1749,9 +1749,9 @@ func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 	if sustained and int(ar["a"]) == int(ar["b"]):
 		for w: Unit in weapons:
 			if w.unit_class == Domain.UnitClass.MG or w.unit_class == Domain.UnitClass.MORTAR:
-				_break_weapon(w, "Fuoco Sostenuto con un doppio")
+				_break_weapon(w, L10n.t("Fuoco Sostenuto con un doppio"))
 				break
-	say("Totale d'attacco: [b]%d[/b]." % total, "fire")
+	say(L10n.t("Totale d'attacco: [b]%d[/b].") % total, "fire")
 	total = await _defense_actions(d, hexes, total, lead.ordnance)
 	for hx: Vector2i in hexes:
 		await _defend_hex(f, d, hx, total, lead.ordnance, opts.get("opfire", false))
@@ -1770,23 +1770,23 @@ func _defend_hex(f: int, d: int, hx: Vector2i, total: int, vs_ord: bool, vs_move
 		var cover := Rules.cover_at(s, hx.x, hx.y, vs_ord)
 		var m := morale_of(t) + cover
 		var moving: bool = vs_movers and _moving_ids.has(t.id)
-		var dr := await roll(own, "la difesa di %s (Morale %d, copertura %+d)" % [t.unit_name, m - cover, cover],
+		var dr := await roll(own, L10n.t("la difesa di %s (Morale %d, copertura %+d)") % [t.display_name, m - cover, cover],
 			func(x: int) -> int: return own if m + x <= total else opp(own))
 		if over or not s.units.has(t.id):
 			continue
 		var dt: int = m + int(dr["sum"])
 		if dt < total:
-			await hit(t, "difesa %d contro %d" % [dt, total])
+			await hit(t, L10n.t("difesa %d contro %d") % [dt, total])
 		elif dt == total:
 			if moving:
-				await hit(t, "pareggio mentre muove (%d)" % dt)
+				await hit(t, L10n.t("pareggio mentre muove (%d)") % dt)
 			elif not t.suppressed:
 				t.suppressed = true
-				say("%s è [b]soppressa[/b] (pareggio %d)." % [uname(t), dt], "bad", { "unit": t.id })
+				say(L10n.t("%s è [b]soppressa[/b] (pareggio %d).") % [uname(t), dt], "bad", { "unit": t.id })
 			else:
-				say("%s resta soppressa (pareggio %d)." % [uname(t), dt], "")
+				say(L10n.t("%s resta soppressa (pareggio %d).") % [uname(t), dt], "")
 		else:
-			say("%s regge (%d contro %d)." % [uname(t), dt, total], "good", { "unit": t.id })
+			say(L10n.t("%s regge (%d contro %d).") % [uname(t), dt, total], "good", { "unit": t.id })
 
 
 func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
@@ -1797,7 +1797,7 @@ func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
 			cov = maxi(cov, Rules.cover_at(s, hx.x, hx.y, vs_ord))
 		var c1 := find_action(d, "MIMETIZZAZIONE")
 		if c1 != null and cov > 0:
-			o.append({ "id": "conceal", "card": hand(d).find(c1), "label": "Azione: Mimetizzazione (−%d all'attacco)" % cov })
+			o.append({ "id": "conceal", "card": hand(d).find(c1), "label": L10n.t("Azione: Mimetizzazione (−%d all'attacco)") % cov })
 		if is_defender(d):
 			for hx: Vector2i in hexes:
 				var hd: GameState.HexData = s.hex_at(hx.x, hx.y)
@@ -1805,14 +1805,14 @@ func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
 					continue
 				var c2 := find_action(d, "TRINCERAMENTI NASCOSTI")
 				if c2 != null and hd.terrain != Domain.TerrainType.BUILDING:
-					o.append({ "id": "entrench", "card": hand(d).find(c2), "hex": hx, "label": "Azione: Trinceramenti Nascosti in %s" % lbl(hx) })
+					o.append({ "id": "entrench", "card": hand(d).find(c2), "hex": hx, "label": L10n.t("Azione: Trinceramenti Nascosti in %s") % lbl(hx) })
 				var c3 := find_action(d, "CASAMATTA NASCOSTA")
 				if c3 != null and s.objective_at(hx.x, hx.y) != null:
-					o.append({ "id": "pillbox", "card": hand(d).find(c3), "hex": hx, "label": "Azione: Casamatta Nascosta in %s" % lbl(hx) })
+					o.append({ "id": "pillbox", "card": hand(d).find(c3), "hex": hx, "label": L10n.t("Azione: Casamatta Nascosta in %s") % lbl(hx) })
 		if o.is_empty():
 			return total
-		o.append({ "id": "no", "label": "Nessuna azione: tira la difesa" })
-		var a := await ask(d, "defense", "DIFESA · attacco totale %d su %s. Vuoi giocare un'AZIONE prima dei tiri di difesa?" % [total, lbl(hexes[0])],
+		o.append({ "id": "no", "label": L10n.t("Nessuna azione: tira la difesa") })
+		var a := await ask(d, "defense", L10n.t("DIFESA · attacco totale %d su %s. Vuoi giocare un'AZIONE prima dei tiri di difesa?") % [total, lbl(hexes[0])],
 			o, { "hex": hexes[0], "total": total })
 		var id := String(a.get("id", "no"))
 		if id == "no":
@@ -1822,13 +1822,13 @@ func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
 		match id:
 			"conceal":
 				total -= cov
-				say("Azione: Mimetizzazione — l'attacco scende a %d." % total, "order", { "card": c, "who": d })
+				say(L10n.t("Azione: Mimetizzazione — l'attacco scende a %d.") % total, "order", { "card": c, "who": d })
 			"entrench":
 				s.hex_at(a["hex"].x, a["hex"].y).has_foxhole = true
-				say("Azione: Trinceramenti Nascosti in %s." % lbl(a["hex"]), "order", { "card": c, "who": d, "hex": a["hex"] })
+				say(L10n.t("Azione: Trinceramenti Nascosti in %s.") % lbl(a["hex"]), "order", { "card": c, "who": d, "hex": a["hex"] })
 			"pillbox":
 				s.hex_at(a["hex"].x, a["hex"].y).fortification = Domain.Fort.PILLBOX
-				say("Azione: Casamatta Nascosta in %s." % lbl(a["hex"]), "order", { "card": c, "who": d, "hex": a["hex"] })
+				say(L10n.t("Azione: Casamatta Nascosta in %s.") % lbl(a["hex"]), "order", { "card": c, "who": d, "hex": a["hex"] })
 	return total
 
 
@@ -1854,7 +1854,7 @@ func _order_advance(f: int) -> void:
 		for id in todo:
 			var u: Unit = s.unit_by_id(id)
 			if u != null and useful(u, Domain.OrderType.ADVANCE):
-				opts.append({ "id": "unit", "unit": id, "label": "Avanza con %s" % uname(u) })
+				opts.append({ "id": "unit", "unit": id, "label": L10n.t("Avanza con %s") % uname(u) })
 		if opts.is_empty():
 			break
 		var u2: Unit = null
@@ -1862,8 +1862,8 @@ func _order_advance(f: int) -> void:
 			u2 = s.unit_by_id(String(opts[0]["unit"]))
 		else:
 			if any:
-				opts.append({ "id": "end", "label": "Termina l'Avanzata" })
-			var a := await ask(f, "pick_mover", "AVANZATA · scegli quale unità attivata avanza adesso (un solo esagono, anche in mezzo ai nemici).", opts, { "order": Domain.OrderType.ADVANCE })
+				opts.append({ "id": "end", "label": L10n.t("Termina l'Avanzata") })
+			var a := await ask(f, "pick_mover", L10n.t("AVANZATA · scegli quale unità attivata avanza adesso (un solo esagono, anche in mezzo ai nemici)."), opts, { "order": Domain.OrderType.ADVANCE })
 			if a.get("id") != "unit":
 				break
 			u2 = s.unit_by_id(String(a["unit"]))
@@ -1871,18 +1871,18 @@ func _order_advance(f: int) -> void:
 		var o2: Array = []
 		for nb in HexGrid.neighbors(u2.q, u2.r):
 			if can_advance(u2, nb):
-				o2.append({ "id": "hex", "hex": nb, "label": "%s%s" % [lbl(nb), " — CORPO A CORPO" if enemy_in(nb, f) else ""] })
+				o2.append({ "id": "hex", "hex": nb, "melee": enemy_in(nb, f), "label": "%s%s" % [lbl(nb), L10n.t(" — CORPO A CORPO") if enemy_in(nb, f) else ""] })
 		if at_edge(opp(f), u2.pos()):
-			o2.append({ "id": "exit", "label": "Esci dalla mappa (+PV)" })
-		o2.append({ "id": "stay", "label": "%s resta ferma" % u2.unit_name })
-		var b := await ask(f, "advance", "AVANZATA · %s: tocca l'esagono adiacente in cui avanzare." % u2.unit_name, o2, { "unit": u2.id })
+			o2.append({ "id": "exit", "label": L10n.t("Esci dalla mappa (+PV)") })
+		o2.append({ "id": "stay", "label": L10n.t("%s resta ferma") % u2.display_name })
+		var b := await ask(f, "advance", L10n.t("AVANZATA · %s: tocca l'esagono adiacente in cui avanzare.") % u2.display_name, o2, { "unit": u2.id })
 		match String(b.get("id", "stay")):
 			"hex":
 				var from := u2.pos()
 				var to: Vector2i = b["hex"]
 				s.set_unit_pos(u2, to.x, to.y)
 				any = true
-				say("%s avanza in %s." % [u2.unit_name, lbl(to)], "move", { "unit": u2.id, "from": from, "to": to, "who": f })
+				say(L10n.t("%s avanza in %s.") % [u2.display_name, lbl(to)], "move", { "unit": u2.id, "from": from, "to": to, "who": f })
 				update_objectives()
 				await _mines_on(u2, from, to)
 				if s.units.has(u2.id):
@@ -1930,66 +1930,66 @@ func _side_at(f: int, h: Vector2i) -> Array:
 
 func _melee(active: int, h: Vector2i) -> void:
 	var inactive := opp(active)
-	say("[b]CORPO A CORPO in %s![/b]" % lbl(h), "melee", { "hex": h, "fx": "melee" })
+	say(L10n.t("[b]CORPO A CORPO in %s![/b]") % lbl(h), "melee", { "hex": h, "fx": "melee" })
 	for side: int in [inactive, active]:
 		while not over:
 			var c := find_action(side, "IMBOSCATA")
 			var foes := _side_at(opp(side), h)
 			if c == null or foes.is_empty() or _side_at(side, h).is_empty():
 				break
-			var a := await ask(side, "ambush", "CORPO A CORPO in %s · giochi IMBOSCATA? L'avversario deve rompere una sua unità prima dei tiri." % lbl(h),
-				[{ "id": "play", "card": hand(side).find(c), "label": "Gioca Imboscata" }, { "id": "no", "label": "No" }], { "hex": h })
+			var a := await ask(side, "ambush", L10n.t("CORPO A CORPO in %s · giochi IMBOSCATA? L'avversario deve rompere una sua unità prima dei tiri.") % lbl(h),
+				[{ "id": "play", "card": hand(side).find(c), "label": L10n.t("Gioca Imboscata") }, { "id": "no", "label": L10n.t("No") }], { "hex": h })
 			if a.get("id") != "play":
 				break
 			_discard_from_hand(side, c)
-			say("%s: [b]Imboscata![/b]" % side_name(side), "order", { "card": c, "who": side })
+			say(L10n.t("%s: [b]Imboscata![/b]") % side_name(side), "order", { "card": c, "who": side })
 			var victim: Unit = foes[0]
 			if foes.size() > 1:
 				var o: Array = []
 				for u: Unit in foes:
-					o.append({ "id": "unit", "unit": u.id, "label": "%s%s" % [uname(u), "" if u.efficient else " (già rotta: eliminata)"] })
-				var b := await ask(opp(side), "ambush_victim", "IMBOSCATA nemica in %s · scegli quale tua unità si rompe." % lbl(h), o, { "hex": h })
+					o.append({ "id": "unit", "unit": u.id, "label": "%s%s" % [uname(u), "" if u.efficient else L10n.t(" (già rotta: eliminata)")] })
+				var b := await ask(opp(side), "ambush_victim", L10n.t("IMBOSCATA nemica in %s · scegli quale tua unità si rompe.") % lbl(h), o, { "hex": h })
 				victim = s.unit_by_id(String(b.get("unit", victim.id)))
-			await hit(victim, "Imboscata")
+			await hit(victim, L10n.t("Imboscata"))
 	if over:
 		return
 	if _side_at(active, h).is_empty() or _side_at(inactive, h).is_empty():
-		say("Il corpo a corpo finisce senza tiri: un lato non ha più unità.", "melee")
+		say(L10n.t("Il corpo a corpo finisce senza tiri: un lato non ha più unità."), "melee")
 		check_end()
 		return
 	var ifp := _melee_fp(inactive, h)
 	var afp := _melee_fp(active, h)
 	var bunker := s.hex_at(h.x, h.y).fortification in [Domain.Fort.BUNKER, Domain.Fort.PILLBOX]
-	var ri := await roll(inactive, "il corpo a corpo dei %s (forza %d)" % [side_name(inactive), ifp],
+	var ri := await roll(inactive, L10n.t("il corpo a corpo dei %s (forza %d)") % [side_name(inactive), ifp],
 		func(t: int) -> int: return inactive if t <= 5 else (active if t >= 9 else -1))
 	if over:
 		return
 	var itot: int = _melee_fp(inactive, h) + int(ri["sum"])
 	var abase := _melee_fp(active, h)
-	var ra := await roll(active, "il corpo a corpo dei %s (forza %d, da battere %d)" % [side_name(active), abase, itot],
+	var ra := await roll(active, L10n.t("il corpo a corpo dei %s (forza %d, da battere %d)") % [side_name(active), abase, itot],
 		func(t: int) -> int: return active if abase + t <= itot else inactive)
 	if over:
 		return
 	var atot: int = _melee_fp(active, h) + int(ra["sum"])
-	say("Corpo a corpo: %s %d — %s %d." % [side_name(active), atot, side_name(inactive), itot], "melee", { "hex": h })
+	say(L10n.t("Corpo a corpo: %s %d — %s %d.") % [side_name(active), atot, side_name(inactive), itot], "melee", { "hex": h })
 	var losers: Array = []
 	if atot < itot or (atot == itot):
 		losers.append_array(_side_at(active, h))
 	if itot < atot or (atot == itot and not bunker):
 		losers.append_array(_side_at(inactive, h))
 	for u: Unit in losers:
-		kill(u, "corpo a corpo")
+		kill(u, L10n.t("corpo a corpo"))
 	for side: int in [active, inactive]:
 		if over or _side_at(side, h).is_empty():
 			continue
 		var nq := find_action(side, "LOTTA SENZA QUARTIERE")
 		var ok := nation(side) == "russian" or (nation(side) == "german" and nation(opp(side)) == "russian")
 		if nq != null and ok:
-			var a2 := await ask(side, "no_quarter", "Hai vinto il corpo a corpo: giochi LOTTA SENZA QUARTIERE (+2 PV)?",
-				[{ "id": "play", "card": hand(side).find(nq), "label": "Gioca (+2 PV)" }, { "id": "no", "label": "No" }], { "hex": h })
+			var a2 := await ask(side, "no_quarter", L10n.t("Hai vinto il corpo a corpo: giochi LOTTA SENZA QUARTIERE (+2 PV)?"),
+				[{ "id": "play", "card": hand(side).find(nq), "label": L10n.t("Gioca (+2 PV)") }, { "id": "no", "label": L10n.t("No") }], { "hex": h })
 			if a2.get("id") == "play":
 				_discard_from_hand(side, nq)
-				add_vp(side, 2, "Lotta senza quartiere")
+				add_vp(side, 2, L10n.t("Lotta senza quartiere"))
 	update_objectives()
 	check_end()
 
@@ -2008,25 +2008,25 @@ func _order_recover(f: int) -> void:
 			u.suppressed = false
 			n += 1
 	if n > 0:
-		say("Recupero: tolta la soppressione a %d unità." % n, "good", { "who": f })
+		say(L10n.t("Recupero: tolta la soppressione a %d unità.") % n, "good", { "who": f })
 	var broken: Array = s.broken_men_of(f)
 	broken.sort_custom(func(a: Unit, b: Unit) -> bool: return (0 if a.is_leader() else 1) < (0 if b.is_leader() else 1))
 	for u: Unit in broken:
 		if over or not s.units.has(u.id) or u.efficient:
 			continue
 		var m := _rally_morale(u)
-		var r := await roll(f, "il recupero di %s (serve meno di %d)" % [u.unit_name, m],
+		var r := await roll(f, L10n.t("il recupero di %s (serve meno di %d)") % [u.display_name, m],
 			func(t: int) -> int: return f if t >= m else opp(f))
 		if over or not s.units.has(u.id):
 			continue
 		if int(r["sum"]) < m:
 			u.efficient = true
-			say("%s [b]si riprende[/b]." % uname(u), "good", { "unit": u.id })
+			say(L10n.t("%s [b]si riprende[/b].") % uname(u), "good", { "unit": u.id })
 		elif int(r["sum"]) == m:
 			u.suppressed = true
-			say("%s resta rotta ed è soppressa." % uname(u), "bad", { "unit": u.id })
+			say(L10n.t("%s resta rotta ed è soppressa.") % uname(u), "bad", { "unit": u.id })
 		else:
-			say("%s resta rotta." % uname(u), "", { "unit": u.id })
+			say(L10n.t("%s resta rotta.") % uname(u), "", { "unit": u.id })
 
 
 func _rout_targets(_f: int) -> Array:
@@ -2045,17 +2045,17 @@ func _order_rout(f: int) -> void:
 	if tg.size() > 1:
 		var o: Array = []
 		for side: int in [opp(f), f]:
-			o.append({ "id": "side", "side": side, "label": "Ritirata sulle unità rotte %s (%d)" % [
-				"NEMICHE" if side != f else "TUE", s.broken_men_of(side).size()] })
-		var a := await ask(f, "rout_who", "RITIRATA · scegli quale giocatore deve tirare per le sue unità rotte.", o, {})
+			o.append({ "id": "side", "side": side, "label": L10n.t("Ritirata sulle unità rotte %s (%d)") % [
+				L10n.t("NEMICHE") if side != f else L10n.t("TUE"), s.broken_men_of(side).size()] })
+		var a := await ask(f, "rout_who", L10n.t("RITIRATA · scegli quale giocatore deve tirare per le sue unità rotte."), o, {})
 		p = int(a.get("side", opp(f)))
 	s.rally_used.append(p)
-	say("Ritirata sulle unità rotte dei %s." % side_name(p), "order", { "who": f })
+	say(L10n.t("Ritirata sulle unità rotte dei %s.") % side_name(p), "order", { "who": f })
 	for u: Unit in s.broken_men_of(p):
 		if over or not s.units.has(u.id) or u.efficient:
 			continue
 		var m := _rally_morale(u)
-		var r := await roll(f, "la ritirata di %s (Morale %d)" % [u.unit_name, m],
+		var r := await roll(f, L10n.t("la ritirata di %s (Morale %d)") % [u.display_name, m],
 			func(t: int) -> int: return p if t >= m else opp(p))
 		if over or not s.units.has(u.id):
 			continue
@@ -2065,20 +2065,20 @@ func _order_rout(f: int) -> void:
 		elif t == m:
 			if not u.suppressed:
 				u.suppressed = true
-				say("%s è soppressa." % uname(u), "bad", { "unit": u.id })
+				say(L10n.t("%s è soppressa.") % uname(u), "bad", { "unit": u.id })
 		else:
-			say("%s tiene la posizione." % uname(u), "good", { "unit": u.id })
+			say(L10n.t("%s tiene la posizione.") % uname(u), "good", { "unit": u.id })
 	update_objectives()
 	check_end()
 
 
 func _retreat(u: Unit, n: int) -> void:
-	say("%s deve ritirarsi di %d esagoni." % [uname(u), n], "bad", { "unit": u.id })
+	say(L10n.t("%s deve ritirarsi di %d esagoni.") % [uname(u), n], "bad", { "unit": u.id })
 	for i in n:
 		if over or not s.units.has(u.id):
 			return
 		if at_edge(u.faction, u.pos()):
-			kill(u, "in rotta fuori dalla mappa")
+			kill(u, L10n.t("in rotta fuori dalla mappa"))
 			return
 		var good: Array = []
 		for nb in HexGrid.neighbors(u.q, u.r):
@@ -2087,19 +2087,19 @@ func _retreat(u: Unit, n: int) -> void:
 			if HexGrid.step_cost(s, u.q, u.r, nb.x, nb.y) >= 0 and not enemy_in(nb, u.faction):
 				good.append(nb)
 		if good.is_empty():
-			kill(u, "ritirata impossibile")
+			kill(u, L10n.t("ritirata impossibile"))
 			return
 		var to: Vector2i = good[0]
 		if good.size() > 1:
 			var o: Array = []
 			for g: Vector2i in good:
 				o.append({ "id": "hex", "hex": g, "label": lbl(g) })
-			var a := await ask(u.faction, "retreat", "RITIRATA · %s deve arretrare ancora di %d esagoni verso il proprio bordo: scegli dove." % [u.unit_name, n - i],
+			var a := await ask(u.faction, "retreat", L10n.t("RITIRATA · %s deve arretrare ancora di %d esagoni verso il proprio bordo: scegli dove.") % [u.display_name, n - i],
 				o, { "unit": u.id })
 			to = a.get("hex", to)
 		var from := u.pos()
 		s.set_unit_pos(u, to.x, to.y)
-		say("%s si ritira in %s." % [u.unit_name, lbl(to)], "move", { "unit": u.id, "from": from, "to": to, "who": u.faction })
+		say(L10n.t("%s si ritira in %s.") % [u.display_name, lbl(to)], "move", { "unit": u.id, "from": from, "to": to, "who": u.faction })
 		await _mines_on(u, from, to)
 	update_objectives()
 
@@ -2116,10 +2116,10 @@ func _order_arty_denied(f: int) -> void:
 		return
 	if r.efficient:
 		r.efficient = false
-		say("Artiglieria Negata: la Radio dei %s è fuori uso." % side_name(opp(f)), "bad", { "who": f })
+		say(L10n.t("Artiglieria Negata: la Radio dei %s è fuori uso.") % side_name(opp(f)), "bad", { "who": f })
 	else:
 		s.units.erase(r.id)
-		say("Artiglieria Negata: la Radio dei %s, già fuori uso, è eliminata." % side_name(opp(f)), "bad", { "who": f })
+		say(L10n.t("Artiglieria Negata: la Radio dei %s, già fuori uso, è eliminata.") % side_name(opp(f)), "bad", { "who": f })
 
 
 func _order_artillery(f: int) -> void:
@@ -2128,7 +2128,7 @@ func _order_artillery(f: int) -> void:
 		return
 	if not radio.efficient:
 		radio.efficient = true
-		say("Accesso alla Batteria: la Radio dei %s torna operativa." % side_name(f), "good", { "who": f })
+		say(L10n.t("Accesso alla Batteria: la Radio dei %s torna operativa.") % side_name(f), "good", { "who": f })
 		return
 	var sp := _spotters(f)
 	if sp.is_empty():
@@ -2137,8 +2137,8 @@ func _order_artillery(f: int) -> void:
 	if sp.size() > 1:
 		var o: Array = []
 		for u: Unit in sp:
-			o.append({ "id": "unit", "unit": u.id, "label": "Osservatore: %s" % uname(u) })
-		var a := await ask(f, "spotter", "ARTIGLIERIA · scegli il comandante che fa da OSSERVATORE.", o, {})
+			o.append({ "id": "unit", "unit": u.id, "label": L10n.t("Osservatore: %s") % uname(u) })
+		var a := await ask(f, "spotter", L10n.t("ARTIGLIERIA · scegli il comandante che fa da OSSERVATORE."), o, {})
 		L = s.unit_by_id(String(a.get("unit", L.id)))
 	L.activated = true
 	var o2: Array = []
@@ -2148,16 +2148,16 @@ func _order_artillery(f: int) -> void:
 				o2.append({ "id": "hex", "hex": Vector2i(q, r), "label": lbl(Vector2i(q, r)) })
 	if o2.is_empty():
 		return
-	var b := await ask(f, "arty_target", "ARTIGLIERIA · scegli l'esagono su cui chiamare il tiro (in vista di %s). Colpirà anche i 6 esagoni adiacenti." % L.unit_name, o2, { "unit": L.id })
+	var b := await ask(f, "arty_target", L10n.t("ARTIGLIERIA · scegli l'esagono su cui chiamare il tiro (in vista di %s). Colpirà anche i 6 esagoni adiacenti.") % L.display_name, o2, { "unit": L.id })
 	var th: Vector2i = b.get("hex", L.pos())
-	var k := await ask(f, "arty_kind", "ARTIGLIERIA su %s · tiro esplosivo o cortina fumogena?" % lbl(th),
-		[{ "id": "he", "label": "Tiro esplosivo (FP %d)" % Rules.radio_fp_for(radio.unit_name) }, { "id": "smoke", "label": "Cortina fumogena (7 esagoni)" }], { "hex": th })
+	var k := await ask(f, "arty_kind", L10n.t("ARTIGLIERIA su %s · tiro esplosivo o cortina fumogena?") % lbl(th),
+		[{ "id": "he", "label": L10n.t("Tiro esplosivo (FP %d)") % Rules.radio_fp_for(radio.unit_name) }, { "id": "smoke", "label": L10n.t("Cortina fumogena (7 esagoni)") }], { "hex": th })
 	var smoke: bool = k.get("id") == "smoke"
 	var dist := HexGrid.distance(L.q, L.r, th.x, th.y)
 	var hind := hindrance(L, th)
 	var need := dist + hind
-	say("%s chiama l'artiglieria su %s." % [L.unit_name, lbl(th)], "fire", { "from": L.pos(), "to": th, "who": f })
-	var tr := await roll(f, "la precisione dell'artiglieria (serve più di %d)" % need,
+	say(L10n.t("%s chiama l'artiglieria su %s.") % [L.display_name, lbl(th)], "fire", { "from": L.pos(), "to": th, "who": f })
+	var tr := await roll(f, L10n.t("la precisione dell'artiglieria (serve più di %d)") % need,
 		func(t: int) -> int: return f if t <= need else opp(f), { "product": true })
 	if over:
 		return
@@ -2167,10 +2167,10 @@ func _order_artillery(f: int) -> void:
 	var cd := dc.dice_red if dc != null else _rng.randi_range(1, 6)
 	var c := Rules.artillery_drift(s, th.x, th.y, accurate, wd, cd)
 	if c.x < 0:
-		say("Il colpo %s e finisce fuori mappa: nessun effetto." % ("è preciso ma devia" if accurate else "è impreciso"), "miss")
+		say(L10n.t("Il colpo %s e finisce fuori mappa: nessun effetto.") % (L10n.t("è preciso ma devia") if accurate else L10n.t("è impreciso")), "miss")
 		await _process_time()
 		return
-	say("Il tiro %s: cade in [b]%s[/b]." % ["è preciso" if accurate else "è impreciso e devia", lbl(c)], "fire", { "hex": c, "fx": "arty" })
+	say(L10n.t("Il tiro %s: cade in [b]%s[/b].") % [L10n.t("è preciso") if accurate else L10n.t("è impreciso e devia"), lbl(c)], "fire", { "hex": c, "fx": "arty" })
 	var blast: Array = [c]
 	for nb in HexGrid.neighbors(c.x, c.y):
 		if in_map(nb):
@@ -2178,7 +2178,7 @@ func _order_artillery(f: int) -> void:
 	s.last_impact_hexes = blast
 	if smoke:
 		Combat.resolve_smoke_barrage(s, c.x, c.y)
-		say("Cortina fumogena su %s e dintorni." % lbl(c), "order", { "hex": c, "fx": "smoke" })
+		say(L10n.t("Cortina fumogena su %s e dintorni.") % lbl(c), "order", { "hex": c, "fx": "smoke" })
 		await _process_time()
 		return
 	var fp := Rules.radio_fp_for(radio.unit_name)
@@ -2189,13 +2189,13 @@ func _order_artillery(f: int) -> void:
 		var has_fort := hd != null and (hd.has_foxhole or hd.fortification != Domain.Fort.NONE)
 		if s.men_at(hx.x, hx.y).is_empty() and not has_fort:
 			continue
-		var ir := await roll(f, "l'impatto in %s (FP %d)" % [lbl(hx), fp], Callable(), {})
+		var ir := await roll(f, L10n.t("l'impatto in %s (FP %d)") % [lbl(hx), fp], Callable(), {})
 		if over:
 			return
 		if has_fort and int(ir["sum"]) == Rules.artillery_fort_vulnerability(fp):
 			hd.has_foxhole = false
 			hd.fortification = Domain.Fort.NONE
-			say("La fortificazione in %s è distrutta." % lbl(hx), "bad", { "hex": hx })
+			say(L10n.t("La fortificazione in %s è distrutta.") % lbl(hx), "bad", { "hex": hx })
 		await _defend_hex(f, opp(f), hx, fp + int(ir["sum"]), true, false, true)
 	update_objectives()
 	check_end()
@@ -2212,7 +2212,7 @@ func _process_time() -> void:
 func _advance_time(f: int) -> void:
 	_reshuffle(f)
 	s.time_marker += 1
-	say("[b]TEMPO![/b] Il segnalino avanza alla casella %d (Morte Subitanea dalla %d). I %s rimescolano il mazzo." % [
+	say(L10n.t("[b]TEMPO![/b] Il segnalino avanza alla casella %d (Morte Subitanea dalla %d). I %s rimescolano il mazzo.") % [
 		s.time_marker, s.sudden_death_space, side_name(f)], "time", { "fx": "time" })
 	if s.time_marker >= s.sudden_death_space:
 		update_objectives()
@@ -2223,7 +2223,7 @@ func _advance_time(f: int) -> void:
 				if o.controller != first:
 					all_same = false
 			if all_same:
-				_finish(first, "Controllano tutti gli obiettivi (chit V) al momento della Morte Subitanea.")
+				_finish(first, L10n.t("Controllano tutti gli obiettivi (chit V) al momento della Morte Subitanea."))
 				return
 		var space := s.time_marker
 		var fin := s.vp_tracker + ObjectiveChits.secret_balance(s)
@@ -2232,21 +2232,21 @@ func _advance_time(f: int) -> void:
 			lead = AX
 		elif fin < 0:
 			lead = AL
-		var r := await roll(f, "la MORTE SUBITANEA (la partita finisce con meno di %d)" % space,
+		var r := await roll(f, L10n.t("la MORTE SUBITANEA (la partita finisce con meno di %d)") % space,
 			func(t: int) -> int: return opp(lead) if t < space else lead, { "no_trigger": true })
 		if over:
 			return
 		if int(r["sum"]) < space:
-			_finish_on_points("Morte Subitanea.")
+			_finish_on_points(L10n.t("Morte Subitanea."))
 			return
-		say("La partita continua.", "time")
+		say(L10n.t("La partita continua."), "time")
 	if s.defender_faction == AX or s.defender_faction == AL:
-		add_vp(s.defender_faction, 1, "il Difensore guadagna 1 PV a ogni Tempo")
+		add_vp(s.defender_faction, 1, L10n.t("il Difensore guadagna 1 PV a ogni Tempo"))
 	for key in s.hexes:
 		var hd: GameState.HexData = s.hexes[key]
 		if hd.has_smoke:
 			hd.has_smoke = false
-			say("Tempo: un segnalino Fumo viene rimosso.", "time")
+			say(L10n.t("Tempo: un segnalino Fumo viene rimosso."), "time")
 			break
 	_reinforcements()
 	# Passo 6: entrambi possono giocare Trincerarsi (A32), prima chi non ha innescato.
@@ -2263,16 +2263,16 @@ func _advance_time(f: int) -> void:
 						or hd2.fortification != Domain.Fort.NONE or Rules.is_water_hex(s, u.q, u.r):
 					continue
 				seen[u.hex_key()] = true
-				o.append({ "id": "hex", "hex": u.pos(), "label": "Buche in %s" % lbl(u.pos()) })
+				o.append({ "id": "hex", "hex": u.pos(), "label": L10n.t("Buche in %s") % lbl(u.pos()) })
 			if o.is_empty():
 				break
-			o.append({ "id": "no", "label": "Non trincerarsi" })
-			var a := await ask(side, "dig_in", "TEMPO · puoi giocare TRINCERARSI: scegli un esagono con una tua unità dove scavare le Buche.", o, { "card": hand(side).find(c) })
+			o.append({ "id": "no", "label": L10n.t("Non trincerarsi") })
+			var a := await ask(side, "dig_in", L10n.t("TEMPO · puoi giocare TRINCERARSI: scegli un esagono con una tua unità dove scavare le Buche."), o, { "card": hand(side).find(c) })
 			if a.get("id") != "hex":
 				break
 			_discard_from_hand(side, c)
 			s.hex_at(a["hex"].x, a["hex"].y).has_foxhole = true
-			say("%s: Trincerarsi — Buche in %s." % [side_name(side), lbl(a["hex"])], "order", { "card": c, "who": side, "hex": a["hex"] })
+			say(L10n.t("%s: Trincerarsi — Buche in %s.") % [side_name(side), lbl(a["hex"])], "order", { "card": c, "who": side, "hex": a["hex"] })
 
 
 func _edge_hex(f: int, need_icons: int) -> Vector2i:
@@ -2310,7 +2310,7 @@ func _reinforcements() -> void:
 				n += 1
 		if n > 0:
 			_assign_carriers()
-			say("Rinforzi per i %s: %d unità entrano dal loro bordo." % [side_name(f), n], "good", { "who": f })
+			say(L10n.t("Rinforzi per i %s: %d unità entrano dal loro bordo.") % [side_name(f), n], "good", { "who": f })
 	s.reinforcements = waiting
 	var out: Array = []
 	for e in s.exited_units:
@@ -2329,7 +2329,7 @@ func _reinforcements() -> void:
 			w.r = pos.y
 			w.carrier_id = u.id
 			s.units[w.id] = w
-		say("%s rientra dal proprio bordo come rinforzo." % u.unit_name, "good", { "unit": u.id })
+		say(L10n.t("%s rientra dal proprio bordo come rinforzo.") % u.display_name, "good", { "unit": u.id })
 	s.exited_units = out
 
 
@@ -2342,13 +2342,13 @@ func _event_native(c: Card, f: int) -> bool:
 			var h := random_hex(f)
 			var hd: GameState.HexData = s.hex_at(h.x, h.y)
 			if hd == null or hd.has_blaze or hd.has_foxhole or hd.fortification != Domain.Fort.NONE or Rules.is_water_hex(s, h.x, h.y):
-				say("   Esagono casuale %s: nessun effetto." % lbl(h), "fate", { "hex": h })
+				say(L10n.t("   Esagono casuale %s: nessun effetto.") % lbl(h), "fate", { "hex": h })
 			elif c.event_name == "CRATERI":
 				hd.has_foxhole = true
-				say("   Crateri: Buche in %s." % lbl(h), "fate", { "hex": h })
+				say(L10n.t("   Crateri: Buche in %s.") % lbl(h), "fate", { "hex": h })
 			else:
 				hd.fortification = Domain.Fort.MINES
-				say("   Trappola esplosiva: Mine in %s." % lbl(h), "fate", { "hex": h })
+				say(L10n.t("   Trappola esplosiva: Mine in %s.") % lbl(h), "fate", { "hex": h })
 			return true
 		"NEBBIA DI GUERRA":
 			for side: int in [AX, AL]:
@@ -2356,7 +2356,7 @@ func _event_native(c: Card, f: int) -> bool:
 				if not hd2.is_empty():
 					var c2: Card = hd2[_rng.randi_range(0, hd2.size() - 1)]
 					_discard_from_hand(side, c2)
-			say("   Nebbia di guerra: ogni giocatore perde una carta a caso dalla mano.", "fate")
+			say(L10n.t("   Nebbia di guerra: ogni giocatore perde una carta a caso dalla mano."), "fate")
 			return true
 		"SPIONAGGIO":
 			var foe := opp(f)
@@ -2365,41 +2365,41 @@ func _event_native(c: Card, f: int) -> bool:
 			var o: Array = []
 			var hf := hand(foe)
 			for i in hf.size():
-				o.append({ "id": "card", "index": i, "label": "Scarta: %s / %s" % [
-					String(Domain.ORDER_LABELS.get(hf[i].order, "?")), hf[i].action_name.capitalize()] })
-			o.append({ "id": "no", "label": "Non scartare nulla" })
-			var a := await ask(f, "interrogation", "SPIONAGGIO · vedi la mano dell'avversario: puoi fargli scartare una carta.", o, {})
+				o.append({ "id": "card", "index": i, "fire_card": hf[i].order == Domain.OrderType.FIRE or hf[i].action_name.begins_with("FUOCO"), "label": L10n.t("Scarta: %s / %s") % [
+					L10n.t(Domain.ORDER_LABELS.get(hf[i].order, "?")), L10n.t(hf[i].action_name).capitalize()] })
+			o.append({ "id": "no", "label": L10n.t("Non scartare nulla") })
+			var a := await ask(f, "interrogation", L10n.t("SPIONAGGIO · vedi la mano dell'avversario: puoi fargli scartare una carta."), o, {})
 			if a.get("id") == "card":
 				_discard_from_hand(foe, hf[int(a["index"])])
-				say("   Spionaggio: i %s scartano una carta scelta dall'avversario." % side_name(foe), "fate")
+				say(L10n.t("   Spionaggio: i %s scartano una carta scelta dall'avversario.") % side_name(foe), "fate")
 			return true
 		"DIVIDERSI":
 			var o2: Array = []
 			for u in men(f):
 				if u.type == Domain.UnitType.SQUAD:
-					o2.append({ "id": "unit", "unit": u.id, "label": "Dividi %s in due Team" % uname(u) })
+					o2.append({ "id": "unit", "unit": u.id, "label": L10n.t("Dividi %s in due Team") % uname(u) })
 			if o2.is_empty():
-				say("   Dividersi: nessuna Squadra da dividere.", "fate")
+				say(L10n.t("   Dividersi: nessuna Squadra da dividere."), "fate")
 				return true
-			o2.append({ "id": "no", "label": "Non dividere nessuna Squadra" })
-			var b := await ask(f, "deploy", "DIVIDERSI · puoi sostituire una tua Squadra con due Team.", o2, {})
+			o2.append({ "id": "no", "label": L10n.t("Non dividere nessuna Squadra") })
+			var b := await ask(f, "deploy", L10n.t("DIVIDERSI · puoi sostituire una tua Squadra con due Team."), o2, {})
 			if b.get("id") == "unit":
 				_deploy(s.unit_by_id(String(b["unit"])))
 			return true
 		"RINFORZI":
-			var it := await _support_roll(f, "Rinforzi", true)
+			var it := await _support_roll(f, L10n.t("Rinforzi"), true)
 			if it.is_empty() or over:
 				return true
 			if String(it["tipo"]) == "radio":
 				if radio_of(f) != null:
-					say("   Rinforzi: %s, ma hai già una Radio: nessun effetto." % String(it["nome"]), "fate")
+					say(L10n.t("   Rinforzi: %s, ma hai già una Radio: nessun effetto.") % L10n.support(it), "fate")
 				else:
 					_team_seq += 1
 					var rd := UnitChart.build_unit("S-%s-%d" % [Domain.FACTION_SHORT.get(f, "U"), _team_seq], f, String(it["arma"]), -1, -1,
 						UnitChart.nation_code(nation(f)))
 					s.units[rd.id] = rd
 					_assign_radio(rd)
-					say("   Rinforzi: i %s ricevono una %s." % [side_name(f), String(it["nome"])], "fate")
+					say(L10n.t("   Rinforzi: i %s ricevono una %s.") % [side_name(f), L10n.support(it)], "fate")
 				return true
 			var o3: Array = []
 			for h: Vector2i in edge_hexes(f):
@@ -2409,31 +2409,31 @@ func _event_native(c: Card, f: int) -> bool:
 				if s.soldier_icons_at(h.x, h.y) + 4 <= 7:
 					o3.append({ "id": "hex", "hex": h, "label": lbl(h) })
 			if o3.is_empty():
-				say("   Rinforzi: nessun esagono libero sul bordo amico.", "fate")
+				say(L10n.t("   Rinforzi: nessun esagono libero sul bordo amico."), "fate")
 				return true
-			var c3 := await ask(f, "place_unit", "RINFORZI · %s: scegli l'esagono del tuo bordo in cui entra." % String(it["nome"]), o3, {})
+			var c3 := await ask(f, "place_unit", L10n.t("RINFORZI · %s: scegli l'esagono del tuo bordo in cui entra.") % L10n.support(it), o3, {})
 			var h3: Vector2i = c3.get("hex", o3[0]["hex"])
 			_spawn_support(f, it, h3)
-			say("   Rinforzi: %s entra in %s." % [String(it["nome"]), lbl(h3)], "fate", { "hex": h3 })
+			say(L10n.t("   Rinforzi: %s entra in %s.") % [L10n.support(it), lbl(h3)], "fate", { "hex": h3 })
 			return true
 		"SACCHEGGIO":
 			var weapons: Array = s.graves.filter(func(x: Unit) -> bool: return x.is_weapon())
 			var bare: Array = men(f).filter(func(x: Unit) -> bool: return s.weapon_carried_by(x.id) == null)
 			if weapons.is_empty() or bare.is_empty():
-				say("   Saccheggio: nessuna arma eliminata da recuperare (o nessuna unità senza arma).", "fate")
+				say(L10n.t("   Saccheggio: nessuna arma eliminata da recuperare (o nessuna unità senza arma)."), "fate")
 				return true
 			var o4: Array = []
 			for w: Unit in weapons:
-				o4.append({ "id": "weapon", "weapon": w, "label": "Recupera %s (FP %d, gittata %d)" % [w.unit_name, w.fp, w.range] })
-			o4.append({ "id": "no", "label": "Non recuperare nulla" })
-			var a4 := await ask(f, "scrounge", "SACCHEGGIO · puoi rimettere in gioco un'arma eliminata, affidandola a una tua unità senza arma.", o4, {})
+				o4.append({ "id": "weapon", "weapon": w, "label": L10n.t("Recupera %s (FP %d, gittata %d)") % [w.display_name, w.fp, w.range] })
+			o4.append({ "id": "no", "label": L10n.t("Non recuperare nulla") })
+			var a4 := await ask(f, "scrounge", L10n.t("SACCHEGGIO · puoi rimettere in gioco un'arma eliminata, affidandola a una tua unità senza arma."), o4, {})
 			if a4.get("id") != "weapon":
 				return true
 			var wpn: Unit = a4["weapon"]
 			var o5: Array = []
 			for m: Unit in bare:
 				o5.append({ "id": "unit", "unit": m.id, "label": uname(m) })
-			var a5 := await ask(f, "scrounge_to", "SACCHEGGIO · scegli a quale tua unità dare %s." % wpn.unit_name, o5, {})
+			var a5 := await ask(f, "scrounge_to", L10n.t("SACCHEGGIO · scegli a quale tua unità dare %s.") % wpn.display_name, o5, {})
 			var tgt: Unit = s.unit_by_id(String(a5.get("unit", bare[0].id)))
 			s.graves.erase(wpn)
 			wpn.faction = f
@@ -2442,28 +2442,28 @@ func _event_native(c: Card, f: int) -> bool:
 			wpn.q = tgt.q
 			wpn.r = tgt.r
 			s.units[wpn.id] = wpn
-			say("   Saccheggio: %s recupera %s." % [uname(tgt), wpn.unit_name], "fate", { "hex": tgt.pos() })
+			say(L10n.t("   Saccheggio: %s recupera %s.") % [uname(tgt), wpn.display_name], "fate", { "hex": tgt.pos() })
 			return true
 		"PROCEDERE FERITI":
 			var dead: Array = s.graves.filter(func(x: Unit) -> bool: return x.is_man())
 			if dead.is_empty():
-				say("   Procedere Feriti: nessuna unità eliminata da far rientrare.", "fate")
+				say(L10n.t("   Procedere Feriti: nessuna unità eliminata da far rientrare."), "fate")
 				return true
 			var o6: Array = []
 			for x: Unit in dead:
-				o6.append({ "id": "grave", "grave": x, "label": "%s (%s)" % [x.unit_name, side_name(x.faction)] })
-			var a6 := await ask(f, "walking_wounded", "PROCEDERE FERITI · scegli un'unità eliminata (tua o nemica): torna in gioco ROTTA dentro o accanto a un esagono casuale.", o6, {})
+				o6.append({ "id": "grave", "grave": x, "label": "%s (%s)" % [x.display_name, side_name(x.faction)] })
+			var a6 := await ask(f, "walking_wounded", L10n.t("PROCEDERE FERITI · scegli un'unità eliminata (tua o nemica): torna in gioco ROTTA dentro o accanto a un esagono casuale."), o6, {})
 			var back: Unit = a6.get("grave", dead[0])
 			var rh := random_hex(f)
 			var spots2 := _placeable_around(rh, back.faction, back.soldier_icons())
 			spots2 = spots2.filter(func(h: Vector2i) -> bool: return not enemy_in(h, back.faction))
 			if spots2.is_empty():
-				say("   Procedere Feriti: esagono casuale %s, nessun posto dove metterla." % lbl(rh), "fate", { "hex": rh })
+				say(L10n.t("   Procedere Feriti: esagono casuale %s, nessun posto dove metterla.") % lbl(rh), "fate", { "hex": rh })
 				return true
 			var o7: Array = []
 			for h: Vector2i in spots2:
 				o7.append({ "id": "hex", "hex": h, "label": lbl(h) })
-			var a7 := await ask(f, "place_unit", "PROCEDERE FERITI · esagono casuale %s: scegli dove rientra %s (dentro o adiacente)." % [lbl(rh), back.unit_name], o7, { "hex": rh })
+			var a7 := await ask(f, "place_unit", L10n.t("PROCEDERE FERITI · esagono casuale %s: scegli dove rientra %s (dentro o adiacente).") % [lbl(rh), back.display_name], o7, { "hex": rh })
 			var h7: Vector2i = a7.get("hex", spots2[0])
 			s.graves.erase(back)
 			back.q = h7.x
@@ -2473,7 +2473,7 @@ func _event_native(c: Card, f: int) -> bool:
 			back.efficient = false
 			s.units[back.id] = back
 			s.casualties[back.faction] = maxi(0, int(s.casualties.get(back.faction, 0)) - 1)
-			say("   Procedere Feriti: %s dei %s rientra rotta in %s." % [back.unit_name, side_name(back.faction), lbl(h7)], "fate", { "hex": h7 })
+			say(L10n.t("   Procedere Feriti: %s dei %s rientra rotta in %s.") % [back.display_name, side_name(back.faction), lbl(h7)], "fate", { "hex": h7 })
 			update_objectives()
 			return true
 		"White Phosphorus":
@@ -2489,17 +2489,17 @@ func _event_native(c: Card, f: int) -> bool:
 					if hd8 == null or hd8.has_blaze or Rules.is_water_hex(s, nb.x, nb.y):
 						continue
 					seen8[nb] = true
-					o8.append({ "id": "hex", "hex": nb, "label": "Fosforo in %s" % lbl(nb) })
+					o8.append({ "id": "hex", "hex": nb, "label": L10n.t("Fosforo in %s") % lbl(nb) })
 			if o8.is_empty():
-				say("   Fosforo bianco: nessuna tua Squadra efficiente può lanciarlo.", "fate")
+				say(L10n.t("   Fosforo bianco: nessuna tua Squadra efficiente può lanciarlo."), "fate")
 				return true
-			o8.append({ "id": "no", "label": "Non usare il fosforo" })
-			var a8 := await ask(f, "phosphorus", "FOSFORO BIANCO · puoi mettere Fumo in un esagono adiacente a una tua Squadra efficiente: chi ha unità in quell'esagono deve romperne una.", o8, {})
+			o8.append({ "id": "no", "label": L10n.t("Non usare il fosforo") })
+			var a8 := await ask(f, "phosphorus", L10n.t("FOSFORO BIANCO · puoi mettere Fumo in un esagono adiacente a una tua Squadra efficiente: chi ha unità in quell'esagono deve romperne una."), o8, {})
 			if a8.get("id") != "hex":
 				return true
 			var h8: Vector2i = a8["hex"]
 			s.hex_at(h8.x, h8.y).has_smoke = true
-			say("   Fosforo bianco in %s." % lbl(h8), "fate", { "hex": h8, "fx": "smoke" })
+			say(L10n.t("   Fosforo bianco in %s.") % lbl(h8), "fate", { "hex": h8, "fx": "smoke" })
 			for side: int in [opp(f), f]:
 				var here := _side_at(side, h8)
 				if here.is_empty():
@@ -2509,9 +2509,9 @@ func _event_native(c: Card, f: int) -> bool:
 					var o9: Array = []
 					for x: Unit in here:
 						o9.append({ "id": "unit", "unit": x.id, "label": uname(x) })
-					var a9 := await ask(side, "ambush_victim", "FOSFORO BIANCO in %s · scegli quale tua unità si rompe." % lbl(h8), o9, { "hex": h8 })
+					var a9 := await ask(side, "ambush_victim", L10n.t("FOSFORO BIANCO in %s · scegli quale tua unità si rompe.") % lbl(h8), o9, { "hex": h8 })
 					victim = s.unit_by_id(String(a9.get("unit", victim.id)))
-				await hit(victim, "Fosforo bianco")
+				await hit(victim, L10n.t("Fosforo bianco"))
 			return true
 	return false
 
@@ -2544,5 +2544,5 @@ func _deploy(sq: Unit) -> void:
 			t.veteran = sq.veteran
 			if w != null:
 				w.carrier_id = t.id
-	say("   Dividersi: %s diventa due Team." % uname(sq), "fate", { "hex": sq.pos() })
+	say(L10n.t("   Dividersi: %s diventa due Team.") % uname(sq), "fate", { "hex": sq.pos() })
 	s.units.erase(sq.id)

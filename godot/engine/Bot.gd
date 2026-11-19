@@ -239,7 +239,7 @@ func pick() -> int:
 		"arty_kind": return _idx(opts, "he")
 		"interrogation":
 			for i in opts.size():
-				if String(opts[i].get("label", "")).contains("Fuoco"):
+				if bool(opts[i].get("fire_card", false)):
 					return i
 			return 0
 		"setup", "move_together":

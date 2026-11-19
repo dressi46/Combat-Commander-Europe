@@ -8,9 +8,10 @@ config_version=5
 config/name="Combat Commander: Europe"
 config/description="Reimplementazione digitale del gioco tattico CC:E (GMT Games) — uso personale"
 config/features=PackedStringArray("4.6")
-run/main_scene="res://scenes/Menu.tscn"
+run/main_scene="res://scenes/Home.tscn"
 
 [autoload]
+L10n="*res://engine/L10n.gd"
 
 Domain="*res://engine/Domain.gd"
 Game="*res://engine/Game.gd"

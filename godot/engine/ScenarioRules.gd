@@ -49,14 +49,14 @@ static func rules(num: int) -> Array:
 static func as_bbcode(num: int) -> String:
 	var e := entry(num)
 	if e.is_empty():
-		return "[i]Regole dello scenario non disponibili.[/i]"
+		return L10n.t("[i]Regole dello scenario non disponibili.[/i]")
 	var out := ""
 	var su := String(e.get("setup", ""))
 	if su != "":
-		out += "[b]Schieramento[/b]\n%s\n\n" % su
+		out += L10n.t("[b]Schieramento[/b]\n%s\n\n") % L10n.t(su)
 	var rs: Array = rules(num)
 	if not rs.is_empty():
-		out += "[b]Regole speciali[/b]\n"
+		out += L10n.t("[b]Regole speciali[/b]\n")
 		for i in rs.size():
-			out += "%d. %s\n" % [i + 1, String(rs[i])]
-	return out if out != "" else "[i]Nessuna regola speciale.[/i]"
+			out += "%d. %s\n" % [i + 1, L10n.t(rs[i])]
+	return out if out != "" else L10n.t("[i]Nessuna regola speciale.[/i]")

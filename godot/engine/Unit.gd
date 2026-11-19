@@ -9,6 +9,10 @@ var faction: int       # Domain.Faction
 var type: int          # Domain.UnitType
 var unit_class: int    # Domain.UnitClass
 var unit_name: String
+var display_name: String:
+	get:
+		return L10n.unit_label(unit_name)
+
 var art_name: String = ""  ## Nome del file segnalino (senza estensione), es. "Lieutenant Y"
 var nation_art: String = ""  ## Cartella arte della nazione reale (es. "Americani"); "" → stand-in
 

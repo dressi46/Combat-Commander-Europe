@@ -27,6 +27,8 @@ const NATION_LABEL := {
 	"german": "Germania", "italian": "Italia", "romanian": "Romania",
 	"russian": "Unione Sovietica", "american": "Stati Uniti",
 	"british": "Gran Bretagna", "french": "Francia",
+	"canadian": "Canada", "brazilian": "Brazil", "polish": "Poland",
+	"yugoslav": "Yugoslavia", "anzac": "ANZAC",
 }
 
 
@@ -72,10 +74,16 @@ func _build_ui() -> void:
 	scroll.anchor_bottom = 1.0
 	scroll.offset_left = 12
 	scroll.offset_right = 262
-	scroll.offset_top = 12
+	scroll.offset_top = 58
 	scroll.offset_bottom = -58  # spazio per versione + Changelog in basso
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
+	var back := Button.new()
+	back.text = L10n.t("Back")
+	back.position = Vector2(12, 10)
+	back.custom_minimum_size = Vector2(120, 40)
+	back.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/Home.tscn"))
+	add_child(back)
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", 2)
@@ -152,7 +160,7 @@ func _build_ui() -> void:
 	ver.add_theme_color_override("font_color", Tema.DIM)
 	bar.add_child(ver)
 	var clog_btn := Button.new()
-	clog_btn.text = "Novità"
+	clog_btn.text = L10n.t("Novità")
 	clog_btn.custom_minimum_size.x = 80
 	clog_btn.pressed.connect(func() -> void:
 		if _changelog != null:
@@ -160,29 +168,34 @@ func _build_ui() -> void:
 	bar.add_child(clog_btn)
 	_build_changelog_panel()
 	var rules_btn := Button.new()
-	rules_btn.text = "Regole dello scenario"
+	rules_btn.text = L10n.t("Regole dello scenario")
 	rules_btn.custom_minimum_size.x = 170
 	rules_btn.pressed.connect(func() -> void:
 		if _rules_panel != null:
 			_rules_panel.visible = not _rules_panel.visible)
 	bar.add_child(rules_btn)
 	_build_rules_panel()
+	_mode = Game.Mode.HOTSEAT if L10n.local_two_player else Game.Mode.VS_AI
 	var diff_opt := OptionButton.new()
 	diff_opt.custom_minimum_size.x = 150
 	for i in 3:
-		diff_opt.add_item("IA: %s" % ["Recluta", "Di linea", "Veterano"][i], i)
+		diff_opt.add_item(L10n.t("IA: %s") % [L10n.t("Recluta"), L10n.t("Di linea"), L10n.t("Veterano")][i], i)
 	diff_opt.selected = 1
 	_difficulty = 1
-	diff_opt.tooltip_text = "Quanto gioca bene l'avversario artificiale"
+	diff_opt.tooltip_text = L10n.t("Quanto gioca bene l'avversario artificiale")
 	diff_opt.item_selected.connect(func(idx: int) -> void: _difficulty = idx)
+	diff_opt.visible = not L10n.local_two_player
 	bar.add_child(diff_opt)
 	var mode_opt := OptionButton.new()
 	mode_opt.custom_minimum_size.x = 190
-	mode_opt.add_item("Contro l'IA", 0)
-	mode_opt.add_item("Due giocatori, un tavolo", 1)
-	mode_opt.add_item("Dimostrazione: IA contro IA", 2)
-	mode_opt.tooltip_text = "Chi comanda i due lati"
-	mode_opt.item_selected.connect(func(idx: int) -> void: _mode = idx)
+	if L10n.local_two_player:
+		mode_opt.add_item(L10n.t("Due giocatori, un tavolo"), Game.Mode.HOTSEAT)
+	else:
+		mode_opt.add_item(L10n.t("Contro l'IA"), Game.Mode.VS_AI)
+		mode_opt.add_item(L10n.t("Dimostrazione: IA contro IA"), Game.Mode.DEMO)
+	mode_opt.tooltip_text = L10n.t("Chi comanda i due lati")
+	mode_opt.item_selected.connect(func(idx: int) -> void: _mode = Game.Mode.VS_AI if idx == 0 else Game.Mode.DEMO)
+	mode_opt.disabled = L10n.local_two_player
 	bar.add_child(mode_opt)
 
 
@@ -202,7 +215,7 @@ func _ob_column(axis: bool) -> Control:
 	btn.custom_minimum_size = Vector2(0, 48)
 	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	btn.add_theme_font_size_override("font_size", 16)
-	btn.tooltip_text = "Gioca con questo lato"
+	btn.tooltip_text = L10n.t("Gioca con questo lato")
 	btn.pressed.connect(_start.bind(Domain.Faction.GERMAN if axis else Domain.Faction.RUSSIAN))
 	col.add_child(btn)
 	var forces := VBoxContainer.new()
@@ -228,8 +241,8 @@ func _build_list() -> void:
 		btn.custom_minimum_size = Vector2(0, 34)
 		btn.add_theme_font_size_override("font_size", 16)
 		btn.clip_text = true
-		btn.text = "%2d.  %s" % [num, titolo]
-		btn.tooltip_text = "%s — %s" % [sc.get("luogo", ""), sc.get("data", "")]
+		btn.text = "%2d.  %s" % [num, L10n.t(titolo)]
+		btn.tooltip_text = "%s — %s" % [L10n.t(sc.get("luogo", "")), L10n.t(sc.get("data", ""))]
 		btn.pressed.connect(_select.bind(num))
 		_list.add_child(btn)
 
@@ -252,7 +265,7 @@ func _select(num: int) -> void:
 func _fill_ob(btn: Button, forces: VBoxContainer, nation: String, forze: Array, faction: int) -> void:
 	if btn == null:
 		return
-	btn.text = "GIOCA CON: %s" % String(NATION_LABEL.get(nation, nation.capitalize())).to_upper()
+	btn.text = L10n.t("GIOCA CON: %s") % L10n.t(NATION_LABEL.get(nation, nation.capitalize())).to_upper()
 	for child in forces.get_children():
 		child.queue_free()
 	var nat := UnitChart.nation_code(nation)
@@ -275,7 +288,7 @@ func _fill_ob(btn: Button, forces: VBoxContainer, nation: String, forze: Array, 
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.text = "%d × %s" % [n, tipo]
+		lbl.text = "%d × %s" % [n, L10n.t(tipo)]
 		row.add_child(lbl)
 		forces.add_child(row)
 
@@ -314,12 +327,12 @@ func _build_rules_panel() -> void:
 	pad.add_child(v)
 	var head := HBoxContainer.new()
 	var t := Label.new()
-	t.text = "Regole dello scenario"
+	t.text = L10n.t("Regole dello scenario")
 	t.add_theme_font_size_override("font_size", 18)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	var close := Button.new()
-	close.text = "Chiudi"
+	close.text = L10n.t("Chiudi")
 	close.pressed.connect(func() -> void: _rules_panel.visible = false)
 	head.add_child(close)
 	v.add_child(head)
@@ -353,12 +366,12 @@ func _build_changelog_panel() -> void:
 	pad.add_child(v)
 	var head := HBoxContainer.new()
 	var t := Label.new()
-	t.text = "Novità — Changelog"
+	t.text = L10n.t("Novità — Changelog")
 	t.add_theme_font_size_override("font_size", 18)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	var close := Button.new()
-	close.text = "Chiudi"
+	close.text = L10n.t("Chiudi")
 	close.pressed.connect(func() -> void: _changelog.visible = false)
 	head.add_child(close)
 	v.add_child(head)
@@ -378,10 +391,13 @@ func _build_changelog_panel() -> void:
 func _load_text(path: String) -> String:
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null:
-		return "(changelog non disponibile)"
+		return L10n.t("(changelog non disponibile)")
 	var t := f.get_as_text()
 	f.close()
-	return t
+	var lines := t.split("\n")
+	for i in lines.size():
+		lines[i] = L10n.t(lines[i])
+	return "\n".join(lines)
 
 
 func _load_tex(path: String) -> Texture2D:

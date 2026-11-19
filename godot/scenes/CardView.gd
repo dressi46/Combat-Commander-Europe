@@ -14,7 +14,7 @@ var marked: bool = false        ## scelta per lo scarto
 var face_down: bool = false
 var _tex: Texture2D = null
 
-const ORDER_IT := {
+const ORDER_LABEL := {
 	Domain.OrderType.MOVE: "MOSSA", Domain.OrderType.FIRE: "FUOCO",
 	Domain.OrderType.ADVANCE: "AVANZATA", Domain.OrderType.RECOVER: "RECUPERO",
 	Domain.OrderType.ROUT: "RITIRATA", Domain.OrderType.PASS: "ORDINI CONTRADDITTORI",
@@ -30,7 +30,7 @@ const ORDER_COL := {
 
 static func art_path(c: Card) -> String:
 	var nat := String(c.id).split("-")[0]
-	return "res://assets/cards_it/%s/%02d.webp" % [nat, c.number]
+	return "res://assets/cards_%s/%s/%02d.webp" % [L10n.locale, nat, c.number]
 
 
 func setup(c: Card, i: int) -> void:
@@ -58,7 +58,8 @@ func _gui_input(event: InputEvent) -> void:
 func _line(t: String, y: float, sz: int, col: Color, bold: bool = true) -> void:
 	var f := Tema.bold_font() if bold else Tema.body_font()
 	var w := size.x - 12.0
-	var lines := _wrap(t, f, sz, w)
+	var translated := L10n.t(t)
+	var lines := _wrap(translated, f, sz, w)
 	for i in lines.size():
 		var tw := f.get_string_size(lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, sz).x
 		draw_string(f, Vector2((size.x - tw) * 0.5, y + i * sz * 1.05), lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1, sz, col)
@@ -95,13 +96,13 @@ func _draw() -> void:
 		var oc: Color = ORDER_COL.get(card.order, Color(0.3, 0.3, 0.3))
 		draw_rect(Rect2(4, 4, size.x - 8, 96 * u), oc)
 		_line("ORDINE", 26 * u, int(15 * u), Color(1, 1, 1, 0.7), false)
-		_line(String(ORDER_IT.get(card.order, "?")), 56 * u, int(26 * u), Color(1, 1, 1))
+		_line(String(ORDER_LABEL.get(card.order, "?")), 56 * u, int(26 * u), Color(1, 1, 1))
 		draw_rect(Rect2(4, 104 * u, size.x - 8, 92 * u), Color(0.22, 0.25, 0.18))
 		_line("AZIONE", 124 * u, int(15 * u), Color(1, 1, 1, 0.6), false)
 		_line(card.action_name if card.action_name != "" else "nessuna", 152 * u, int(22 * u), Tema.PAPER)
 		draw_rect(Rect2(4, 200 * u, size.x - 8, 92 * u), Color(0.19, 0.18, 0.15))
 		_line("EVENTO", 220 * u, int(15 * u), Color(1, 1, 1, 0.6), false)
-		_line(card.event_name.to_upper(), 248 * u, int(20 * u), Tema.PAPER)
+		_line(card.event_name, 248 * u, int(20 * u), Tema.PAPER)
 		draw_rect(Rect2(4, 296 * u, size.x - 8, 85 * u), Color(0.26, 0.23, 0.16))
 		_line("%s     %d  +  %d" % [card.random_hex_label, card.dice_white, card.dice_red], 345 * u, int(30 * u), Color(1, 1, 1))
 		var cons := ""

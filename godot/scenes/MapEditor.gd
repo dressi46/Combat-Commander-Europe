@@ -83,7 +83,7 @@ func _load_image() -> void:
 	# Immagine inclusa nel progetto (sempre disponibile, anche sul web)
 	var path := "res://assets/maps_img/map%d.jpg" % map_num
 	_map_texture = load(path) as Texture2D
-	_status = "Mappa %d caricata" % map_num if _map_texture else "Immagine mancante: %s" % path
+	_status = L10n.t("Mappa %d caricata") % map_num if _map_texture else L10n.t("Immagine mancante: %s") % path
 
 
 func _json_path() -> String:
@@ -225,7 +225,7 @@ func _draw() -> void:
 		_text("%d" % obj["vp"], oc, 11, Color(1, 0.95, 0.3))
 
 	# HUD
-	var hud := "Mappa %d/24 | %s | trascina=dipingi  frecce=pan  Maiusc+frecce=griglia  [ ]=dimensione  +/-=zoom  Ctrl+Z  S=salva | %s" % [
+	var hud := L10n.t("Mappa %d/24 | %s | trascina=dipingi  frecce=pan  Maiusc+frecce=griglia  [ ]=dimensione  +/-=zoom  Ctrl+Z  S=salva | %s") % [
 		map_num, tool.to_upper(), _status]
 	draw_rect(Rect2(8, 8, 1180, 18), Color(0, 0, 0, 0.7))
 	_text(hud, Vector2(14, 21), 12, Color.WHITE, false)
@@ -299,7 +299,7 @@ func _undo() -> void:
 	var s: Dictionary = _undo_stack.pop_back()
 	terrain = s["terrain"]; features = s["features"]; sides = s["sides"]
 	elevation = s["elevation"]; objectives = s["objectives"]
-	_status = "Annullato"; queue_redraw()
+	_status = L10n.t("Annullato"); queue_redraw()
 
 
 # ─── Pittura ──────────────────────────────────────────────────────────────────
@@ -394,7 +394,7 @@ func _save() -> void:
 		"_calib": { "hex": grid_hex, "ox": grid_ox, "oy": grid_oy },  # taratura griglia per mappa
 	}
 	var json_str := JSON.stringify(data, "\t")
-	var counts := "(%d terreni, %d alt., %d lati)" % [terrain.size(), elevation.size(), sides.size()]
+	var counts := L10n.t("(%d terreni, %d alt., %d lati)") % [terrain.size(), elevation.size(), sides.size()]
 
 	# 1) Persistenza nel browser/utente (IndexedDB sul web) — sopravvive ai ricaricamenti
 	var uf := FileAccess.open("user://map%d.json" % map_num, FileAccess.WRITE)
@@ -404,13 +404,13 @@ func _save() -> void:
 	if OS.has_feature("web"):
 		# 2a) Sul web: scarica il file da committare
 		_download_web("map%d.json" % map_num, json_str)
-		_status = "SCARICATO map%d.json %s — mettilo in assets/maps/ e fai push" % [map_num, counts]
+		_status = L10n.t("SCARICATO map%d.json %s — mettilo in assets/maps/ e fai push") % [map_num, counts]
 	else:
 		# 2b) Su desktop: scrive direttamente il file del progetto
 		var f := FileAccess.open(_json_path(), FileAccess.WRITE)
 		if f:
 			f.store_string(json_str); f.close()
-			_status = "SALVATO map%d.json %s" % [map_num, counts]
+			_status = L10n.t("SALVATO map%d.json %s") % [map_num, counts]
 		else:
 			_status = "Salvato in user:// (impossibile scrivere nel progetto)"
 	queue_redraw()
@@ -443,19 +443,19 @@ func _build_ui() -> void:
 
 	# Riga TERRENO
 	var row1 := HBoxContainer.new(); row1.add_theme_constant_override("separation", 3); v.add_child(row1)
-	_row_label(row1, "TERRENO:")
+	_row_label(row1, L10n.t("TERRENO:"))
 	for pair in TERRAIN_TOOLS:
 		_tool_btn(row1, pair[0], pair[1])
 
 	# Riga LATI (siepi, muri, bocage, LOS libera…)
 	var rowS := HBoxContainer.new(); rowS.add_theme_constant_override("separation", 3); v.add_child(rowS)
-	_row_label(rowS, "LATI:")
+	_row_label(rowS, L10n.t("LATI:"))
 	for pair in SIDE_TOOLS:
 		_tool_btn(rowS, pair[0], pair[1])
 
 	# Riga FEATURE/ALTEZZE
 	var rowF := HBoxContainer.new(); rowF.add_theme_constant_override("separation", 3); v.add_child(rowF)
-	_row_label(rowF, "LINEE/ALT:")
+	_row_label(rowF, L10n.t("LINEE/ALT:"))
 	for pair in FEATURE_TOOLS:
 		_tool_btn(rowF, pair[0], pair[1])
 	_tool_btn(rowF, "alt.1", "elev1"); _tool_btn(rowF, "alt.2", "elev2")
@@ -464,27 +464,27 @@ func _build_ui() -> void:
 
 	# Riga ALTRO
 	var row2 := HBoxContainer.new(); row2.add_theme_constant_override("separation", 3); v.add_child(row2)
-	_row_label(row2, "ALTRO:")
-	_tool_btn(row2, "obiettivo (1-5)", "objective")
+	_row_label(row2, L10n.t("ALTRO:"))
+	_tool_btn(row2, L10n.t("obiettivo (1-5)"), "objective")
 	_tool_btn(row2, "cancella", "erase")
 
 	var row3 := HBoxContainer.new(); row3.add_theme_constant_override("separation", 5); v.add_child(row3)
-	var opl := Label.new(); opl.text = "Opacità:"; opl.add_theme_font_size_override("font_size", 10)
+	var opl := Label.new(); opl.text = L10n.t("Opacità:"); opl.add_theme_font_size_override("font_size", 10)
 	opl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER; row3.add_child(opl)
 	var sld := HSlider.new(); sld.min_value = 0.0; sld.max_value = 1.0; sld.step = 0.05
 	sld.value = overlay_alpha; sld.custom_minimum_size = Vector2(110, 0)
 	sld.value_changed.connect(func(val): overlay_alpha = val; queue_redraw())
 	row3.add_child(sld)
 	# Navigazione mappe con testo chiaro
-	var prev := Button.new(); prev.text = "< MAPPA PREC"; prev.add_theme_font_size_override("font_size", 10)
+	var prev := Button.new(); prev.text = L10n.t("< MAPPA PREC"); prev.add_theme_font_size_override("font_size", 10)
 	prev.pressed.connect(func(): _change_map(-1)); row3.add_child(prev)
 	_map_label = Label.new(); _map_label.add_theme_font_size_override("font_size", 11)
 	_map_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER; row3.add_child(_map_label)
-	var nextb := Button.new(); nextb.text = "MAPPA SUCC >"; nextb.add_theme_font_size_override("font_size", 10)
+	var nextb := Button.new(); nextb.text = L10n.t("MAPPA SUCC >"); nextb.add_theme_font_size_override("font_size", 10)
 	nextb.pressed.connect(func(): _change_map(1)); row3.add_child(nextb)
-	var sb := Button.new(); sb.text = "SALVA"; sb.add_theme_font_size_override("font_size", 10)
+	var sb := Button.new(); sb.text = L10n.t("SALVA"); sb.add_theme_font_size_override("font_size", 10)
 	sb.pressed.connect(_save); row3.add_child(sb)
-	var bk := Button.new(); bk.text = "MENU"; bk.add_theme_font_size_override("font_size", 10)
+	var bk := Button.new(); bk.text = L10n.t("MENU"); bk.add_theme_font_size_override("font_size", 10)
 	bk.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/Menu.tscn")); row3.add_child(bk)
 	_update_map_label()
 
@@ -511,7 +511,7 @@ func _row_label(parent: Node, txt: String) -> void:
 
 
 func _tool_btn(parent: Node, lbl: String, t: String) -> void:
-	var b := Button.new(); b.text = lbl; b.toggle_mode = true
+	var b := Button.new(); b.text = L10n.t(lbl); b.toggle_mode = true
 	b.button_group = _tool_group  # solo uno attivo alla volta
 	b.add_theme_font_size_override("font_size", 10)
 	b.add_theme_constant_override("h_separation", 2)
@@ -531,4 +531,4 @@ func _change_map(delta: int) -> void:
 
 func _update_map_label() -> void:
 	if _map_label:
-		_map_label.text = "  Mappa %d / 24  " % map_num
+		_map_label.text = L10n.t("  Mappa %d / 24  ") % map_num

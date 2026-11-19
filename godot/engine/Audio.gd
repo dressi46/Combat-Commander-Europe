@@ -72,7 +72,7 @@ func _on_event(ev: Dictionary) -> void:
 		"time":
 			play("time")
 		"fate":
-			if String(ev.get("text", "")).contains("Cecchino"):
+			if ev.get("fx") == "sniper":
 				play("rifle")
 
 

@@ -186,43 +186,43 @@ func _fire_flyover_text(hx: Vector2i) -> String:
 	match String(pv.get("verdict", "")):
 		"favorevole":  col = "#6cff6c"
 		"sfavorevole": col = "#ff7066"
-	var txt := "[b]Fuoco su (%d,%d)[/b]" % [hx.x, hx.y]
-	txt += "\n[color=#9fd]FP %d[/color]  vs  DIF %d" % [int(pv.get("fp", 0)), int(pv.get("defense", 0))]
-	txt += "\ncopertura %d · difensori %d · tiratori %d" % [
+	var txt := L10n.t("[b]Fuoco su (%d,%d)[/b]") % [hx.x, hx.y]
+	txt += L10n.t("\n[color=#9fd]FP %d[/color]  vs  DIF %d") % [int(pv.get("fp", 0)), int(pv.get("defense", 0))]
+	txt += L10n.t("\ncopertura %d · difensori %d · tiratori %d") % [
 		int(pv.get("cover", 0)), int(pv.get("defenders", 0)), int(pv.get("shooters", 0))]
-	txt += "\n[color=%s]%s (margine %+d)[/color]" % [
-		col, String(pv.get("verdict", "—")), int(pv.get("margin", 0))]
-	txt += "\n[color=#aaa]clic per aprire il fuoco[/color]"
+	txt += L10n.t("\n[color=%s]%s (margine %+d)[/color]") % [
+		col, L10n.t(pv.get("verdict", "—")), int(pv.get("margin", 0))]
+	txt += L10n.t("\n[color=#aaa]clic per aprire il fuoco[/color]")
 	return txt
 
 
 ## Testo informativo dell'esagono: terreno + copertura + marker + unità presenti.
 func _hex_info_text(s: GameState, q: int, r: int) -> String:
-	var txt := "[b]Esagono (%d,%d)[/b]" % [q, r]
+	var txt := L10n.t("[b]Esagono (%d,%d)[/b]") % [q, r]
 	var hd: GameState.HexData = s.hex_at(q, r)
 	if hd != null:
-		var terr: String = Domain.TERRAIN_NAMES.get(hd.terrain, "?")
+		var terr: String = L10n.t(Domain.TERRAIN_NAMES.get(hd.terrain, "?"))
 		var cov := Rules.cover_at(s, q, r, false)
-		txt += "\n[color=#9fd]%s (cop. %d)[/color]" % [terr, cov]
+		txt += L10n.t("\n[color=#9fd]%s (cop. %d)[/color]") % [terr, cov]
 		var feats: Array[String] = []
 		if hd.elevation > 0:
-			feats.append("quota %d" % hd.elevation)
+			feats.append(L10n.t("quota %d") % hd.elevation)
 		if hd.fortification != Domain.Fort.NONE:
-			feats.append(Domain.FORT_NAMES.get(hd.fortification, "?"))
-		if hd.has_foxhole: feats.append("buca")
-		if hd.has_smoke: feats.append("fumo")
-		if hd.has_blaze: feats.append("incendio")
-		if hd.has_road: feats.append("strada")
+			feats.append(L10n.t(Domain.FORT_NAMES.get(hd.fortification, "?")))
+		if hd.has_foxhole: feats.append(L10n.t("buca"))
+		if hd.has_smoke: feats.append(L10n.t("fumo"))
+		if hd.has_blaze: feats.append(L10n.t("incendio"))
+		if hd.has_road: feats.append(L10n.t("strada"))
 		if feats.size() > 0:
-			txt += "\n[color=#cc9]%s[/color]" % ", ".join(feats)
+			txt += L10n.t("\n[color=#cc9]%s[/color]") % ", ".join(feats)
 	for u in s.units_at(q, r):
 		var fac: String = Domain.FACTION_SHORT.get(u.faction, "?")
 		var st: Array[String] = []
-		if not u.efficient: st.append("rotta")
-		if u.suppressed: st.append("soppr.")
-		if u.activated: st.append("att.")
+		if not u.efficient: st.append(L10n.t("rotta"))
+		if u.suppressed: st.append(L10n.t("soppr."))
+		if u.activated: st.append(L10n.t("att."))
 		var stxt := "  [i]%s[/i]" % ", ".join(st) if st.size() > 0 else ""
-		txt += "\n• %s (%s) PdF%d G%d M%d%s" % [u.unit_name, fac, u.fp, u.range, u.move, stxt]
+		txt += L10n.t("\n• %s (%s) PdF%d G%d M%d%s") % [u.display_name, fac, u.fp, u.range, u.move, stxt]
 	return txt
 
 
@@ -834,10 +834,10 @@ func _add_fire_readout(s: GameState) -> void:
 	var pv := Game.fire_preview()
 	if pv.is_empty():
 		return
-	var txt := "FP %d" % int(pv.get("fp", 0))
+	var txt := L10n.t("FP %d") % int(pv.get("fp", 0))
 	var col := Color(1.0, 0.95, 0.5)
 	if int(pv.get("defense", -1)) >= 0:
-		txt += " vs DIF %d -> %s" % [int(pv["defense"]), pv.get("verdict", "")]
+		txt += L10n.t(" vs DIF %d -> %s") % [int(pv["defense"]), pv.get("verdict", "")]
 		match String(pv.get("verdict", "")):
 			"favorevole":  col = Color(0.4, 1.0, 0.4)
 			"sfavorevole": col = Color(1.0, 0.45, 0.4)
@@ -957,11 +957,11 @@ func _los_color_3d(kind: int) -> Color:
 func _los_label_3d(s: GameState, kind: int) -> String:
 	match kind:
 		HexGrid.LOS_CLEAR:
-			return "LOS LIBERA"
+			return L10n.t("LOS LIBERA")
 		HexGrid.LOS_HINDERED:
-			return "LOS OSTACOLATA (-%d)" % HexGrid.los_hindrance(s.los_a.x, s.los_a.y, s.los_b.x, s.los_b.y, s)
+			return L10n.t("LOS OSTACOLATA (-%d)") % HexGrid.los_hindrance(s.los_a.x, s.los_a.y, s.los_b.x, s.los_b.y, s)
 		_:
-			return "LOS BLOCCATA"
+			return L10n.t("LOS BLOCCATA")
 
 
 func _add_pieces(s: GameState) -> void:
@@ -1364,10 +1364,10 @@ func _badge_mark(u: Unit) -> Dictionary:
 	if not opt.is_empty():
 		if opt.has("on"):
 			var is_on := sel.has(u.id) or (w != null and sel.has(w.id))
-			return { "mark": "on" if is_on else "off", "extra": "DENTRO" if is_on else "FUORI" }
+			return { "mark": "on" if is_on else "off", "extra": L10n.t("DENTRO") if is_on else L10n.t("FUORI") }
 		var extra := ""
 		if String(p.get("kind", "")) == "activate" and u.is_leader() and u.command > 0:
-			extra = "COMANDA %d" % u.command
+			extra = L10n.t("COMANDA %d") % u.command
 		return { "mark": "pick", "extra": extra }
 	if u.id == String(p.get("unit", p.get("leader", ""))):
 		return { "mark": "focus", "extra": "" }
@@ -1412,7 +1412,7 @@ func _build_badge_control(u: Unit, tokens: Array, _sel: bool) -> Control:
 	vb.add_theme_constant_override("separation", 1)
 	panel.add_child(vb)
 	var name_lbl := Label.new()
-	name_lbl.text = u.unit_name
+	name_lbl.text = u.display_name
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_font_override("font", Tema.bold_font())
 	name_lbl.add_theme_font_size_override("font_size", 22)
@@ -1446,11 +1446,11 @@ func _build_badge_control(u: Unit, tokens: Array, _sel: bool) -> Control:
 	if String(m["extra"]) != "":
 		bands.append([String(m["extra"]), border, Color(0.06, 0.06, 0.05)])
 	if not u.efficient:
-		bands.append(["GUASTA" if u.is_weapon() else "ROTTA", Color(0.85, 0.12, 0.10), Color(1, 1, 1)])
+		bands.append([L10n.t("GUASTA") if u.is_weapon() else L10n.t("ROTTA"), Color(0.85, 0.12, 0.10), Color(1, 1, 1)])
 	if u.suppressed:
-		bands.append(["SOPPRESSA", Color(0.90, 0.65, 0.10), Color(0.08, 0.08, 0.06)])
+		bands.append([L10n.t("SOPPRESSA"), Color(0.90, 0.65, 0.10), Color(0.08, 0.08, 0.06)])
 	if u.veteran:
-		bands.append(["VETERANA", Color(0.20, 0.55, 0.90), Color(1, 1, 1)])
+		bands.append([L10n.t("VETERANA"), Color(0.20, 0.55, 0.90), Color(1, 1, 1)])
 	for bnd in bands:
 		var bs := StyleBoxFlat.new()
 		bs.bg_color = bnd[1]
@@ -1536,7 +1536,7 @@ func _add_objectives(s: GameState) -> void:
 		var lbl := Label3D.new()
 		# Numero stampato dell'obiettivo; se i chit aperti gli danno un valore,
 		# lo si mostra accanto (es. «3 · 6 VP»).
-		lbl.text = "%d" % o.id if o.vp <= 0 else "%d · %d VP" % [o.id, o.vp]
+		lbl.text = "%d" % o.id if o.vp <= 0 else L10n.t("%d · %d VP") % [o.id, o.vp]
 		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lbl.font_size = 80
 		lbl.pixel_size = 0.011
