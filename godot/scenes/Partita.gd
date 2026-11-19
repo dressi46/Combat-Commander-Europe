@@ -795,22 +795,11 @@ func _toggle_3d() -> void:
 
 
 func _set_speed_label() -> void:
-	var name := L10n.t("normale")
-	if Game.speed < 0.8:
-		name = L10n.t("lento")
-	elif Game.speed > 1.5:
-		name = L10n.t("veloce")
-	btn_speed.text = L10n.t("Ritmo: %s") % name
+	btn_speed.text = L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()])
 
 
 func _cycle_speed() -> void:
-	if Game.speed < 0.8:
-		Game.speed = 1.0
-	elif Game.speed > 1.5:
-		Game.speed = 0.55
-	else:
-		Game.speed = 2.2
-	Game.save_settings()
+	Game.select_speed((Game.speed_index() + 1) % Game.SPEEDS.size())
 	_set_speed_label()
 
 

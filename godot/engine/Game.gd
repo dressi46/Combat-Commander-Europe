@@ -32,6 +32,9 @@ var bots: Dictionary = {}
 var human: int = Flow.AX
 var mode: int = Mode.VS_AI
 var difficulty: int = 1
+const SPEEDS := [0.55, 1.0, 2.2]
+const SPEED_LABELS := ["lento", "normale", "veloce"]
+var sound_percent := 100
 var speed: float = 1.0            ## moltiplicatore del ritmo (1 = normale)
 var paused: bool = false
 var busy: bool = false            ## cronaca in riproduzione / IA al lavoro
@@ -52,13 +55,40 @@ func _ready() -> void:
 	if cfg.load(SETTINGS_PATH) == OK:
 		tutorial_enabled = bool(cfg.get_value("ui", "tutorial", true))
 		speed = float(cfg.get_value("ui", "speed", 1.0))
+		sound_percent = clampi(int(cfg.get_value("audio", "percent", 100)), 0, 100)
+	_apply_sound()
 
 
 func save_settings() -> void:
 	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("audio", "percent", sound_percent)
 	cfg.set_value("ui", "tutorial", tutorial_enabled)
 	cfg.set_value("ui", "speed", speed)
 	cfg.save(SETTINGS_PATH)
+
+
+func speed_index() -> int:
+	if speed < 0.8:
+		return 0
+	return 2 if speed > 1.5 else 1
+
+
+func select_speed(index: int) -> void:
+	speed = SPEEDS[index]
+	save_settings()
+
+
+func set_sound_percent(percent: int) -> void:
+	sound_percent = clampi(percent, 0, 100)
+	_apply_sound()
+	save_settings()
+
+
+func _apply_sound() -> void:
+	AudioServer.set_bus_mute(0, sound_percent == 0)
+	if sound_percent > 0:
+		AudioServer.set_bus_volume_db(0, linear_to_db(sound_percent / 100.0))
 
 
 func set_tutorial(on: bool) -> void:

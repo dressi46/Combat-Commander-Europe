@@ -1,50 +1,68 @@
-# Combat Commander: Europe — Edizione digitale
+# Combat Commander: Europe
 
-Versione digitale del gioco da tavolo tattico **Combat Commander: Europe** (GMT Games),
-in **Godot 4.6**, con esportazione web. Progetto amatoriale a uso personale.
+**Español** · [English](README.en.md)
 
-## Español e inglés
+Adaptación digital del juego de mesa táctico de GMT Games, hecha con Godot 4.6.3. Proyecto de aficionados para uso personal.
 
-Abre el proyecto de la carpeta `godot` con Godot 4.6.3. En el menú principal, **Configuración → Idioma** cambia el idioma y guarda la preferencia. **Un solo jugador** permite jugar contra la IA o ver una demostración. **Multijugador** permite jugar en el mismo dispositivo o conectarse al lobby para crear partidas públicas y privadas. [Alojamiento y uso del lobby](online/README.md).
+## Jugar en el navegador
 
-In English, open **Settings → Language**. Choose **Single player** for AI play or a demonstration, or **Multiplayer** for local two-player games or online public and private rooms.
+En Ubuntu, abre una terminal en la carpeta del **paquete para Linux** que contiene el lanzador y ejecuta:
 
-Para añadir otro idioma, copia `godot/assets/i18n/en.json` con el código del idioma, traduce los valores y registra su nombre en `languages.json`. Conserva las claves, el orden de los marcadores como `%s` y `%d`, y las etiquetas de formato. El juego muestra la traducción inglesa cuando falta una entrada.
-
-Puedes añadir imágenes de cartas por idioma y mazo. Por ejemplo, `godot/assets/cards_es/german/01.webp` sustituye la cara de la carta alemana 1 en español. Godot importa las imágenes al abrir el proyecto. Cuando falta una ilustración, el juego dibuja la carta con los datos del mazo.
-
-Versión original en línea: https://tannoiser2.github.io/Combat-Commander-Europe/
-
-## Com'è fatto (dalla v0.50 «Rifondazione»)
-
-| Parte | File | Che cosa fa |
-|---|---|---|
-| Motore a decisioni | `godot/engine/Flow.gd` | Tutta la partita come sequenza di decisioni: a ogni passo elenca **solo le mosse legali** e aspetta una scelta. |
-| IA | `godot/engine/Bot.gd` | Sceglie fra le stesse opzioni del giocatore, dando un punteggio a ciascuna. |
-| Regista | `godot/engine/Game.gd` | Fa girare il motore, dà il ritmo alla cronaca, traduce i tocchi in scelte. |
-| Regole pure | `Rules.gd`, `HexGrid.gd`, `Combat.gd`, `Events.gd`, `ObjectiveChits.gd` | Calcoli riusati dal motore (linea di vista, costi, copertura, eventi, chit). |
-| Dati | `godot/assets/` | 24 mappe, 6 mazzi da 72 carte, tabella unità (fronte e retro), scenari. |
-| Interfaccia | `godot/scenes/Partita.gd`, `Board2D.gd`, `CardView.gd`, `Map3D.gd`, `Menu.gd` | Guida passo passo, mappa 2D e 3D, mano di carte, cronaca. |
-| Tema | `godot/engine/Tema.gd`, `godot/assets/fonts/` | Colori e font (Black Ops One, Barlow Condensed — licenza OFL). |
-
-## Verifiche
-
+```sh
+./iniciar-local.sh
 ```
+
+Deja la terminal abierta y entra en [el juego local](http://localhost:8781/) desde Brave. En el mismo equipo también puedes abrir [el taller de misiones y cartas](http://localhost:8781/workshop/?lang=es). Para jugar desde otro dispositivo, abre la dirección HTTPS donde se haya alojado el juego. [Guía del servidor y del lobby](online/README.md).
+
+## Menú principal
+
+- **Un solo jugador** permite jugar contra la IA o ver una demostración.
+- **Multijugador** ofrece juego en el mismo dispositivo y salas en línea públicas o privadas. Cada participante puede usar su propio idioma.
+- **Taller de misiones y cartas** permite editar y generar escenarios, adjuntar documentos y jugar misiones personalizadas contra la IA. Para importar una carta, elige su idioma, mazo y número. En un PDF también puedes elegir página y casilla. El navegador guarda los archivos en el dispositivo.
+- **Configuración** guarda el idioma, el ritmo de las acciones y el volumen de los efectos. El ritmo lento da más tiempo para leer la crónica.
+
+## Abrir o exportar el proyecto
+
+Abre [godot/project.godot](godot/project.godot) con Godot 4.6.3 y pulsa **F5** para jugar. Para crear la versión web desde el repositorio, instala las plantillas de exportación de esa versión y ejecuta desde la raíz:
+
+```sh
+mkdir -p godot/build
 godot --headless --path godot --import
-godot --headless --path godot res://tests/SelfPlay.tscn -- all 1     # partite IA contro IA su tutti gli scenari
-godot --path godot --resolution 1024x768 res://tests/UiTour.tscn -- /tmp/giro 2 160   # schermate di ogni tipo di decisione
-python3 tools/controlla_glifi.py                                    # nessun carattere senza glifo
+godot --headless --path godot --export-release Web build/index.html
+python3 online/prepare-workshop.py godot/build
+python3 -m http.server 8781 --bind 127.0.0.1 --directory godot/build
 ```
 
-## Pubblicazione
+Abre [localhost:8781](http://localhost:8781/). Esta última orden sirve el juego y el taller. Para las partidas en línea, arranca también el servidor Godot con la variable `PORT=8791` al probar en ese puerto web. [Instrucciones del lobby](online/README.md).
 
-Solo su richiesta: pulsante «Run workflow» di `deploy.yml`, oppure un commit su `main`
-con `[pubblica]` nel messaggio.
+## Traducir el juego
 
-## Stato e cose da fare
+Copia `godot/assets/i18n/en.json`, usa el código del nuevo idioma como nombre de archivo y regístralo en `languages.json` del mismo directorio. Traduce los valores y conserva las claves, los marcadores como `%s` y `%d` y las etiquetas de formato. El inglés sirve de respaldo cuando falta un texto. Los textos del taller están en `online/workshop/`.
 
-Vedi `docs/STATO.md`. I vecchi audit e il codice della v0.48 sono in `docs/archivio/`.
+Para incluir ilustraciones en el proyecto, usa rutas como `godot/assets/cards_es/german/01.webp`. Godot importa la imagen al abrir el proyecto. Si falta la ilustración, el juego dibuja la carta a partir de los datos del mazo.
 
-## Note legali
+## Organización
 
-*Combat Commander: Europe* è © GMT Games. Tutti i materiali originali restano dei rispettivi titolari.
+| Carpeta | Contenido |
+|---|---|
+| `godot/engine/` | Motor de decisiones (`Flow.gd`), IA (`Bot.gd`), coordinación de la partida (`Game.gd`) y reglas de combate, terreno, eventos y objetivos. La IA elige entre las mismas jugadas legales que el jugador. |
+| `godot/assets/` | 24 mapas, seis mazos de 72 cartas, escenarios, anversos y reversos de unidades, traducciones y fuentes Black Ops One y Barlow Condensed (OFL). |
+| `godot/scenes/` | Menús, mapas 2D y 3D, mano, ayuda y crónica. El tema visual está en `godot/engine/Tema.gd`. |
+| `online/` | Taller web, lanzador local y archivos para alojar el lobby. |
+| `docs/` | [Estado del proyecto](docs/STATO.md), auditorías y [archivo histórico](docs/archivio/), con código de la v0.48 y pruebas gráficas. |
+
+## Verificación y publicación
+
+Desde la raíz del repositorio:
+
+```sh
+godot --headless --path godot --import
+godot --headless --path godot res://tests/RulesCheck.tscn
+godot --headless --path godot res://tests/SelfPlay.tscn -- all 1
+godot --path godot --resolution 1024x768 res://tests/UiTour.tscn -- /tmp/cc-ui 2 160
+python3 tools/controlla_glifi.py
+```
+
+Estas comprobaciones cubren las reglas, partidas entre dos IA en todos los escenarios, capturas de las decisiones y cobertura de caracteres. Para publicar en GitHub Pages, ejecuta manualmente `deploy.yml` o incluye `[pubblica]` en el mensaje de un commit a `main`. [Versión web del proyecto original](https://tannoiser2.github.io/Combat-Commander-Europe/).
+
+*Combat Commander: Europe* es © GMT Games. Los materiales originales pertenecen a sus respectivos titulares.

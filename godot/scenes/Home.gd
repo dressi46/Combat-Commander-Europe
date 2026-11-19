@@ -86,7 +86,27 @@ func _settings() -> void:
 		_settings())
 	column.add_child(picker)
 	picker.grab_focus()
+	var pace := _setting_picker("Action playback speed")
+	for key in Game.SPEED_LABELS:
+		pace.add_item(L10n.t(key))
+	pace.select(Game.speed_index())
+	pace.item_selected.connect(Game.select_speed)
+	var volume := _setting_picker("Sound effects volume")
+	for percent in [0, 25, 50, 75, 100]:
+		volume.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)
+	volume.select(volume.get_item_index(Game.sound_percent))
+	volume.item_selected.connect(func(index: int): Game.set_sound_percent(volume.get_item_id(index)))
 	_button("Back", _home)
+
+
+func _setting_picker(key: String) -> OptionButton:
+	var label := Label.new()
+	label.text = L10n.t(key)
+	column.add_child(label)
+	var picker := OptionButton.new()
+	picker.custom_minimum_size.y = 44
+	column.add_child(picker)
+	return picker
 
 
 func _scale() -> void:
