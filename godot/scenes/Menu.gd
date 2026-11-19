@@ -35,6 +35,10 @@ const NATION_LABEL := {
 func _ready() -> void:
 	_scenarios = _load_json("res://assets/scenari.json")
 	_catalog = _load_json("res://assets/scenarios/catalog.json")
+	L10n.scale_menu()
+	if L10n.small_screen():
+		_build_phone_menu()
+		return
 	_build_ui()
 	if _scenarios.size() > 0:
 		_select(int(_scenarios[0].get("numero", 1)))
@@ -411,3 +415,41 @@ func _start(faction: int) -> void:
 		return
 	Game.start_new_game(faction, _selected_num, _difficulty, _mode)
 	get_tree().change_scene_to_file("res://scenes/Partita.tscn")
+
+func _build_phone_menu() -> void:
+	theme = Tema.get_theme()
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(scroll)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_theme_constant_override("separation", 12)
+	scroll.add_child(col)
+	var back := Button.new()
+	back.text = L10n.t("Back")
+	back.custom_minimum_size.y = 48
+	back.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/Home.tscn"))
+	col.add_child(back)
+	var picker := OptionButton.new()
+	for s in _scenarios:
+		picker.add_item("%d · %s" % [s.numero, L10n.t(s.titolo)], s.numero)
+	picker.custom_minimum_size.y = 48
+	col.add_child(picker)
+	var full := Button.new()
+	full.text = L10n.t("Full scenario menu")
+	full.custom_minimum_size.y = 48
+	full.pressed.connect(func():
+		get_window().content_scale_size = Vector2i(1280, 800)
+		scroll.queue_free()
+		_build_ui()
+		_select(picker.get_selected_id()))
+	for side in [Flow.AX, Flow.AL]:
+		var btn := Button.new()
+		btn.text = L10n.t("Asse" if side == Flow.AX else "Alleati")
+		btn.custom_minimum_size.y = 52
+		btn.pressed.connect(func():
+			_selected_num = picker.get_selected_id()
+			_mode = Game.Mode.HOTSEAT if L10n.local_two_player else Game.Mode.VS_AI
+			_start(side))
+		col.add_child(btn)
+	col.add_child(full)

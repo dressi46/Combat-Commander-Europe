@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Combat Commander · Workshop</title><link rel="stylesheet" href="style.css">
+<header><a href="../" data-t>Back to game</a><strong>Combat Commander · Europe</strong><select id="language" aria-label="Language"><option value="es">Español</option><option value="en">English</option></select></header>
+<main><h1 data-t>Workshop</h1><nav><button id="missionTab" data-t>Missions</button><button id="cardTab" data-t>Cards</button></nav>
+<p id="status" role="status"></p>
+<section id="missions">
+<div class="row"><label><span data-t>My missions</span><select id="saved"></select></label><button id="newMission" data-t>New mission</button></div>
+<form id="editor">
+<label><span data-t>Mission name</span><input id="title" required maxlength="80"></label>
+<details open><summary data-t>Scenario generator</summary>
+<p data-t>Roll the battlefield and factions. Choose your map and edge, then enter purchases and leaders from your order of battle.</p>
+<div class="row"><button type="button" id="roll" data-t>Roll scenario</button><a href="generator.pdf" target="_blank" rel="noopener" data-t>Read the generator manual</a></div>
+<p id="rollResult"></p></details>
+<div class="grid" id="settings"></div>
+<div class="teams" id="teams"></div>
+<p id="balance"></p>
+<div class="row"><button data-t>Save mission</button><button type="button" id="play" data-t>Play against the AI</button></div>
+</form>
+<h2 data-t>Mission documents</h2><label><span data-t>Attach PDFs or photos to this mission</span><input type="file" id="attachments" accept="application/pdf,image/png,image/jpeg,image/webp" multiple></label><div id="documents"></div>
+</section>
+<section id="cards" hidden><h2 data-t>Card illustrations</h2><p data-t>Choose a deck and card number. For a sheet of cards, select the page and grid cell. Illustrations are saved for the selected game language on this browser.</p>
+<div class="grid" id="cardFields"></div>
+<label><span data-t>Photo or PDF sheet</span><input type="file" id="source" accept="application/pdf,image/png,image/jpeg,image/webp"></label>
+<div class="grid" id="crop"></div><canvas id="face" hidden></canvas><button id="importFace" disabled data-t>Save illustration</button><h3 data-t>Imported cards</h3><div id="imported"></div></section>
+</main><script src="art.js"></script><script type="module" src="workshop.js"></script></html>

@@ -40,6 +40,34 @@ var btn_3d: Button
 var btn_speed: Button
 var btn_pause: Button
 
+var mobile_panels: Array[Control] = []
+var mobile_tabs := HBoxContainer.new()
+var mobile_page := 0
+var toolbar_scroll := ScrollContainer.new()
+var track_scroll := ScrollContainer.new()
+var mobile := false
+
+func _layout_for_screen() -> void:
+	var window := get_window()
+	mobile = L10n.small_screen()
+	window.content_scale_size = Vector2i(480, 460) if mobile else Vector2i(1280, 800)
+	mobile_tabs.visible = mobile
+	for i in mobile_tabs.get_child_count():
+		mobile_tabs.get_child(i).set_pressed_no_signal(i == mobile_page)
+	toolbar_scroll.custom_minimum_size.y = 52 if mobile else 42
+	track_scroll.get_parent().visible = not mobile or mobile_page == 0
+	for i in mobile_panels.size():
+		mobile_panels[i].visible = not mobile or i == mobile_page
+	mobile_panels[1].size_flags_horizontal = Control.SIZE_EXPAND_FILL if mobile else Control.SIZE_SHRINK_END
+	mobile_panels[2].size_flags_vertical = Control.SIZE_EXPAND_FILL if mobile else Control.SIZE_SHRINK_END
+	mobile_panels[0].get_parent().visible = not mobile or mobile_page != 2
+	foe_lbl.visible = not mobile
+
+
+func _exit_tree() -> void:
+	get_window().content_scale_size = Vector2i(1280, 800)
+
+
 var _sel_card := -1
 var _dice_until := 0
 var _played_until := 0
@@ -51,6 +79,8 @@ func _ready() -> void:
 	if Game.flow == null:
 		Game.start_new_game(Flow.AX, 1, 1)
 	_build()
+	_layout_for_screen()
+	get_window().size_changed.connect(_layout_for_screen)
 	Game.decision_changed.connect(_refresh)
 	Game.state_changed.connect(_refresh_status)
 	Game.chronicle.connect(_on_event)
@@ -104,7 +134,21 @@ func _build() -> void:
 	# ── Riga 1: titolo e comandi ────────────────────────────────────────────
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 6)
-	root.add_child(bar)
+	root.add_child(toolbar_scroll)
+	toolbar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	toolbar_scroll.add_child(bar)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.add_child(mobile_tabs)
+	for caption in ["Board", "Decisions", "Hand"]:
+		var tab := _btn(L10n.t(caption))
+		tab.toggle_mode = true
+		tab.custom_minimum_size.y = 48
+		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var idx := mobile_tabs.get_child_count()
+		tab.pressed.connect(func():
+			mobile_page = idx
+			_layout_for_screen())
+		mobile_tabs.add_child(tab)
 	var menu := _btn(L10n.t("MENU"), L10n.t("Torna al menu degli scenari"), 70)
 	menu.pressed.connect(_exit_board)
 	bar.add_child(menu)
@@ -146,7 +190,10 @@ func _build() -> void:
 	track.custom_minimum_size = Vector2(600, 46)
 	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	track.draw.connect(_draw_track)
-	tp.add_child(track)
+	tp.add_child(track_scroll)
+	track_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	track_scroll.custom_minimum_size.y = 55
+	track_scroll.add_child(track)
 
 	# ── Centro: mappa + pannello laterale ───────────────────────────────────
 	var mid := HBoxContainer.new()
@@ -233,8 +280,11 @@ func _build() -> void:
 	hand_box = HBoxContainer.new()
 	hand_box.add_theme_constant_override("separation", 8)
 	hsc.add_child(hand_box)
+	mobile_panels.assign([board_holder, side, hp])
 	_set_speed_label()
-	title_lbl.text = "%d · %s" % [Game.state.scenario_number, L10n.t(Game.state.scenario_name).to_upper()]
+	title_lbl.text = L10n.t(Game.state.scenario_name).to_upper()
+	if Game.state.scenario_number < 1000:
+		title_lbl.text = "%d · %s" % [Game.state.scenario_number, title_lbl.text]
 
 
 func _build_overlays() -> void:
@@ -563,6 +613,9 @@ func _on_card_tapped(v: CardView) -> void:
 			Game.choose(mine[0])
 			return
 	_select_card(v.index)
+	if mobile and _sel_card >= 0:
+		mobile_page = 0
+		_layout_for_screen()
 
 
 func _card_options(p: Dictionary, card_index: int) -> Array:

@@ -10,7 +10,7 @@ Una desconexión pausa la partida durante cinco minutos. Pulsa **Conectar** de n
 
 ## Probar en Ubuntu
 
-En el paquete distribuido, ejecuta `./iniciar-local.sh` y abre <http://localhost:8780>. También puedes abrir dos pestañas para probar ambos bandos. El servidor web y el de partidas escuchan solo en la interfaz local. Cierra el script con Ctrl+C.
+En el paquete distribuido, ejecuta `./iniciar-local.sh` y abre <http://localhost:8781>. También puedes abrir dos pestañas para probar ambos bandos. El servidor web y el de partidas escuchan solo en la interfaz local. Cierra el script con Ctrl+C.
 
 ## Desplegar en lobby.dressi.es
 
@@ -39,3 +39,11 @@ godot --headless --path godot res://tests/OnlineCheck.tscn -- ws://127.0.0.1:879
 ```
 
 Los textos del lobby comparten los catálogos de `godot/assets/i18n` con el resto del juego. El cliente indica su idioma al conectar. El servidor presenta cada decisión y mensaje del motor en el idioma de su destinatario.
+
+## Taller y perfiles
+
+En **Taller de misiones y cartas** puedes guardar misiones, adjuntarles fotos o PDF y jugarlas contra la IA en el navegador. El generador usa las tiradas de los pasos RS.1–RS.3. Consulta las tablas de cada nación para elegir las fuerzas, líderes y apoyos y registrar sus costes. Al seleccionar una formación compatible, el taller carga las fuerzas, sortea los líderes y rellena órdenes, iniciativa y rendición de la tabla. El taller calcula postura, profundidad de despliegue, mano inicial y muerte súbita. En **Cartas**, elige idioma, mazo y número. Para recortar una hoja, indica la página, el número de filas y columnas y la casilla contando desde la esquina superior izquierda. Los documentos y las ilustraciones se guardan en ese navegador y dirección web.
+
+La primera conexión con un nombre reserva ese nombre y devuelve una ID permanente. El navegador o instalación guarda la credencial del jugador. Borrar sus datos o cambiar de dispositivo impide recuperar el nombre desde ese dispositivo sin una copia de la credencial. En Docker los perfiles se conservan en el volumen `players`.
+
+Después de exportar el proyecto a HTML, ejecuta `python3 online/prepare-workshop.py RUTA_DE_LA_EXPORTACION` desde la raíz del repositorio para incluir el taller, el lector PDF y las tablas. Para traducir el taller, añade el catálogo correspondiente en `online/workshop/` y registra el idioma en el juego.

@@ -4,6 +4,9 @@ signal changed
 const LOBBY := "res://online/Lobby.tscn"
 const BOARD := "res://scenes/Partita.tscn"
 const PUBLIC_URL := "wss://lobby.dressi.es"
+var nickname := ""
+var proof := ""
+var profile_id := ""
 var endpoint := PUBLIC_URL
 var socket: WebSocketPeer
 var lobby_ready := false
@@ -25,20 +28,39 @@ func _ready() -> void:
 	var config := ConfigFile.new()
 	if config.load("user://lobby.cfg") == OK:
 		endpoint = config.get_value("network", "endpoint", PUBLIC_URL)
-	elif OS.has_feature("web"):
+	if OS.has_feature("web") and endpoint == PUBLIC_URL:
 		var loc = JavaScriptBridge.get_interface("window").location
 		if loc.protocol == "https:":
 			endpoint = "wss://%s" % str(loc.host) if loc.hostname == "lobby.dressi.es" else PUBLIC_URL
-		elif loc.protocol == "http:" and loc.hostname in ["localhost", "127.0.0.1"]:
-			endpoint = "ws://%s:8790" % str(loc.hostname)
+		elif loc.protocol == "http:":
+			endpoint = "ws://%s:%d" % [str(loc.hostname), 8791 if str(loc.port) == "8781" else 8790]
 
 
-func connect_lobby(url: String) -> void:
+func _load_profile() -> void:
+	var cfg := ConfigFile.new()
+	cfg.load("user://players.cfg")
+	nickname = cfg.get_value(endpoint, "name", "")
+	proof = cfg.get_value(endpoint, "proof", "")
+
+
+func connect_lobby(url: String, name_value: String = "") -> void:
 	if socket != null:
 		return
 	if url != endpoint:
 		_clear_seat()
 	endpoint = url
+	_load_profile()
+	nickname = name_value.strip_edges()
+	if proof.is_empty():
+		proof = Crypto.new().generate_random_bytes(32).hex_encode()
+	var profile := ConfigFile.new()
+	profile.load("user://players.cfg")
+	profile.set_value(endpoint, "name", nickname)
+	profile.set_value(endpoint, "proof", proof)
+	if profile.save("user://players.cfg") != OK:
+		status = "Cannot save profile"
+		changed.emit()
+		return
 	var cfg := ConfigFile.new()
 	cfg.set_value("network", "endpoint", endpoint)
 	cfg.save("user://lobby.cfg")
@@ -61,7 +83,7 @@ func _process(_delta: float) -> void:
 		WebSocketPeer.STATE_OPEN:
 			if not greeted:
 				greeted = true
-				send({"op": "hello", "version": 1, "locale": L10n.locale})
+				send({"op": "hello", "version": 1, "locale": L10n.locale, "name": nickname, "proof": proof})
 			while socket != null and socket.get_available_packet_count() > 0:
 				var msg: Variant = bytes_to_var(socket.get_packet())
 				if msg is Dictionary:
@@ -79,6 +101,8 @@ func send(msg: Dictionary) -> void:
 
 func _receive(msg: Dictionary) -> void:
 	match msg.get("type"):
+		"profile":
+			profile_id = msg.id
 		"rooms":
 			var first := not lobby_ready
 			lobby_ready = true
@@ -109,6 +133,8 @@ func _receive(msg: Dictionary) -> void:
 				show_events()
 		"error":
 			status = msg.key
+			if not lobby_ready:
+				_close()
 			if status == "Session unavailable":
 				_clear_seat()
 			waiting = false

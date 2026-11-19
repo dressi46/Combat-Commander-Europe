@@ -296,7 +296,7 @@ func _draw_objectives(s: GameState) -> void:
 			col = COL_AL.lightened(0.35)
 		draw_polyline(_closed(_corners(o.q, o.r, 0.9)), Color(col.r, col.g, col.b, 0.95), 4.0)
 		var tag := c + Vector2(0, -hs * 0.72)
-		var owner := "nessuno"
+		var owner := L10n.t("Uncontrolled")
 		if o.controller >= 0 and Game.flow != null:
 			owner = Game.flow.side_name(o.controller)
 		var t := L10n.t("Ob.%d  %s  %d PV") % [o.id, owner, o.vp]

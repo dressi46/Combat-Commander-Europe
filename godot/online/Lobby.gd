@@ -1,6 +1,7 @@
 extends ScrollContainer
 
 var column := VBoxContainer.new()
+var username: LineEdit
 var address: LineEdit
 var invitation: LineEdit
 var scenarios: OptionButton
@@ -13,12 +14,15 @@ var bookings: Array
 
 
 func _ready() -> void:
+	L10n.scale_menu()
+	get_window().size_changed.connect(_scale)
 	theme = Tema.get_theme()
 	var center := CenterContainer.new()
 	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(center)
-	column.custom_minimum_size.x = 530
+	column.custom_minimum_size.x = 340
+	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_theme_constant_override("separation", 10)
 	center.add_child(column)
 	bookings = JSON.parse_string(FileAccess.get_file_as_string("res://assets/scenari.json"))
@@ -35,6 +39,7 @@ func _label(key: String) -> void:
 func _button(parent: Control, caption: String, action: Callable) -> void:
 	var b := Button.new()
 	b.text = caption
+	b.custom_minimum_size.y = 46
 	b.pressed.connect(action)
 	parent.add_child(b)
 
@@ -61,7 +66,7 @@ func _refresh() -> void:
 			item.queue_free()
 		for room in Online.listed:
 			var title := L10n.t(bookings[int(room.scenario)-1].titolo)
-			_button(room_list, L10n.t("Join · %s") % title, _join.bind(room.code))
+			_button(room_list, L10n.t("Join · %s") % (title + " · " + str(room.get("host", ""))), _join.bind(room.code))
 		if Online.listed.is_empty():
 			var empty := Label.new()
 			empty.text = L10n.t("No open rooms")
@@ -76,17 +81,25 @@ func _exit_tree() -> void:
 
 
 func _connect_form() -> void:
+	Online._load_profile()
+	_label("Username")
+	username = LineEdit.new()
+	username.max_length = 24
+	username.text = Online.nickname
+	column.add_child(username)
 	_label("Server address")
 	address = LineEdit.new()
 	address.text = Online.endpoint
 	column.add_child(address)
-	_button(column, L10n.t("Connect"), func(): Online.connect_lobby(address.text.strip_edges()))
+	_button(column, L10n.t("Connect"), func(): Online.connect_lobby(address.text.strip_edges(), username.text))
 	_button(column, L10n.t("Local server"), func():
-		address.text = "ws://127.0.0.1:8790"
-		Online.connect_lobby(address.text))
+		address.text = "ws://127.0.0.1:8791"
+		Online.connect_lobby(address.text, username.text))
 
 
 func _room_form() -> void:
+	_label(Online.nickname + " · ID " + Online.profile_id)
+	column.get_child(-1).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label("Create a match")
 	scenarios = OptionButton.new()
 	for s in bookings:
@@ -121,3 +134,7 @@ func _waiting() -> void:
 
 func _join(value: String) -> void:
 	Online.send({"op": "join", "code": value.strip_edges().to_lower()})
+
+
+func _scale() -> void:
+	L10n.scale_menu()

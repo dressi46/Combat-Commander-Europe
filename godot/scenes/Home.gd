@@ -7,10 +7,20 @@ func _ready() -> void:
 	if "--lobby-server" in OS.get_cmdline_user_args() and DisplayServer.get_name() == "headless":
 		get_tree().change_scene_to_file.call_deferred("res://online/Server.tscn")
 		return
+	L10n.scale_menu()
+	get_window().size_changed.connect(_scale)
 	theme = Tema.get_theme()
 	column.custom_minimum_size.x = 330
 	column.add_theme_constant_override("separation", 12)
 	add_child(column)
+	if OS.has_feature("web"):
+		var launch: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('mission')", true)
+		if launch is String and launch.is_valid_int() and int(launch) >= 1000 and not ScenarioLoader.entry(int(launch)).is_empty():
+			var side := Flow.AL if ScenarioLoader.entry(int(launch)).get("human") == "allies" else Flow.AX
+			JavaScriptBridge.eval("history.replaceState(null, '', location.pathname)", true)
+			Game.start_new_game(side, int(launch))
+			get_tree().change_scene_to_file.call_deferred("res://scenes/Partita.tscn")
+			return
 	_home()
 
 
@@ -38,7 +48,15 @@ func _home() -> void:
 	_page("Combat Commander: Europe")
 	_button("Single player", _scenarios.bind(false)).grab_focus()
 	_button("Multiplayer", _multiplayer_menu)
+	_button("Mission and card workshop", _workshop)
 	_button("Settings", _settings)
+
+
+func _workshop() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.get_interface("window").location.assign("workshop/?lang=" + L10n.locale)
+	else:
+		OS.shell_open("http://localhost:8781/workshop/?lang=" + L10n.locale)
 
 
 func _multiplayer_menu() -> void:
@@ -69,3 +87,7 @@ func _settings() -> void:
 	column.add_child(picker)
 	picker.grab_focus()
 	_button("Back", _home)
+
+
+func _scale() -> void:
+	L10n.scale_menu()

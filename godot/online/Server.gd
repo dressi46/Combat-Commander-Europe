@@ -78,11 +78,51 @@ func _error(id: int, key: String) -> void:
 	_send(id, {"type": "error", "key": key})
 
 
+# One file per canonical name. The server serializes requests on the main thread.
+func _profile(id: int, msg: Dictionary) -> bool:
+	if not msg.has("name"): # v1 clients have guest identities for this connection.
+		peers[id].display = "· %08x" % id
+		return true
+	var name_value: Variant = msg.get("name")
+	var key: Variant = msg.get("proof")
+	if not name_value is String or not key is String or key.length() != 64 or not key.is_valid_hex_number(false):
+		_error(id, "Invalid player profile")
+		return false
+	var nick: String = name_value.strip_edges()
+	if nick.length() < 2 or nick.length() > 24 or not nick.is_valid_ascii_identifier():
+		_error(id, "Use 2–24 letters, digits or underscores, starting with a letter or underscore")
+		return false
+	var path := "user://players/" + nick.to_lower().sha256_text()
+	var signature: String = key.sha256_text()
+	var uid: String
+	if FileAccess.file_exists(path):
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if not data is Dictionary or data.get("signature") != signature:
+			_error(id, "Username already registered")
+			return false
+		uid = data.id
+	else:
+		DirAccess.make_dir_recursive_absolute("user://players")
+		uid = crypto.generate_random_bytes(16).hex_encode()
+		var file := FileAccess.open(path + ".tmp", FileAccess.WRITE)
+		if file == null:
+			_error(id, "Cannot save profile")
+			return false
+		file.store_string(JSON.stringify({"id": uid, "signature": signature}))
+		file.close()
+		if DirAccess.rename_absolute(path + ".tmp", path) != OK:
+			_error(id, "Cannot save profile")
+			return false
+	peers[id].display = nick
+	_send(id, {"type": "profile", "id": uid, "name": nick})
+	return true
+
+
 func _list(id: int) -> void:
 	var waiting := []
 	for r in rooms.values():
 		if r.open and r.flow == null and r.ids[0] != 0:
-			waiting.append({"code": r.code, "scenario": r.scenario, "side": r.host_side})
+			waiting.append({"code": r.code, "scenario": r.scenario, "side": r.host_side, "host": peers[r.ids[0]].display})
 	_send(id, {"type": "rooms", "rooms": waiting})
 
 
@@ -97,6 +137,8 @@ func _request(id: int, msg: Dictionary) -> void:
 	var op: Variant = msg.get("op")
 	if p.locale == "":
 		if op == "hello" and msg.get("version") == 1 and catalogs.has(msg.get("locale")):
+			if not _profile(id, msg):
+				return
 			p.locale = msg.locale
 			_list(id)
 		else:

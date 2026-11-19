@@ -233,16 +233,16 @@ func _top(f: int) -> bool:
 
 ## Distanza (in mezze righe o colonne) dell'esagono dal bordo amico di `f`.
 func edge_dist(f: int, h: Vector2i) -> int:
-	if s.edge_mode == 0:
-		return (s.map_cols - 1 - h.x) if f == AX else h.x
+	if s.edge_mode in [0, 3]:
+		return (s.map_cols - 1 - h.x) if (f == AX) == (s.edge_mode == 0) else h.x
 	var y2 := 2 * h.y + (h.x & 1)
 	return y2 if _top(f) else (2 * (s.map_rows - 1) + 1) - y2
 
 
 ## L'esagono tocca il bordo amico di `f`?
 func at_edge(f: int, h: Vector2i) -> bool:
-	if s.edge_mode == 0:
-		return h.x == (s.map_cols - 1 if f == AX else 0)
+	if s.edge_mode in [0, 3]:
+		return h.x == (s.map_cols - 1 if (f == AX) == (s.edge_mode == 0) else 0)
 	return h.y == (0 if _top(f) else s.map_rows - 1)
 
 

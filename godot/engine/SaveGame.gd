@@ -76,7 +76,7 @@ static func _state_to_dict(s: GameState) -> Dictionary:
 		"cal_hex": s.cal_hex, "cal_ox": s.cal_ox, "cal_oy": s.cal_oy,
 		"hexes": hexes, "side_features": sides,
 		# Scenario / fazioni
-		"scenario_number": s.scenario_number, "scenario_name": s.scenario_name,
+		"edge_mode": s.edge_mode, "scenario_number": s.scenario_number, "scenario_name": s.scenario_name,
 		"axis_nation": s.axis_nation, "allied_nation": s.allied_nation,
 		"human_faction": s.human_faction, "active_faction": s.active_faction,
 		"initiative_holder": s.initiative_holder, "defender_faction": s.defender_faction,
@@ -134,6 +134,7 @@ static func _state_from_dict(d: Dictionary) -> GameState:
 	s.side_features = sides
 
 	s.scenario_number = int(d.get("scenario_number", 1)); s.scenario_name = String(d.get("scenario_name", ""))
+	s.edge_mode = int(d.get("edge_mode", ScenarioLoader.edge_mode_for(s.scenario_number)))
 	s.axis_nation = String(d.get("axis_nation", "german")); s.allied_nation = String(d.get("allied_nation", "russian"))
 	s.human_faction = int(d.get("human_faction", 0)); s.active_faction = int(d.get("active_faction", 0))
 	s.initiative_holder = int(d.get("initiative_holder", 0))

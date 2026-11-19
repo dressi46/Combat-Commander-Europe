@@ -46,6 +46,7 @@ jobs:
           ls -R "${{ steps.export.outputs.build_directory }}"
           mkdir -p dist
           cp -r "${{ steps.export.outputs.build_directory }}/Web/." dist/
+          python3 online/prepare-workshop.py dist
           # Service worker per COOP/COEP (abilita SharedArrayBuffer su Pages)
           curl -sL https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.min.js \
             -o dist/coi-serviceworker.js

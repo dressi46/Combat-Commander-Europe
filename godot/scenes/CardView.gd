@@ -41,6 +41,14 @@ func setup(c: Card, i: int) -> void:
 		var p := art_path(c)
 		if ResourceLoader.exists(p):
 			_tex = load(p)
+		if OS.has_feature("web"):
+			var store = JavaScriptBridge.get_interface("CCArt")
+			if store != null:
+				var encoded: Variant = store.getFace(L10n.locale + "/" + str(c.id))
+				if encoded is String and not encoded.is_empty():
+					var img := Image.new()
+					if img.load_jpg_from_buffer(Marshalls.base64_to_raw(encoded)) == OK:
+						_tex = ImageTexture.create_from_image(img)
 	queue_redraw()
 
 

@@ -31,6 +31,12 @@ static func catalog() -> Array:
 
 ## Voce di catalogo per numero scenario (o {} se assente).
 static func entry(num: int) -> Dictionary:
+	if num >= 1000 and OS.has_feature("web"):
+		var stored: Variant = JavaScriptBridge.eval("localStorage.getItem('cc.mission.%d')" % num, true)
+		if stored is String:
+			var custom: Variant = JSON.parse_string(stored)
+			if custom is Dictionary and int(custom.get("numero", 0)) == num:
+				return custom
 	for s in catalog():
 		if int(s.get("numero", 0)) == num:
 			return s
@@ -73,7 +79,7 @@ static func setup(state: GameState, num: int) -> bool:
 		return false
 
 	# ─── Mappa (con i suoi obiettivi) ───────────────────────────────────────
-	state.edge_mode = edge_mode_for(num)
+	state.edge_mode = int(e.get("edge_mode", edge_mode_for(num)))
 	var map_id := String(e.get("mappa", "map1"))
 	if not MapLoader.load_into(state, "res://assets/maps/%s.json" % map_id):
 		return false
@@ -560,13 +566,13 @@ static func _setup_hexes(state: GameState, e: Dictionary, side: String, depth_ov
 	# Bordo: Axis a Est (colonne destre), Allied a Ovest (colonne sinistre).
 	# Profondità della zona di schieramento per lato (dalle schede scenario).
 	var depth := depth_override if depth_override > 0 else maxi(1, int(spec.get("depth", e.get("setup_%s_depth" % side, 3))))
-	if state.edge_mode != 0:
+	if state.edge_mode in [1, 2]:
 		var top := (side == "allies") == (state.edge_mode == 1)
 		var d2 := mini(depth, state.map_rows)
 		for r in (range(0, d2) if top else range(state.map_rows - d2, state.map_rows)):
 			for q in state.map_cols:
 				_add_hex(state, out, seen, q, r)
-	elif side == "axis":
+	elif (side == "axis") == (state.edge_mode == 0):
 		for q in range(maxi(0, state.map_cols - depth), state.map_cols):
 			for r in state.map_rows:
 				_add_hex(state, out, seen, q, r)

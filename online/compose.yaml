@@ -4,6 +4,7 @@ services:
     user: "65534:65534"
     volumes:
       - ./linux:/opt/game:ro
+      - players:/tmp
     entrypoint: ["/opt/game/CombatCommander", "--headless", "--", "--lobby-server"]
     environment:
       XDG_DATA_HOME: /tmp/game
@@ -23,5 +24,6 @@ services:
     depends_on: [server]
     restart: unless-stopped
 volumes:
+  players:
   certificates:
   caddy_config:

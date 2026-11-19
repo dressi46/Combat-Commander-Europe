@@ -66,3 +66,15 @@ func support(item: Dictionary) -> String:
 	if unit.is_empty():
 		return weapon
 	return unit if weapon.is_empty() else "%s + %s" % [unit, weapon]
+
+
+func small_screen() -> bool:
+	var physical := Vector2(get_window().size)
+	if OS.has_feature("web"):
+		var browser = JavaScriptBridge.get_interface("window")
+		physical = Vector2(browser.innerWidth, browser.innerHeight)
+	return minf(physical.x, physical.y) < 650
+
+
+func scale_menu() -> void:
+	get_window().content_scale_size = Vector2i(420, 460) if small_screen() else Vector2i(1280, 800)

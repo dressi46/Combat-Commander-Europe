@@ -1,0 +1,3325 @@
+{
+  "german": {
+    "A": {
+      "years": [
+        1940,
+        1943
+      ],
+      "quality": "Elite",
+      "cost": [
+        32,
+        22,
+        12
+      ],
+      "initiative": [
+        13,
+        13,
+        13
+      ],
+      "surrender": [
+        8,
+        6,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Pionier": [
+          6,
+          4,
+          2
+        ],
+        "Elite Rifle": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          1,
+          1,
+          1
+        ],
+        "Flamethrower": [
+          3,
+          2,
+          1
+        ],
+        "Satchel Charge": [
+          6,
+          4,
+          2
+        ]
+      }
+    },
+    "B": {
+      "years": [
+        1942,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        40,
+        26,
+        15
+      ],
+      "initiative": [
+        11,
+        11,
+        11
+      ],
+      "surrender": [
+        12,
+        8,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "SS": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Team Elite": [
+          2,
+          1,
+          1
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          1
+        ],
+        "Medium Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "C": {
+      "years": [
+        1939,
+        1944
+      ],
+      "quality": "Elite",
+      "cost": [
+        35,
+        21,
+        11
+      ],
+      "initiative": [
+        11,
+        9,
+        13
+      ],
+      "surrender": [
+        11,
+        7,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Elite Rifle": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          2,
+          0,
+          0
+        ],
+        "Team Elite": [
+          2,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          1
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          1
+        ],
+        "Light Mortar": [
+          1,
+          0,
+          0
+        ],
+        "Medium Mortar": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "D": {
+      "years": [
+        1940,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        32,
+        20,
+        10
+      ],
+      "initiative": [
+        15,
+        9,
+        7
+      ],
+      "surrender": [
+        11,
+        7,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Parachute": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Team Elite": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          3,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "E": {
+      "years": [
+        1939,
+        1944
+      ],
+      "quality": "Elite",
+      "cost": [
+        30,
+        20,
+        10
+      ],
+      "initiative": [
+        5,
+        3,
+        1
+      ],
+      "surrender": [
+        11,
+        8,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Parachute": [
+          9,
+          6,
+          3
+        ],
+        "Team Elite": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Satchel Charge": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "F": {
+      "years": [
+        1939,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        33,
+        19,
+        9
+      ],
+      "initiative": [
+        19,
+        11,
+        9
+      ],
+      "surrender": [
+        12,
+        7,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Rifle": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          2,
+          0,
+          0
+        ],
+        "Team Line": [
+          3,
+          2,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "G": {
+      "years": [
+        1942,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        24,
+        15,
+        8
+      ],
+      "initiative": [
+        5,
+        5,
+        7
+      ],
+      "surrender": [
+        9,
+        6,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Rifle": [
+          3,
+          2,
+          1
+        ],
+        "Volksgrenadier": [
+          6,
+          4,
+          2
+        ],
+        "Team Line": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "H": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Green",
+      "cost": [
+        21,
+        14,
+        7
+      ],
+      "initiative": [
+        7,
+        9,
+        5
+      ],
+      "surrender": [
+        8,
+        6,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Volksgrenadier": [
+          6,
+          4,
+          2
+        ],
+        "Conscript": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          2,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "J": {
+      "years": [
+        1942,
+        1944
+      ],
+      "quality": "Green",
+      "cost": [
+        18,
+        12,
+        6
+      ],
+      "initiative": [
+        -1,
+        -1,
+        -1
+      ],
+      "surrender": [
+        8,
+        6,
+        3
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Conscript": [
+          9,
+          6,
+          3
+        ],
+        "Light MG": [
+          1,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "american": {
+    "R": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        37,
+        25,
+        13
+      ],
+      "initiative": [
+        16,
+        14,
+        12
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Engineer": [
+          6,
+          4,
+          2
+        ],
+        "Paratroop": [
+          3,
+          2,
+          1
+        ],
+        "Elite": [
+          3,
+          2,
+          1
+        ],
+        "Team Elite": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          3,
+          2,
+          1
+        ],
+        "Flamethrower": [
+          3,
+          2,
+          1
+        ],
+        "Satchel Charge": [
+          6,
+          4,
+          2
+        ]
+      }
+    },
+    "S": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        31,
+        21,
+        11
+      ],
+      "initiative": [
+        4,
+        6,
+        8
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Paratroop": [
+          12,
+          8,
+          4
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "T": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        37,
+        24,
+        12
+      ],
+      "initiative": [
+        10,
+        10,
+        6
+      ],
+      "surrender": [
+        15,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Elite": [
+          12,
+          8,
+          4
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Team Elite": [
+          4,
+          3,
+          2
+        ],
+        "Medium MG": [
+          2,
+          2,
+          2
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        ".50cal MG": [
+          1,
+          1,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          1,
+          0
+        ]
+      }
+    },
+    "U": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        34,
+        23,
+        12
+      ],
+      "initiative": [
+        18,
+        16,
+        14
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Elite": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Team Elite": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          3,
+          2,
+          1
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "V": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        32,
+        22,
+        12
+      ],
+      "initiative": [
+        6,
+        10,
+        16
+      ],
+      "surrender": [
+        15,
+        10,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Elite": [
+          6,
+          4,
+          2
+        ],
+        "Line": [
+          6,
+          4,
+          2
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Team Line": [
+          3,
+          3,
+          2
+        ],
+        "Medium MG": [
+          2,
+          2,
+          2
+        ],
+        "Heavy MG": [
+          0,
+          1,
+          0
+        ],
+        ".50cal MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          1,
+          0
+        ]
+      }
+    },
+    "W": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        27,
+        18,
+        9
+      ],
+      "initiative": [
+        8,
+        6,
+        4
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Line": [
+          12,
+          8,
+          4
+        ],
+        "Team Line": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          2,
+          1,
+          1
+        ],
+        "Heavy MG": [
+          0,
+          1,
+          0
+        ],
+        ".50cal MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "X": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        27,
+        18,
+        9
+      ],
+      "initiative": [
+        6,
+        4,
+        2
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Line": [
+          6,
+          4,
+          2
+        ],
+        "Green": [
+          6,
+          4,
+          2
+        ],
+        "Team Line": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          3,
+          2,
+          1
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "Y": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Green",
+      "cost": [
+        28,
+        17,
+        8
+      ],
+      "initiative": [
+        4,
+        4,
+        4
+      ],
+      "surrender": [
+        15,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Line": [
+          6,
+          4,
+          2
+        ],
+        "Green": [
+          6,
+          4,
+          2
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Team Green": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          2,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          1,
+          0
+        ]
+      }
+    },
+    "Z": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Green",
+      "cost": [
+        19,
+        13,
+        7
+      ],
+      "initiative": [
+        -4,
+        0,
+        4
+      ],
+      "surrender": [
+        10,
+        7,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Green": [
+          12,
+          8,
+          4
+        ],
+        "Medium MG": [
+          3,
+          2,
+          1
+        ]
+      }
+    }
+  },
+  "russian": {
+    "R": {
+      "years": [
+        1942,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        28,
+        19,
+        10
+      ],
+      "initiative": [
+        6,
+        8,
+        10
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards SMG": [
+          15,
+          10,
+          5
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Satchel Charge": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "S": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        29,
+        20,
+        11
+      ],
+      "initiative": [
+        8,
+        8,
+        8
+      ],
+      "surrender": [
+        13,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards SMG": [
+          7,
+          4,
+          2
+        ],
+        "Guards Rifle": [
+          7,
+          4,
+          2
+        ],
+        "Team Elite": [
+          2,
+          4,
+          2
+        ],
+        "Light MG": [
+          5,
+          3,
+          1
+        ],
+        ".50cal MG": [
+          1,
+          1,
+          1
+        ],
+        "Satchel Charge": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "T": {
+      "years": [
+        1942,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        34,
+        23,
+        12
+      ],
+      "initiative": [
+        18,
+        14,
+        10
+      ],
+      "surrender": [
+        13,
+        9,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Assault": [
+          6,
+          4,
+          2
+        ],
+        "Guards SMG": [
+          8,
+          5,
+          2
+        ],
+        "Team Elite": [
+          2,
+          2,
+          2
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Flamethrower": [
+          3,
+          2,
+          1
+        ],
+        "Satchel Charge": [
+          6,
+          4,
+          2
+        ]
+      }
+    },
+    "U": {
+      "years": [
+        1939,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        30,
+        19,
+        10
+      ],
+      "initiative": [
+        10,
+        6,
+        8
+      ],
+      "surrender": [
+        14,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards Rifle": [
+          15,
+          10,
+          5
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          1,
+          1,
+          1
+        ],
+        ".50cal MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "V": {
+      "years": [
+        1941,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        22,
+        15,
+        8
+      ],
+      "initiative": [
+        10,
+        10,
+        10
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "SMG": [
+          15,
+          10,
+          5
+        ],
+        "Satchel Charge": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "W": {
+      "years": [
+        1939,
+        1942
+      ],
+      "quality": "Line",
+      "cost": [
+        22,
+        13,
+        7
+      ],
+      "initiative": [
+        2,
+        4,
+        6
+      ],
+      "surrender": [
+        14,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Rifle": [
+          12,
+          8,
+          4
+        ],
+        "Militia": [
+          3,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          1,
+          0,
+          0
+        ],
+        "Team Line": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "X": {
+      "years": [
+        1943,
+        1944
+      ],
+      "quality": "Line",
+      "cost": [
+        25,
+        17,
+        8
+      ],
+      "initiative": [
+        4,
+        8,
+        12
+      ],
+      "surrender": [
+        15,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Rifle": [
+          15,
+          10,
+          5
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Team Line": [
+          1,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Medium MG": [
+          0,
+          1,
+          0
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "Y": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        25,
+        17,
+        8
+      ],
+      "initiative": [
+        2,
+        8,
+        10
+      ],
+      "surrender": [
+        15,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards Rifle": [
+          5,
+          2,
+          1
+        ],
+        "Rifle": [
+          5,
+          6,
+          3
+        ],
+        "Militia": [
+          5,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Team Line": [
+          1,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          0,
+          1,
+          0
+        ],
+        ".50cal MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "Z": {
+      "years": [
+        1941,
+        1944
+      ],
+      "quality": "Green",
+      "cost": [
+        17,
+        11,
+        5
+      ],
+      "initiative": [
+        4,
+        2,
+        0
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Militia": [
+          15,
+          10,
+          5
+        ],
+        "Light MG": [
+          1,
+          1,
+          0
+        ],
+        "Medium MG": [
+          1,
+          1,
+          0
+        ],
+        "Light Mortar": [
+          1,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "british": {
+    "R": {
+      "years": [
+        1944,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        28,
+        19,
+        10
+      ],
+      "initiative": [
+        10,
+        12,
+        14
+      ],
+      "surrender": [
+        8,
+        6,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Engineer": [
+          6,
+          4,
+          2
+        ],
+        "Guards": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Flamethrower": [
+          2,
+          1,
+          0
+        ],
+        "Satchel Charge": [
+          4,
+          3,
+          2
+        ]
+      }
+    },
+    "S": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        29,
+        19,
+        9
+      ],
+      "initiative": [
+        10,
+        6,
+        2
+      ],
+      "surrender": [
+        10,
+        7,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Airborne": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "T": {
+      "years": [
+        1941,
+        1944
+      ],
+      "quality": "Elite",
+      "cost": [
+        50,
+        34,
+        18
+      ],
+      "initiative": [
+        2,
+        4,
+        8
+      ],
+      "surrender": [
+        18,
+        12,
+        7
+      ],
+      "orders": [
+        6,
+        4,
+        2
+      ],
+      "leaders": [
+        6,
+        4,
+        2
+      ],
+      "forces": {
+        "Airborne": [
+          6,
+          4,
+          2
+        ],
+        "Guards": [
+          6,
+          4,
+          2
+        ],
+        "Team Weapon": [
+          6,
+          4,
+          2
+        ],
+        "Light MG": [
+          6,
+          4,
+          2
+        ],
+        "Light Mortar": [
+          6,
+          4,
+          2
+        ],
+        "Satchel Charge": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "U": {
+      "years": [
+        1940,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        28,
+        18,
+        9
+      ],
+      "initiative": [
+        14,
+        10,
+        8
+      ],
+      "surrender": [
+        10,
+        7,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          2,
+          1,
+          1
+        ],
+        "Medium Mortar": [
+          1,
+          1,
+          0
+        ]
+      }
+    },
+    "V": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        30,
+        19,
+        10
+      ],
+      "initiative": [
+        8,
+        8,
+        8
+      ],
+      "surrender": [
+        14,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards": [
+          6,
+          4,
+          2
+        ],
+        "Line": [
+          3,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          4,
+          2,
+          1
+        ],
+        "Team Elite": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "W": {
+      "years": [
+        1940,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        28,
+        18,
+        10
+      ],
+      "initiative": [
+        6,
+        10,
+        14
+      ],
+      "surrender": [
+        14,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards": [
+          3,
+          2,
+          1
+        ],
+        "Line": [
+          6,
+          4,
+          2
+        ],
+        "Team Weapon": [
+          4,
+          2,
+          1
+        ],
+        "Team Line": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "X": {
+      "years": [
+        1940,
+        1943
+      ],
+      "quality": "Line",
+      "cost": [
+        25,
+        15,
+        7
+      ],
+      "initiative": [
+        0,
+        0,
+        0
+      ],
+      "surrender": [
+        12,
+        8,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Line": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          4,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          1,
+          0
+        ]
+      }
+    },
+    "Y": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Line",
+      "cost": [
+        26,
+        16,
+        8
+      ],
+      "initiative": [
+        4,
+        4,
+        2
+      ],
+      "surrender": [
+        12,
+        8,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Guards": [
+          3,
+          2,
+          1
+        ],
+        "Line": [
+          3,
+          2,
+          1
+        ],
+        "Territorial": [
+          3,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          4,
+          2,
+          1
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Light Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "Z": {
+      "years": [
+        1940,
+        1945
+      ],
+      "quality": "Green",
+      "cost": [
+        21,
+        13,
+        7
+      ],
+      "initiative": [
+        6,
+        6,
+        8
+      ],
+      "surrender": [
+        12,
+        7,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Territorial": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          1,
+          0,
+          0
+        ],
+        "Team Green": [
+          3,
+          2,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "italian": {
+    "A": {
+      "years": [
+        1939,
+        1944
+      ],
+      "quality": "Elite",
+      "cost": [
+        28,
+        19,
+        10
+      ],
+      "initiative": [
+        15,
+        15,
+        15
+      ],
+      "surrender": [
+        15,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Sissi": [
+          15,
+          10,
+          5
+        ],
+        "Team Weapon": [
+          2,
+          1,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          1,
+          1,
+          0
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Molotov Cocktail": [
+          6,
+          4,
+          2
+        ]
+      }
+    },
+    "B": {
+      "years": [
+        1940,
+        1943
+      ],
+      "quality": "Elite",
+      "cost": [
+        25,
+        16,
+        7
+      ],
+      "initiative": [
+        9,
+        1,
+        1
+      ],
+      "surrender": [
+        18,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Bersaglieri": [
+          18,
+          12,
+          6
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          0
+        ],
+        "Light MG": [
+          6,
+          4,
+          2
+        ],
+        "Medium MG": [
+          0,
+          1,
+          0
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "Brixia Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "C": {
+      "years": [
+        1939,
+        1944
+      ],
+      "quality": "Elite",
+      "cost": [
+        22,
+        14,
+        7
+      ],
+      "initiative": [
+        3,
+        9,
+        9
+      ],
+      "surrender": [
+        18,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Bersaglieri": [
+          9,
+          6,
+          3
+        ],
+        "Fucilieri": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "GrW Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "D": {
+      "years": [
+        1941,
+        1944
+      ],
+      "quality": "Line",
+      "cost": [
+        23,
+        14,
+        6
+      ],
+      "initiative": [
+        7,
+        5,
+        3
+      ],
+      "surrender": [
+        19,
+        12,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Bersaglieri": [
+          6,
+          4,
+          2
+        ],
+        "Fucilieri": [
+          12,
+          8,
+          4
+        ],
+        "Team Weapon": [
+          4,
+          2,
+          0
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ],
+        "GrW Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "E": {
+      "years": [
+        1940,
+        1943
+      ],
+      "quality": "Line",
+      "cost": [
+        19,
+        11,
+        6
+      ],
+      "initiative": [
+        7,
+        7,
+        7
+      ],
+      "surrender": [
+        17,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Fucilieri": [
+          18,
+          12,
+          6
+        ],
+        "Team Weapon": [
+          2,
+          0,
+          0
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Medium MG": [
+          2,
+          0,
+          0
+        ]
+      }
+    },
+    "F": {
+      "years": [
+        1941,
+        1944
+      ],
+      "quality": "Line",
+      "cost": [
+        23,
+        15,
+        7
+      ],
+      "initiative": [
+        9,
+        7,
+        5
+      ],
+      "surrender": [
+        19,
+        13,
+        7
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Bersaglieri": [
+          3,
+          2,
+          1
+        ],
+        "Fucilieri": [
+          12,
+          8,
+          4
+        ],
+        "Blackshirt": [
+          3,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          5,
+          3,
+          1
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ],
+        "Brandt Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "G": {
+      "years": [
+        1942,
+        1942
+      ],
+      "quality": "Line",
+      "cost": [
+        16,
+        10,
+        5
+      ],
+      "initiative": [
+        3,
+        3,
+        1
+      ],
+      "surrender": [
+        16,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Fucilieri": [
+          12,
+          8,
+          4
+        ],
+        "Blackshirt": [
+          6,
+          4,
+          2
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          1,
+          0,
+          0
+        ],
+        "Brixia Mortar": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "H": {
+      "years": [
+        1941,
+        1941
+      ],
+      "quality": "Green",
+      "cost": [
+        18,
+        11,
+        5
+      ],
+      "initiative": [
+        9,
+        7,
+        5
+      ],
+      "surrender": [
+        18,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Fucilieri": [
+          9,
+          6,
+          3
+        ],
+        "Blackshirt": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          1,
+          0,
+          0
+        ],
+        "GrW Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "J": {
+      "years": [
+        1940,
+        1943
+      ],
+      "quality": "Green",
+      "cost": [
+        14,
+        9,
+        5
+      ],
+      "initiative": [
+        1,
+        3,
+        9
+      ],
+      "surrender": [
+        16,
+        11,
+        6
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Blackshirt": [
+          18,
+          12,
+          6
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          1,
+          0,
+          0
+        ],
+        "Brixia Mortar": [
+          2,
+          1,
+          0
+        ]
+      }
+    }
+  },
+  "french": {
+    "R": {
+      "years": [
+        1943,
+        1945
+      ],
+      "quality": "Elite",
+      "cost": [
+        30,
+        20,
+        10
+      ],
+      "initiative": [
+        18,
+        14,
+        8
+      ],
+      "surrender": [
+        15,
+        11,
+        6
+      ],
+      "orders": [
+        3,
+        2,
+        1
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "BAR": [
+          3,
+          2,
+          1
+        ],
+        "Legionnaire": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Team Elite": [
+          3,
+          2,
+          1
+        ],
+        "60mm Mortar": [
+          3,
+          2,
+          1
+        ],
+        "Medium MG": [
+          2,
+          2,
+          1
+        ],
+        ".50cal MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "S": {
+      "years": [
+        1940,
+        1940
+      ],
+      "quality": "Elite",
+      "cost": [
+        26,
+        17,
+        8
+      ],
+      "initiative": [
+        4,
+        4,
+        4
+      ],
+      "surrender": [
+        14,
+        10,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "BAR": [
+          9,
+          6,
+          3
+        ],
+        "Chasseur": [
+          3,
+          2,
+          1
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Team Elite": [
+          2,
+          1,
+          0
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ],
+        "50mm Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "T": {
+      "years": [
+        1939,
+        1939
+      ],
+      "quality": "Line",
+      "cost": [
+        22,
+        14,
+        7
+      ],
+      "initiative": [
+        6,
+        6,
+        6
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "BAR": [
+          5,
+          3,
+          1
+        ],
+        "Chasseur": [
+          5,
+          4,
+          2
+        ],
+        "Reservist": [
+          2,
+          1,
+          1
+        ],
+        "Team Weapon": [
+          3,
+          2,
+          1
+        ],
+        "Team Line": [
+          1,
+          0,
+          0
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ],
+        "50mm Mortar": [
+          3,
+          2,
+          1
+        ]
+      }
+    },
+    "U": {
+      "years": [
+        1940,
+        1941
+      ],
+      "quality": "Line",
+      "cost": [
+        18,
+        11,
+        6
+      ],
+      "initiative": [
+        2,
+        4,
+        6
+      ],
+      "surrender": [
+        11,
+        7,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Legionnaire": [
+          3,
+          2,
+          1
+        ],
+        "Chasseur": [
+          6,
+          4,
+          2
+        ],
+        "Reservist": [
+          3,
+          2,
+          1
+        ],
+        "Team Line": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "V": {
+      "years": [
+        1939,
+        1940
+      ],
+      "quality": "Line",
+      "cost": [
+        21,
+        13,
+        6
+      ],
+      "initiative": [
+        2,
+        4,
+        4
+      ],
+      "surrender": [
+        13,
+        8,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Chasseur": [
+          12,
+          8,
+          4
+        ],
+        "Team Weapon": [
+          3,
+          1,
+          0
+        ],
+        "Light MG": [
+          4,
+          3,
+          2
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ],
+        "60mm Mortar": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "W": {
+      "years": [
+        1940,
+        1940
+      ],
+      "quality": "Line",
+      "cost": [
+        17,
+        10,
+        5
+      ],
+      "initiative": [
+        0,
+        0,
+        0
+      ],
+      "surrender": [
+        11,
+        8,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Chasseur": [
+          9,
+          5,
+          2
+        ],
+        "Reservist": [
+          3,
+          3,
+          2
+        ],
+        "Team Line": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          3,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "X": {
+      "years": [
+        1940,
+        1940
+      ],
+      "quality": "Green",
+      "cost": [
+        17,
+        10,
+        5
+      ],
+      "initiative": [
+        8,
+        4,
+        2
+      ],
+      "surrender": [
+        11,
+        7,
+        4
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Chasseur": [
+          6,
+          4,
+          2
+        ],
+        "Reservist": [
+          6,
+          4,
+          2
+        ],
+        "Team Weapon": [
+          1,
+          0,
+          0
+        ],
+        "Light MG": [
+          4,
+          2,
+          1
+        ],
+        "Heavy MG": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    "Y": {
+      "years": [
+        1941,
+        1941
+      ],
+      "quality": "Green",
+      "cost": [
+        17,
+        10,
+        6
+      ],
+      "initiative": [
+        6,
+        8,
+        10
+      ],
+      "surrender": [
+        12,
+        8,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Chasseur": [
+          3,
+          2,
+          1
+        ],
+        "Reservist": [
+          9,
+          6,
+          3
+        ],
+        "Team Green": [
+          2,
+          1,
+          1
+        ],
+        "Light MG": [
+          3,
+          1,
+          1
+        ],
+        "Heavy MG": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "Z": {
+      "years": [
+        1940,
+        1940
+      ],
+      "quality": "Green",
+      "cost": [
+        21,
+        14,
+        7
+      ],
+      "initiative": [
+        8,
+        6,
+        4
+      ],
+      "surrender": [
+        13,
+        9,
+        5
+      ],
+      "orders": [
+        4,
+        3,
+        2
+      ],
+      "leaders": [
+        3,
+        2,
+        1
+      ],
+      "forces": {
+        "Reservist": [
+          9,
+          6,
+          3
+        ],
+        "Team Weapon": [
+          6,
+          4,
+          2
+        ],
+        "Heavy MG": [
+          3,
+          2,
+          1
+        ],
+        "French '75": [
+          3,
+          2,
+          1
+        ]
+      }
+    }
+  }
+}
