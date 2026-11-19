@@ -1,6 +1,9 @@
-extends CenterContainer
+extends ScrollContainer
 
 var column := VBoxContainer.new()
+var layout := BoxContainer.new()
+var art := TextureRect.new()
+var editing := false
 
 
 func _ready() -> void:
@@ -10,9 +13,30 @@ func _ready() -> void:
 	L10n.scale_menu()
 	get_window().size_changed.connect(_scale)
 	theme = Tema.get_theme()
-	column.custom_minimum_size.x = 330
+	horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var center := CenterContainer.new()
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(center)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.EDGE, 1, 3, 0))
+	center.add_child(panel)
+	panel.add_child(layout)
+	layout.add_theme_constant_override("separation", 0)
+	var crop := AtlasTexture.new()
+	crop.atlas = preload("res://assets/artwork/scenario_01.jpg")
+	crop.region = Rect2(22, 180, 461, 415)
+	art.texture = crop
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	layout.add_child(art)
+	var padding := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		padding.add_theme_constant_override("margin_" + side, 18)
+	layout.add_child(padding)
+	_scale()
 	column.add_theme_constant_override("separation", 12)
-	add_child(column)
+	padding.add_child(column)
 	if OS.has_feature("web"):
 		var launch: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('mission')", true)
 		if launch is String and launch.is_valid_int() and int(launch) >= 1000 and not ScenarioLoader.entry(int(launch)).is_empty():
@@ -25,12 +49,16 @@ func _ready() -> void:
 
 
 func _page(title: String) -> void:
+	editing = false
+	_scale()
 	for child in column.get_children():
 		column.remove_child(child)
 		child.queue_free()
 	var heading := Label.new()
 	heading.text = title
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	heading.add_theme_font_override("font", Tema.title_font())
+	heading.add_theme_color_override("font_color", Tema.BRASS)
 	heading.add_theme_font_size_override("font_size", 32)
 	column.add_child(heading)
 
@@ -38,6 +66,7 @@ func _page(title: String) -> void:
 func _button(key: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = L10n.t(key)
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.custom_minimum_size.y = 48
 	button.pressed.connect(action)
 	column.add_child(button)
@@ -45,7 +74,7 @@ func _button(key: String, action: Callable) -> Button:
 
 
 func _home() -> void:
-	_page("Combat Commander: Europe")
+	_page("Combat Commander\nEurope")
 	_button("Single player", _scenarios.bind(false)).grab_focus()
 	_button("Multiplayer", _multiplayer_menu)
 	_button("Mission and card workshop", _workshop)
@@ -96,7 +125,16 @@ func _settings() -> void:
 		volume.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)
 	volume.select(volume.get_item_index(Game.sound_percent))
 	volume.item_selected.connect(func(index: int): Game.set_sound_percent(volume.get_item_id(index)))
+	_button("Quick translation", _translation)
 	_button("Back", _home)
+
+
+func _translation() -> void:
+	_page(L10n.t("Quick translation"))
+	editing = true
+	_scale()
+	column.add_child(preload("res://scenes/QuickTranslation.gd").new())
+	_button("Back", _settings)
 
 
 func _setting_picker(key: String) -> OptionButton:
@@ -111,3 +149,8 @@ func _setting_picker(key: String) -> OptionButton:
 
 func _scale() -> void:
 	L10n.scale_menu()
+	var compact := L10n.small_screen()
+	layout.vertical = compact
+	art.visible = not editing
+	art.custom_minimum_size = Vector2(0, 104) if compact else Vector2(330, 345)
+	column.custom_minimum_size.x = 330 if compact else (590 if editing else 385)

@@ -7,6 +7,8 @@ var languages: Dictionary = {}
 var locale := "en"
 var messages: Dictionary = {}
 var english: Dictionary = {}
+var originals: Dictionary = {}
+var edits: Dictionary = {}
 var match_text: MatchText
 var local_two_player := false
 
@@ -30,8 +32,20 @@ func _read_catalog(code: String) -> Dictionary:
 
 
 func _select(code: String) -> void:
-	messages = english if code == "en" else _read_catalog(code)
-	locale = "en" if messages.is_empty() else code
+	originals = english if code == "en" else _read_catalog(code)
+	locale = "en" if originals.is_empty() else code
+	if locale == "en":
+		originals = english
+	edits = {}
+	var path := _edits_path()
+	if FileAccess.file_exists(path):
+		var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if saved is Dictionary:
+			for key in saved:
+				if english.has(key) and saved[key] is String and _valid_edit(key, saved[key]):
+					edits[key] = saved[key]
+	messages = originals.duplicate()
+	messages.merge(edits, true)
 	TranslationServer.set_locale(locale)
 
 
@@ -78,3 +92,45 @@ func small_screen() -> bool:
 
 func scale_menu() -> void:
 	get_window().content_scale_size = Vector2i(420, 460) if small_screen() else Vector2i(1280, 800)
+
+func _edits_path() -> String:
+	return "user://translations-%s.json" % locale
+
+
+func _tokens(value: String, pattern: String) -> Array[String]:
+	var regex := RegEx.create_from_string(pattern)
+	var result: Array[String] = []
+	for token in regex.search_all(value):
+		result.append(token.get_string())
+	return result
+
+
+func _valid_edit(key: String, value: String) -> bool:
+	var base: String = originals.get(key, english.get(key, key))
+	if value.strip_edges().is_empty():
+		return false
+	var formats := "%(?:[-+0-9.*]*[a-zA-Z]|%|)"
+	var tags := "\\[/?[a-z]+(?:=[^\\]]*)?\\]"
+	return (_tokens(base, formats) == _tokens(value, formats)
+		and _tokens(base, tags) == _tokens(value, tags))
+
+
+func save_edit(key: String, value: String) -> String:
+	if not english.has(key) or not _valid_edit(key, value):
+		return "Keep the formatting tags and placeholders in their original order."
+	var next := edits.duplicate()
+	var base: String = originals.get(key, english[key])
+	if value == base:
+		next.erase(key)
+	else:
+		next[key] = value
+	var path := _edits_path()
+	var file := FileAccess.open(path + ".tmp", FileAccess.WRITE)
+	if file == null or not file.store_string(JSON.stringify(next)):
+		return "Could not save the translation."
+	file.close()
+	if DirAccess.rename_absolute(path + ".tmp", path) != OK:
+		return "Could not save the translation."
+	edits = next
+	messages[key] = value
+	return ""
