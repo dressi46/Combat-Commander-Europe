@@ -37,6 +37,8 @@ Abre [localhost:8781](http://localhost:8781/). Esta última orden sirve el juego
 
 ## Traducir el juego
 
+Español, inglés e italiano están disponibles en **Configuración → Idioma**. Para empezar otro idioma, pulsa **Añadir idioma**, escribe su nombre y elige una lengua de partida. Al crearlo se abre **Traducción rápida**. También puedes buscar las frases del taller. Cada navegador o instalación conserva sus idiomas y correcciones. En partidas en línea, los mensajes que envía el servidor usan la lengua de partida.
+
 En **Configuración → Traducción rápida** puedes buscar una frase por su texto en inglés o en el idioma activo, corregirla y restaurar su versión original. Los cambios se guardan en ese dispositivo para el idioma elegido.
 
 Copia `godot/assets/i18n/en.json`, usa el código del nuevo idioma como nombre de archivo y regístralo en `languages.json` del mismo directorio. Traduce los valores y conserva las claves, los marcadores como `%s` y `%d` y las etiquetas de formato. El inglés sirve de respaldo cuando falta un texto. Los textos del taller están en `online/workshop/`.

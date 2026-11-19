@@ -2,12 +2,41 @@ import {rollScenario, posture, hand, depth, leaders, eligible} from "./rules.js"
 const $ = id => document.getElementById(id);
 const language = new URLSearchParams(location.search).get("lang") || localStorage.getItem("cc.lang") || navigator.language.slice(0,2);
 const languages=await (await fetch("languages.json")).json();
+// The game and the native launcher both pass the active profile to the workshop.
+const builtins = new Set(Object.keys(languages));
+function validProfile(p) {
+  return p && builtins.has(p.base) && typeof p.name==="string" && p.name.length<=48
+    && (p.code===p.base || /^x-[a-f0-9]{12}$/.test(p.code))
+    && p.overrides && typeof p.overrides==="object" && !Array.isArray(p.overrides);
+}
+const profiles = new Map();
+try {
+  for (const entry of JSON.parse(localStorage.getItem("cc.languageProfiles") || "[]")) {
+    if(validProfile(entry)) profiles.set(entry.code,entry);
+  }
+} catch { /* Use the shipped catalog when browser storage is unavailable. */ }
+const incoming = new URLSearchParams(location.hash.slice(1)).get("language");
+if(incoming){
+  try {
+    const entry = JSON.parse(incoming);
+    if(validProfile(entry) && entry.code===language){
+      profiles.set(entry.code,entry);
+      localStorage.setItem("cc.languageProfiles",JSON.stringify([...profiles.values()]));
+    }
+  } catch { /* The incoming profile remains usable for the current session. */ }
+  history.replaceState(null,"",location.pathname+location.search);
+}
+for(const [code,profile] of profiles) if(!builtins.has(code)) languages[code]=profile.name;
 const lang = Object.hasOwn(languages,language)?language:"en";
+const profile = profiles.get(lang);
 const languageOptions=Object.entries(languages);
 $("language").replaceChildren(...languageOptions.map(([code,name])=>new Option(name,code)));
 const data = await (await fetch("data.json")).json();
 const formations = await (await fetch("formations.json")).json();
-const messages = await (await fetch(lang+".json")).json();
+const messages = await (await fetch((profile?.base || lang)+".json")).json();
+if(profile) for(const [key,value] of Object.entries(profile.overrides)){
+  if(Object.hasOwn(messages,key) && typeof value==="string") messages[key]=value;
+}
 const t = key => messages[key] || key;
 document.documentElement.lang=lang;
 document.title=t("Workshop")+" · Combat Commander";

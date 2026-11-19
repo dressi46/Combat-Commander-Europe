@@ -3,6 +3,10 @@ extends Node
 const DIRECTORY := "res://assets/i18n/"
 const SETTINGS := "user://language.cfg"
 
+const CUSTOM_PATH := "user://custom-languages.json"
+
+var builtins: Dictionary = {}
+var custom: Dictionary = {}
 var languages: Dictionary = {}
 var locale := "en"
 var messages: Dictionary = {}
@@ -15,7 +19,16 @@ var local_two_player := false
 
 func _ready() -> void:
 	var registry := FileAccess.get_file_as_string(DIRECTORY + "languages.json")
-	languages = JSON.parse_string(registry)
+	builtins = JSON.parse_string(registry)
+	languages = builtins.duplicate()
+	if FileAccess.file_exists(CUSTOM_PATH):
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(CUSTOM_PATH))
+		if data is Dictionary:
+			for code in data:
+				var item: Variant = data[code]
+				if item is Dictionary and item.get("name") is String and builtins.has(item.get("base")) and code == _custom_code(item.name):
+					custom[code] = item
+					languages[code] = item.name
 	english = _read_catalog("en")
 	var config := ConfigFile.new()
 	config.load(SETTINGS)
@@ -32,7 +45,8 @@ func _read_catalog(code: String) -> Dictionary:
 
 
 func _select(code: String) -> void:
-	originals = english if code == "en" else _read_catalog(code)
+	var base := base_language(code)
+	originals = english if base == "en" else _read_catalog(base)
 	locale = "en" if originals.is_empty() else code
 	if locale == "en":
 		originals = english
@@ -46,7 +60,7 @@ func _select(code: String) -> void:
 					edits[key] = saved[key]
 	messages = originals.duplicate()
 	messages.merge(edits, true)
-	TranslationServer.set_locale(locale)
+	TranslationServer.set_locale(base_language(locale))
 
 
 func set_language(code: String) -> void:
@@ -134,3 +148,40 @@ func save_edit(key: String, value: String) -> String:
 	edits = next
 	messages[key] = value
 	return ""
+
+func base_language(code: String) -> String:
+	return custom[code].base if custom.has(code) else code
+
+
+func _custom_code(display_name: String) -> String:
+	return "x-" + display_name.strip_edges().to_lower().sha256_text().left(12)
+
+
+func add_language(display_name: String, base: String) -> String:
+	var clean := display_name.strip_edges()
+	if clean.is_empty() or clean.length() > 48 or not builtins.has(base):
+		return "Enter a language name."
+	for name_value in languages.values():
+		if str(name_value).to_lower() == clean.to_lower():
+			return "This language already exists."
+	var code := _custom_code(clean)
+	var next := custom.duplicate()
+	next[code] = {"name": clean, "base": base}
+	var file := FileAccess.open(CUSTOM_PATH + ".tmp", FileAccess.WRITE)
+	if file == null or not file.store_string(JSON.stringify(next)):
+		return "Could not save the language."
+	file.close()
+	if DirAccess.rename_absolute(CUSTOM_PATH + ".tmp", CUSTOM_PATH) != OK:
+		return "Could not save the language."
+	custom = next
+	languages[code] = clean
+	set_language(code)
+	return ""
+
+
+func workshop_url() -> String:
+	var payload := {"code": locale, "name": languages[locale], "base": base_language(locale), "overrides": {}}
+	for key: String in edits:
+		if key.begins_with("workshop/"):
+			payload.overrides[key.trim_prefix("workshop/")] = edits[key]
+	return "workshop/?lang=" + locale.uri_encode() + "#language=" + JSON.stringify(payload).uri_encode()

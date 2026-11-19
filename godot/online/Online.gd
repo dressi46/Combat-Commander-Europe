@@ -83,7 +83,7 @@ func _process(_delta: float) -> void:
 		WebSocketPeer.STATE_OPEN:
 			if not greeted:
 				greeted = true
-				send({"op": "hello", "version": 1, "locale": L10n.locale, "name": nickname, "proof": proof})
+				send({"op": "hello", "version": 1, "locale": "es" if L10n.base_language(L10n.locale) == "es" else "en", "preferred_locale": L10n.base_language(L10n.locale), "name": nickname, "proof": proof})
 			while socket != null and socket.get_available_packet_count() > 0:
 				var msg: Variant = bytes_to_var(socket.get_packet())
 				if msg is Dictionary:

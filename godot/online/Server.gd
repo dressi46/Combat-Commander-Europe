@@ -15,7 +15,7 @@ var serial := 0
 func _ready() -> void:
 	var port := int(OS.get_environment("PORT")) if OS.has_environment("PORT") else 8790
 	var bind_address := OS.get_environment("LOBBY_BIND")
-	for code in L10n.languages:
+	for code in L10n.builtins:
 		catalogs[code] = L10n._read_catalog(code)
 	if listener.listen(port, bind_address if bind_address != "" else "*") != OK:
 		push_error("Cannot listen on port %d" % port)
@@ -139,7 +139,8 @@ func _request(id: int, msg: Dictionary) -> void:
 		if op == "hello" and msg.get("version") == 1 and catalogs.has(msg.get("locale")):
 			if not _profile(id, msg):
 				return
-			p.locale = msg.locale
+			var preferred: Variant = msg.get("preferred_locale")
+			p.locale = preferred if catalogs.has(preferred) else msg.locale
 			_list(id)
 		else:
 			_error(id, "Incompatible client")

@@ -37,6 +37,8 @@ Open [localhost:8781](http://localhost:8781/). The last command serves the game 
 
 ## Translate the game
 
+Spanish, English and Italian are available under **Settings → Language**. Choose **Add a language**, enter a name and select a starting language. Creating it opens **Quick translation**, where you can also search for workshop phrases. Each browser or installation keeps its own languages and edits. Online match messages sent by the server use the starting language.
+
 In **Settings → Quick translation**, search for a phrase in English or the active language, edit it, or restore the original wording. Changes are saved on this device for the selected language.
 
 Copy `godot/assets/i18n/en.json`, name the copy after the new language code and register it in the adjacent `languages.json`. Translate the values and preserve keys, placeholders such as `%s` and `%d`, and formatting tags. Missing entries fall back to English. The workshop has its own catalogs in `online/workshop/`.

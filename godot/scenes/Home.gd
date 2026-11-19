@@ -83,9 +83,9 @@ func _home() -> void:
 
 func _workshop() -> void:
 	if OS.has_feature("web"):
-		JavaScriptBridge.get_interface("window").location.assign("workshop/?lang=" + L10n.locale)
+		JavaScriptBridge.get_interface("window").location.assign(L10n.workshop_url())
 	else:
-		OS.shell_open("http://localhost:8781/workshop/?lang=" + L10n.locale)
+		OS.shell_open("http://localhost:8781/" + L10n.workshop_url())
 
 
 func _multiplayer_menu() -> void:
@@ -115,6 +115,7 @@ func _settings() -> void:
 		_settings())
 	column.add_child(picker)
 	picker.grab_focus()
+	_button("Add a language", _add_language)
 	var pace := _setting_picker("Action playback speed")
 	for key in Game.SPEED_LABELS:
 		pace.add_item(L10n.t(key))
@@ -127,6 +128,35 @@ func _settings() -> void:
 	volume.item_selected.connect(func(index: int): Game.set_sound_percent(volume.get_item_id(index)))
 	_button("Quick translation", _translation)
 	_button("Back", _home)
+
+
+func _add_language() -> void:
+	_page(L10n.t("Add a language"))
+	var label := Label.new()
+	label.text = L10n.t("Language name")
+	column.add_child(label)
+	var field := LineEdit.new()
+	field.max_length = 48
+	field.placeholder_text = "Euskara"
+	column.add_child(field)
+	var picker := _setting_picker("Start from")
+	var codes := L10n.builtins.keys()
+	for code in codes:
+		picker.add_item(L10n.builtins[code])
+	picker.select(codes.find(L10n.base_language(L10n.locale)))
+	var notice := Label.new()
+	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(notice)
+	var create := func():
+		var issue := L10n.add_language(field.text, codes[picker.selected])
+		if issue.is_empty():
+			_translation()
+		else:
+			notice.text = L10n.t(issue)
+	_button("Create language", create)
+	field.text_submitted.connect(func(_value: String): create.call())
+	_button("Back", _settings)
+	field.grab_focus()
 
 
 func _translation() -> void:
