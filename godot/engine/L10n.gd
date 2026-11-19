@@ -7,6 +7,7 @@ var languages: Dictionary = {}
 var locale := "en"
 var messages: Dictionary = {}
 var english: Dictionary = {}
+var match_text: MatchText
 var local_two_player := false
 
 
@@ -45,6 +46,8 @@ func set_language(code: String) -> void:
 
 
 func t(source: String) -> String:
+	if match_text != null and english.has(source):
+		return match_text.template(source)
 	return messages.get(source, english.get(source, source))
 
 

@@ -4,6 +4,9 @@ var column := VBoxContainer.new()
 
 
 func _ready() -> void:
+	if "--lobby-server" in OS.get_cmdline_user_args() and DisplayServer.get_name() == "headless":
+		get_tree().change_scene_to_file.call_deferred("res://online/Server.tscn")
+		return
 	theme = Tema.get_theme()
 	column.custom_minimum_size.x = 330
 	column.add_theme_constant_override("separation", 12)
@@ -34,8 +37,15 @@ func _button(key: String, action: Callable) -> Button:
 func _home() -> void:
 	_page("Combat Commander: Europe")
 	_button("Single player", _scenarios.bind(false)).grab_focus()
-	_button("Multiplayer", _scenarios.bind(true))
+	_button("Multiplayer", _multiplayer_menu)
 	_button("Settings", _settings)
+
+
+func _multiplayer_menu() -> void:
+	_page(L10n.t("Multiplayer"))
+	_button("Online lobby", func(): get_tree().change_scene_to_file("res://online/Lobby.tscn")).grab_focus()
+	_button("Due giocatori, un tavolo", _scenarios.bind(true))
+	_button("Back", _home)
 
 
 func _scenarios(local_multiplayer: bool) -> void:

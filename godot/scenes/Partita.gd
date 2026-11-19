@@ -58,6 +58,8 @@ func _ready() -> void:
 	Game.game_over.connect(_on_game_over)
 	_refresh()
 	_refresh_status()
+	if Game.mode == Game.Mode.ONLINE:
+		Online.show_events()
 
 
 # ═══ Costruzione ═════════════════════════════════════════════════════════════
@@ -104,7 +106,7 @@ func _build() -> void:
 	bar.add_theme_constant_override("separation", 6)
 	root.add_child(bar)
 	var menu := _btn(L10n.t("MENU"), L10n.t("Torna al menu degli scenari"), 70)
-	menu.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/Menu.tscn"))
+	menu.pressed.connect(_exit_board)
 	bar.add_child(menu)
 	title_lbl = Tema.title("", 24)
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -130,6 +132,8 @@ func _build() -> void:
 	btn_pause = _btn(L10n.t("Pausa"), L10n.t("Ferma lo scorrere delle azioni dell'avversario"), 78)
 	btn_pause.pressed.connect(_toggle_pause)
 	bar.add_child(btn_pause)
+	btn_pause.visible = Game.mode != Game.Mode.ONLINE
+	btn_speed.visible = Game.mode != Game.Mode.ONLINE
 	var help := _btn(L10n.t("Come si gioca"), L10n.t("Sequenza di gioco e regole speciali dello scenario"), 126)
 	help.pressed.connect(func() -> void: help_panel.visible = not help_panel.visible)
 	bar.add_child(help)
@@ -430,6 +434,9 @@ func _refresh() -> void:
 	if fl.over:
 		who_lbl.text = L10n.t("PARTITA FINITA")
 		guide.text = L10n.t("Vincono i [b]%s[/b].\n%s") % [fl.side_name(fl.winner), fl.end_reason]
+	elif Game.mode == Game.Mode.ONLINE and Online.disconnected_player:
+		who_lbl.text = L10n.t("Match paused")
+		guide.text = L10n.t("Waiting for the other player to reconnect")
 	elif p.is_empty():
 		var who := int(fl.pending.get("who", fl.s.active_faction))
 		who_lbl.text = L10n.t("%s IN AZIONE") % fl.side_name(who).to_upper()
@@ -533,8 +540,8 @@ func _refresh_hand(p: Dictionary) -> void:
 		cv.tapped.connect(_on_card_tapped)
 		hand_box.add_child(cv)
 	foe_lbl.text = L10n.t("%s\nin mano %d carte · mazzo %d\n\n%s (tu)\nmazzo %d · scarti %d\nOrdini: %d di %d") % [
-		fl.side_name(foe).to_upper(), fl.hand(foe).size(), fl.deck(foe).size(),
-		fl.side_name(me).to_upper(), fl.deck(me).size(), fl.pile(me).size(),
+		fl.side_name(foe).to_upper(), _pile_count(foe, 0), _pile_count(foe, 1),
+		fl.side_name(me).to_upper(), _pile_count(me, 1), _pile_count(me, 2),
 		fl.orders_done if fl.s.active_faction == me else 0, int(fl.orders_max[me])]
 	_refresh_preview(p)
 
@@ -793,7 +800,7 @@ func _on_game_over(w: int) -> void:
 	v.add_theme_constant_override("separation", 14)
 	pn.add_child(v)
 	var fl := Game.flow
-	var mine := Game.mode == Game.Mode.VS_AI
+	var mine := Game.mode in [Game.Mode.VS_AI, Game.Mode.ONLINE]
 	var head := L10n.t("VITTORIA!") if (mine and w == Game.human) else (L10n.t("SCONFITTA") if mine else L10n.t("FINE PARTITA"))
 	var t := Tema.title(head, 44, Tema.BRASS if (not mine or w == Game.human) else Tema.RED)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -812,10 +819,37 @@ func _on_game_over(w: int) -> void:
 	again.pressed.connect(func() -> void:
 		Game.start_new_game(Game.human, fl.s.scenario_number, Game.difficulty, Game.mode)
 		get_tree().reload_current_scene())
+	again.visible = Game.mode != Game.Mode.ONLINE
 	hb.add_child(again)
 	var look := _btn(L10n.t("Guarda la mappa"), "", 160)
 	look.pressed.connect(func() -> void: overlay.visible = false)
 	hb.add_child(look)
 	var back := _btn(L10n.t("Menu"), "", 110)
-	back.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/Menu.tscn"))
+	back.pressed.connect(_exit_board)
 	hb.add_child(back)
+
+func _pile_count(side: int, pile: int) -> int:
+	if Game.mode == Game.Mode.ONLINE:
+		return Online.counts[side][pile]
+	match pile:
+		0: return Game.flow.hand(side).size()
+		1: return Game.flow.deck(side).size()
+		_: return Game.flow.pile(side).size()
+
+
+func _exit_board() -> void:
+	if Game.mode != Game.Mode.ONLINE:
+		get_tree().change_scene_to_file("res://scenes/Menu.tscn")
+		return
+	if Game.flow.over:
+		Online.leave()
+		return
+	var dialog := ConfirmationDialog.new()
+	dialog.dialog_text = L10n.t("Leave and end the match for both players?")
+	dialog.ok_button_text = L10n.t("Leave room")
+	dialog.cancel_button_text = L10n.t("Annulla")
+	dialog.confirmed.connect(Online.leave)
+	dialog.close_requested.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()

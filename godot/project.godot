@@ -16,6 +16,7 @@ L10n="*res://engine/L10n.gd"
 Domain="*res://engine/Domain.gd"
 Game="*res://engine/Game.gd"
 Audio="*res://engine/Audio.gd"
+Online="*res://online/Online.gd"
 
 [display]
 

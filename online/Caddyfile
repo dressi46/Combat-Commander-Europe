@@ -1,0 +1,10 @@
+{$LOBBY_DOMAIN:lobby.dressi.es} {
+	@socket header Upgrade websocket
+	handle @socket {
+		reverse_proxy server:8790
+	}
+	handle {
+		root * /srv/web
+		file_server
+	}
+}

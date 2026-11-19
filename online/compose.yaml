@@ -1,0 +1,27 @@
+services:
+  server:
+    image: debian:bookworm-slim
+    user: "65534:65534"
+    volumes:
+      - ./linux:/opt/game:ro
+    entrypoint: ["/opt/game/CombatCommander", "--headless", "--", "--lobby-server"]
+    environment:
+      XDG_DATA_HOME: /tmp/game
+    restart: unless-stopped
+  web:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      LOBBY_DOMAIN: ${LOBBY_DOMAIN:-lobby.dressi.es}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv/web:ro
+      - certificates:/data
+      - caddy_config:/config
+    depends_on: [server]
+    restart: unless-stopped
+volumes:
+  certificates:
+  caddy_config:

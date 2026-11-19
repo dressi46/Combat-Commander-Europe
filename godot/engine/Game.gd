@@ -22,7 +22,7 @@ signal fire_resolved(result: Object)
 signal grenade_thrown(fq: int, fr: int, tq: int, tr: int)
 signal artillery_impact(q: int, r: int)
 
-enum Mode { VS_AI, HOTSEAT, DEMO }
+enum Mode { VS_AI, HOTSEAT, DEMO, ONLINE }
 
 var flow: Flow = null
 var state: GameState:
@@ -90,7 +90,7 @@ func start_new_game(human_faction: int = Flow.AX, scenario_num: int = 1,
 
 ## Il lato indicato è giocato da una persona?
 func is_human(f: int) -> bool:
-	return not bots.has(f)
+	return f == human if mode == Mode.ONLINE else not bots.has(f)
 
 
 ## Lato dal cui punto di vista si mostra la mano (in hotseat: chi deve decidere).
@@ -105,6 +105,8 @@ func viewer() -> int:
 ## Decisione in sospeso per una persona ({} se non tocca a un umano o se la
 ## cronaca è ancora in corso).
 func pending() -> Dictionary:
+	if mode == Mode.ONLINE and (Online.waiting or Online.disconnected_player):
+		return {}
 	if flow == null or flow.over or busy or flow.pending.is_empty():
 		return {}
 	if not is_human(int(flow.pending["who"])):
@@ -221,6 +223,9 @@ func _play_event(ev: Dictionary) -> void:
 func choose(index: int) -> void:
 	var p := pending()
 	if p.is_empty():
+		return
+	if mode == Mode.ONLINE:
+		Online.choose(index)
 		return
 	flow.answer(index)
 	_after_engine()
@@ -350,3 +355,24 @@ func _sync_legacy() -> void:
 		s.fire_ready_ids.append(id)
 	for id in p.get("selected", []):
 		s.ordered_group.append(String(id))
+
+## Network clients only display the server's projection. No client runs or advances rules.
+func receive_match(view: Dictionary) -> void:
+	_timer.stop()
+	_queue.clear()
+	bots.clear()
+	mode = Mode.ONLINE
+	human = view.seat
+	busy = false
+	paused = false
+	flow = Flow.new()
+	flow.s = SaveGame._state_from_dict(view.board)
+	flow.pending = view.pending
+	flow.orders_done = view.orders_done
+	flow.orders_max = view.orders_max
+	flow.over = view.over
+	flow.winner = view.winner
+	flow.end_reason = view.reason
+	_sync_legacy()
+	state_changed.emit()
+	decision_changed.emit()

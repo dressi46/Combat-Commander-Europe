@@ -5,9 +5,9 @@ in **Godot 4.6**, con esportazione web. Progetto amatoriale a uso personale.
 
 ## Español e inglés
 
-Abre el proyecto de la carpeta `godot` con Godot 4.6.3. En el menú principal, **Configuración → Idioma** cambia el idioma y guarda la preferencia. **Un solo jugador** permite jugar contra la IA o ver una demostración. **Multijugador** inicia una partida de dos jugadores en el mismo dispositivo.
+Abre el proyecto de la carpeta `godot` con Godot 4.6.3. En el menú principal, **Configuración → Idioma** cambia el idioma y guarda la preferencia. **Un solo jugador** permite jugar contra la IA o ver una demostración. **Multijugador** permite jugar en el mismo dispositivo o conectarse al lobby para crear partidas públicas y privadas. [Alojamiento y uso del lobby](online/README.md).
 
-In English, open **Settings → Language**. Choose **Single player** for AI play or a demonstration, or **Multiplayer** for two players sharing one device.
+In English, open **Settings → Language**. Choose **Single player** for AI play or a demonstration, or **Multiplayer** for local two-player games or online public and private rooms.
 
 Para añadir otro idioma, copia `godot/assets/i18n/en.json` con el código del idioma, traduce los valores y registra su nombre en `languages.json`. Conserva las claves, el orden de los marcadores como `%s` y `%d`, y las etiquetas de formato. El juego muestra la traducción inglesa cuando falta una entrada.
 
