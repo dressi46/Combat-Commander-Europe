@@ -2,15 +2,16 @@
 
 Legenda: ✅ automatizzato dal motore · 👁️ mostrato nelle «Regole scenario» ma non ancora automatizzato.
 
-> **Fase 1 — primer lote automatizado** (`tests/ScenarioRulesCheck.gd`, 21 comprobaciones):
+> **Fase 1 — primer lote automatizado** (`tests/ScenarioRulesCheck.gd`, 32 comprobaciones):
 > - **2 · Bocage**: cruzar una siepe cuesta +2 PM (la cobertura +1 sigue pendiente).
-> - **5 · Gelo profondo**: fortificaciones bloqueadas tras el inicio.
-> - **7 · Nessuna pietà**: las salidas eliminan y no dan PV.
+> - **5 · Gelo profondo**: fortificaciones bloqueadas tras el inicio; **camuflaje invernal** (−2 al fuego del Eje).
+> - **7 · Nessuna pietà**: las salidas eliminan y no dan PV; **partisanos** (todo terreno cuesta 1); **mortero capturado** eliminado al averiarse.
 > - **8 · Acción nocturna**: descarte del Eje = 1, fuego −distancia y salidas rusas eliminadas.
 > - **10 · Commandos**: +1 al cuerpo a cuerpo aliado.
-> - **12 · Cuevas**: cecchinos del Eje a 2 hexágonos.
+> - **12 · Cuevas**: cecchinos del Eje a 2 hexágonos; **cada Brezza reduce la niebla** en 1.
 > - **13 · Salidas alemanas**: eliminadas; solo los Aliados puntúan por salida.
-> - **20 · Incursión**: salida del Eje bloqueada mientras haya un arma aliada en juego.
+> - **16 · Blitzkrieg detenido**: **defensa fanática** (recuperar o Veterano tras una salida alemana) y **camino hundido** (LOS libre entre fosas y D5/M10).
+> - **20 · Incursión**: salida del Eje bloqueada mientras haya un arma aliada; **Sissu** (descarte de 1 carta tras los órdenes).
 > - **22 · Fuego de fijación**: escuadras británicas empiezan suprimidas; crepúsculo = marcador de Tiempo.
 > - **23 · Minas**: fuerza 7.
 >

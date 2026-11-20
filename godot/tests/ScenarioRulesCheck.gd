@@ -84,5 +84,47 @@ func _ready() -> void:
 	ok(ScenarioEffects.mine_strength(23) == 7, "escenario 23: minas de fuerza 7")
 	ok(ScenarioEffects.mine_strength(1) == 6, "escenario normal: minas de fuerza 6")
 
+	# ── 5 · Mimetización invernal ─────────────────────────────────────────
+	ok(ScenarioEffects.winter_camouflage(5), "escenario 5: camuflaje invernal activo")
+
+	# ── 7 · Partisanos: todo terreno cuesta 1 ─────────────────────────────
+	ok(ScenarioEffects.partisan_terrain(7, Domain.Faction.RUSSIAN), "escenario 7: partisanos aliados")
+	var s7 := GameState.new()
+	s7.scenario_number = 7
+	s7.map_cols = 2
+	s7.map_rows = 1
+	s7.hexes["0,0"] = GameState.HexData.new(Domain.TerrainType.OPEN, 0)
+	s7.hexes["1,0"] = GameState.HexData.new(Domain.TerrainType.WOODS, 0)
+	ok(HexGrid.step_cost(s7, 0, 0, 1, 0, null, 1) == 1, "escenario 7: bosque cuesta 1 con partisanos")
+	ok(HexGrid.step_cost(s7, 0, 0, 1, 0) > 1, "escenario normal: bosque cuesta más de 1")
+
+	# ── 7 · Mortero capturado: se elimina al averiarse ────────────────────
+	var w7 := Unit.new("m7", Domain.Faction.RUSSIAN, Domain.UnitType.WEAPON, Domain.UnitClass.MORTAR, "Light Mortar")
+	ok(ScenarioEffects.captured_weapon_eliminates(7, w7), "escenario 7: mortero capturado se elimina")
+	ok(not ScenarioEffects.captured_weapon_eliminates(8, w7), "otro escenario: mortero normal")
+
+	# ── 12 · Brezza reduce la niebla ──────────────────────────────────────
+	var f12 := Flow.new_game(12, Flow.AX, 7)
+	var fog_before := f12.s.global_hindrance
+	var breeze_lines: Array[String] = []
+	Events._breeze(f12.s, breeze_lines)
+	ok(f12.s.global_hindrance == fog_before - 1, "escenario 12: Brezza reduce la niebla")
+
+	# ── 16 · Defensa fanática y camino hundido ────────────────────────────
+	ok(ScenarioEffects.fanatic_defense(16), "escenario 16: defensa fanática activa")
+	var s16 := GameState.new()
+	s16.scenario_number = 16
+	s16.map_cols = 3
+	s16.map_rows = 1
+	s16.hexes["0,0"] = GameState.HexData.new(Domain.TerrainType.GULLY, 0)
+	s16.hexes["1,0"] = GameState.HexData.new(Domain.TerrainType.WOODS, 0)
+	s16.hexes["2,0"] = GameState.HexData.new(Domain.TerrainType.GULLY, 0)
+	ok(HexGrid.has_los(0, 0, 2, 0, s16), "escenario 16: LOS libre entre fosas")
+	s16.scenario_number = 1
+	ok(not HexGrid.has_los(0, 0, 2, 0, s16), "escenario normal: el bosque bloquea")
+
+	# ── 20 · Sissu ────────────────────────────────────────────────────────
+	ok(ScenarioEffects.sissu(20), "escenario 20: Sissu activo")
+
 	print("SCENARIO_RULES_RESULT: %s (%d controlli, %d falliti)" % ["PASS" if fails == 0 else "FAIL", total, fails])
 	get_tree().quit(0 if fails == 0 else 1)

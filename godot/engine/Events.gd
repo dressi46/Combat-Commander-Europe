@@ -223,6 +223,10 @@ static func _breeze(state: GameState, lines: Array[String]) -> void:
 			hd.has_smoke = false
 			removed += 1
 	lines.append(L10n.t("Brezza: rimossi %d fumi (incendi non simulati).") % removed)
+	# SSR 12: ogni Brezza riduce di 1 l'ostacolo della nebbia.
+	if state.scenario_number == 12 and state.global_hindrance > 0:
+		state.global_hindrance -= 1
+		lines.append(L10n.t("La nebbia si dirada: ostacolo %d.") % state.global_hindrance)
 
 
 ## E58 Eroe: se la fazione di chi pesca non ha già un Eroe in campo, ne compare

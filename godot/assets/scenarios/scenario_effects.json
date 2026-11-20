@@ -17,7 +17,8 @@
       "V",
       "X"
     ],
-    "fortifications_locked": true
+    "fortifications_locked": true,
+    "winter_camouflage": true
   },
   "6": {
     "exclude_chits": [
@@ -37,7 +38,12 @@
     "exit_eliminates": {
       "axis": true,
       "allies": true
-    }
+    },
+    "partisan_terrain": {
+      "axis": false,
+      "allies": true
+    },
+    "captured_mortar": true
   },
   "17": {
     "opening_cards": {
@@ -52,7 +58,8 @@
       "V",
       "W"
     ],
-    "exit_block_allies_weapon": true
+    "exit_block_allies_weapon": true,
+    "sissu": true
   },
   "21": {
     "opening_cards": {
@@ -95,7 +102,8 @@
     "sniper_range": {
       "axis": 2,
       "allies": 1
-    }
+    },
+    "breeze_fog": true
   },
   "13": {
     "exit_eliminates": {
@@ -112,5 +120,9 @@
   },
   "23": {
     "mine_strength": 7
+  },
+  "16": {
+    "fanatic_defense": true,
+    "sunken_road": true
   }
 }

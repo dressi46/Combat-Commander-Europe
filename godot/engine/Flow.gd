@@ -480,6 +480,11 @@ func _apply_trigger(c: Card, f: int, ctx: Dictionary) -> void:
 func _break_weapon(w: Unit, why: String) -> void:
 	if w == null or not s.units.has(w.id):
 		return
+	# SSR 7: il mortaio leggero tedesco catturato è eliminato se si guasta.
+	if ScenarioEffects.captured_weapon_eliminates(s.scenario_number, w):
+		s.units.erase(w.id)
+		say(L10n.t("%s: %s è eliminata (mortaio catturato).") % [why, w.display_name], "bad")
+		return
 	if w.efficient:
 		w.efficient = false
 		say(L10n.t("%s: %s si guasta.") % [why, w.display_name], "bad")
@@ -716,6 +721,8 @@ func _turn(f: int) -> void:
 				blocked[i] = why
 		if orders_done == 0:
 			opts.append({ "id": "discard", "label": L10n.t("Scarta carte (al posto degli Ordini)") })
+		elif f == AX and ScenarioEffects.sissu(s.scenario_number):
+			opts.append({ "id": "discard", "label": L10n.t("Scarta 1 carta (Sissu)") })
 		opts.append({ "id": "end", "label": L10n.t("Fine turno") if orders_done > 0 else L10n.t("Passa senza scartare") })
 		var a := await ask(f, "turn",
 			L10n.t("Gioca una carta come ORDINE (%d di %d usati), oppure termina il turno.") % [orders_done, int(orders_max[f])]
@@ -728,7 +735,7 @@ func _turn(f: int) -> void:
 				await _play_order(f, c)
 				orders_done += 1
 			"discard":
-				await _discard_turn(f)
+				await _discard_turn(f, 1 if orders_done > 0 else -1)
 				break
 			_:
 				break
@@ -790,8 +797,8 @@ func _play_order(f: int, c: Card) -> void:
 	await _process_time()
 
 
-func _discard_turn(f: int) -> void:
-	var limit := discard_limit(f)
+func _discard_turn(f: int, limit_override: int = -1) -> void:
+	var limit := discard_limit(f) if limit_override < 0 else limit_override
 	var sel: Array = []
 	while true:
 		var opts: Array = []
@@ -1145,7 +1152,8 @@ func _choose_activation(f: int, order: int, th: Vector2i = Vector2i(-1, -1)) -> 
 func step_cost(u: Unit, to: Vector2i, left: int, spent: int) -> int:
 	if not in_map(to):
 		return -1
-	var c := HexGrid.step_cost(s, u.q, u.r, to.x, to.y)
+	var c := HexGrid.step_cost(s, u.q, u.r, to.x, to.y, null,
+		1 if ScenarioEffects.partisan_terrain(s.scenario_number, u.faction) else -1)
 	if c < 0:
 		return -1
 	for m in s.men_at(to.x, to.y):
@@ -1312,7 +1320,7 @@ func _move_stack(f: int, stack: Array) -> bool:
 			"exit":
 				for m: Unit in stack:
 					if s.units.has(m.id):
-						_exit_unit(f, m)
+						await _exit_unit(f, m)
 				return true
 			"smoke":
 				await _smoke_grenades(f, s.unit_by_id(String(a.get("by", u.id))), hand(f)[int(a["card"])])
@@ -1337,9 +1345,39 @@ func _exit_unit(f: int, u: Unit) -> void:
 		return
 	var v := s.exit_unit_for_vp(u.id)
 	say(L10n.t("%s esce dalla mappa: +%d PV ai %s. Rientrerà come rinforzo.") % [nm, v, side_name(f)], "vp", { "hex": from, "who": f })
+	if ScenarioEffects.fanatic_defense(s.scenario_number) and f == AX:
+		await _fanatic_defense()
 	update_objectives()
 	if s.men_of(f).is_empty():
 		_finish_on_points(L10n.t("L'ultima unità dei %s ha lasciato la mappa.") % side_name(f))
+
+
+## SSR 16: dopo un'uscita tedesca dal bordo alleato, l'Alleato recupera una
+## unità rotta o dà un segnalino Veterano a un'unità che non lo ha.
+func _fanatic_defense() -> void:
+	if over:
+		return
+	var opts: Array = []
+	for u in s.men_of(AL):
+		if not u.is_man():
+			continue
+		if not u.efficient:
+			opts.append({ "id": "rally", "unit": u.id, "label": L10n.t("Recupera %s") % uname(u) })
+		elif not u.veteran:
+			opts.append({ "id": "veteran", "unit": u.id, "label": L10n.t("Veterano: %s") % uname(u) })
+	if opts.is_empty():
+		return
+	opts.append({ "id": "no", "label": L10n.t("Nessun effetto") })
+	var a := await ask(AL, "fanatic_defense", L10n.t("DIFESA FANATICA: un'unità tedesca è uscita dal bordo alleato. Scegli un recupero o un segnalino Veterano."), opts, {})
+	var u2 := s.unit_by_id(String(a.get("unit", "")))
+	if u2 == null:
+		return
+	if a.get("id") == "rally" and not u2.efficient:
+		u2.recover()
+		say(L10n.t("Difesa fanatica: %s recuperata.") % u2.display_name, "good")
+	elif a.get("id") == "veteran" and not u2.veteran:
+		u2.veteran = true
+		say(L10n.t("Difesa fanatica: %s diventa veterana.") % u2.display_name, "good")
 
 
 func _smoke_grenades(f: int, u: Unit, c: Card) -> void:
@@ -1898,6 +1936,9 @@ func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
 		match id:
 			"conceal":
 				total -= cov
+				# SSR 5: Mimetica invernale alleata, -2 in più contro il fuoco dell'Asse.
+				if ScenarioEffects.winter_camouflage(s.scenario_number) and d == AL:
+					total -= 2
 				say(L10n.t("Azione: Mimetizzazione — l'attacco scende a %d.") % total, "order", { "card": c, "who": d })
 			"entrench":
 				s.hex_at(a["hex"].x, a["hex"].y).has_foxhole = true
@@ -1965,7 +2006,7 @@ func _order_advance(f: int) -> void:
 					await _react_to_entry(f, [u2], to, "advance")
 				check_end()
 			"exit":
-				_exit_unit(f, u2)
+				await _exit_unit(f, u2)
 				any = true
 
 

@@ -181,6 +181,38 @@ static func fortifications_locked(num: int) -> bool:
 	return bool(entry(num).get("fortifications_locked", false))
 
 
+## Mimetica invernale (scenario 5): l'Occultamento alleato toglie 2 in più.
+static func winter_camouflage(num: int) -> bool:
+	return bool(entry(num).get("winter_camouflage", false))
+
+
+## Partigiani (scenario 7): l'Alleato tratta ogni terreno come costo 1.
+static func partisan_terrain(num: int, f: int) -> bool:
+	return bool(_side_value(num, "partisan_terrain", f, false))
+
+
+## Mortaio leggero tedesco catturato (scenario 7): se si guasta è eliminato.
+static func captured_weapon_eliminates(num: int, w: Unit) -> bool:
+	if w == null or num != 7:
+		return false
+	return w.faction == Domain.Faction.RUSSIAN and String(w.unit_name).contains("Light Mortar")
+
+
+## Difesa fanatica (scenario 16): uscita tedesca dal bordo alleato.
+static func fanatic_defense(num: int) -> bool:
+	return bool(entry(num).get("fanatic_defense", false))
+
+
+## Strada incassata (scenario 16): LOS libera fra Fossi e i crocevia D5/M10.
+static func sunken_road(num: int) -> bool:
+	return bool(entry(num).get("sunken_road", false))
+
+
+## Sissu (scenario 20): l'Asse può scartare 1 carta anche nei turni con Ordini.
+static func sissu(num: int) -> bool:
+	return bool(entry(num).get("sissu", false))
+
+
 ## Applica gli effetti di stato iniziale dopo che le forze sono piazzate.
 static func apply_initial_state(state: GameState) -> void:
 	var n := state.scenario_number

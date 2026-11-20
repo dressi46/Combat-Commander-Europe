@@ -137,6 +137,8 @@ static func has_los(
 	q1: int, r1: int, q2: int, r2: int,
 	state: GameState
 ) -> bool:
+	if ScenarioEffects.sunken_road(state.scenario_number) and _sunken_road_clear(state, q1, r1, q2, r2):
+		return true
 	var dist := distance(q1, r1, q2, r2)
 	if dist == 0:
 		return true
@@ -185,6 +187,19 @@ static func has_los(
 	return true
 
 
+## Strada incassata (SSR 16): LOS libera fra Fossi e i crocevia D5/M10.
+static func _sunken_road_clear(state: GameState, q1: int, r1: int, q2: int, r2: int) -> bool:
+	var a: GameState.HexData = state.hex_at(q1, r1)
+	var b: GameState.HexData = state.hex_at(q2, r2)
+	if a == null or b == null:
+		return false
+	var ga := a.terrain == Domain.TerrainType.GULLY
+	var gb := b.terrain == Domain.TerrainType.GULLY
+	var cross_a := Vector2i(q1, r1) == Domain.label_to_qr("D5") or Vector2i(q1, r1) == Domain.label_to_qr("M10")
+	var cross_b := Vector2i(q2, r2) == Domain.label_to_qr("D5") or Vector2i(q2, r2) == Domain.label_to_qr("M10")
+	return (ga and gb) or (ga and cross_b) or (cross_a and gb)
+
+
 ## Hindrance lungo la LOS (10.3.3): NON cumulativo — si usa il modificatore
 ## SINGOLO più grande. Il terreno che ostacola conta solo se non sta più in basso
 ## dell'estremo più alto (T88.5); il fumo ostacola sempre, anche nell'esagono del
@@ -231,7 +246,7 @@ static func los_hindrance(q1: int, r1: int, q2: int, r2: int, state: GameState) 
 ## Costo per entrare in (tq,tr) venendo da (fq,fr): terreno + attraversamento
 ## del lato (muro/siepe/bocage/torrente = +1, dirupo = impassabile) e tariffa
 ## strada (1 PM se entrambi gli esagoni sono su strada). -1 se impraticabile.
-static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int, details: Variant = null) -> int:
+static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int, details: Variant = null, base_override: int = -1) -> int:
 	var hd: GameState.HexData = state.hex_at(tq, tr)
 	if hd == null:
 		return -1
@@ -240,6 +255,8 @@ static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int, deta
 	var base: int = Domain.TERRAIN_MOVE_COST.get(hd.terrain, 1)
 	if base >= 99:
 		return -1
+	if base_override >= 0:
+		base = base_override
 	var fhd: GameState.HexData = state.hex_at(fq, fr)
 	if fhd != null and ((hd.has_road and fhd.has_road) \
 			or (hd.has_trail and fhd.has_trail) \
@@ -304,6 +321,7 @@ static func reachable_costs(u: Unit, state: GameState, budget_override: int = -1
 		return costs
 	# BFS con costo: dizionario "q,r" → PM spesi fin qui
 	var visited := {}
+	var base_override := 1 if ScenarioEffects.partisan_terrain(state.scenario_number, u.faction) else -1
 	var frontier := [{"q": u.q, "r": u.r, "spent": 0}]
 	visited["%d,%d" % [u.q, u.r]] = 0
 
@@ -316,7 +334,7 @@ static func reachable_costs(u: Unit, state: GameState, budget_override: int = -1
 		for nb in neighbors(cq, cr):
 			if nb.x < 0 or nb.x >= state.map_cols or nb.y < 0 or nb.y >= state.map_rows:
 				continue
-			var cost := step_cost(state, cq, cr, nb.x, nb.y)
+			var cost := step_cost(state, cq, cr, nb.x, nb.y, null, base_override)
 			if cost < 0:
 				continue
 			var total := spent + cost
