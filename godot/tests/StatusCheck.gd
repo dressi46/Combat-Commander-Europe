@@ -1,4 +1,5 @@
 extends Node
+const BattleReport = preload("res://scenes/BattleReport.gd")
 
 func _ready() -> void:
 	var flow := Flow.new_game(1, Flow.AX, 123)
@@ -28,12 +29,32 @@ func _ready() -> void:
 	if board.controls.get_popup().get_item_count() < 7:
 		return _fail("Missing board controls")
 	board.status_strip._inspect("Objectives")
-	var dialog: AcceptDialog = null
+	var dialog: BattleReport = null
 	for node in board.get_children():
-		if node is AcceptDialog:
+		if node is BattleReport:
 			dialog = node
 	if dialog == null or not dialog.visible:
 		return _fail("Objective detail did not open")
+	var tiles := dialog.contents.get_children().filter(func(c): return c is Button)
+	if tiles.size() != 1 or tiles[0].text.contains(" — "):
+		return _fail("Private counter should be face down")
+	tiles[0].button_pressed = true
+	if tiles[0].text != ObjectiveChits._describe(ObjectiveChits._find("B")):
+		return _fail("Own counter did not turn over")
+	dialog.confirmed.emit()
+	s.objective_chits.append({"letter":"D","owner":Flow.AX,"revealed":false})
+	board.status_strip._inspect("Objectives")
+	if board.active_report.contents.get_children().filter(func(c): return c is Button).size() != 2:
+		return _fail("Second private counter missing")
+	board.active_report.confirmed.emit()
+	s.objective_chits.clear()
+	board.status_strip._inspect("Objectives")
+	if board.active_report.contents.get_children().any(func(c): return c is Button or c is Label):
+		return _fail("Empty private section visible")
+	board.active_report.confirmed.emit()
+	board.status_strip._inspect("Clock")
+	if board.active_report.contents.get_child(0).get_child_count() < 13:
+		return _fail("Time track is incomplete")
 	print("STATUS_RESULT: PASS")
 	get_tree().quit()
 

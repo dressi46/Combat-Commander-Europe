@@ -38,6 +38,7 @@ var sound_percent := 100
 var speed: float = 1.0            ## moltiplicatore del ritmo (1 = normale)
 var paused: bool = false
 var busy: bool = false            ## cronaca in riproduzione / IA al lavoro
+var manual: bool = false          ## modalità manuale: l'IA aspetta un passo alla volta
 
 const SETTINGS_PATH := "user://settings.cfg"
 var tutorial_enabled: bool = true
@@ -55,6 +56,7 @@ func _ready() -> void:
 	if cfg.load(SETTINGS_PATH) == OK:
 		tutorial_enabled = bool(cfg.get_value("ui", "tutorial", true))
 		speed = float(cfg.get_value("ui", "speed", 1.0))
+		manual = bool(cfg.get_value("ui", "manual", false))
 		sound_percent = clampi(int(cfg.get_value("audio", "percent", 100)), 0, 100)
 	_apply_sound()
 
@@ -65,6 +67,7 @@ func save_settings() -> void:
 	cfg.set_value("audio", "percent", sound_percent)
 	cfg.set_value("ui", "tutorial", tutorial_enabled)
 	cfg.set_value("ui", "speed", speed)
+	cfg.set_value("ui", "manual", manual)
 	cfg.save(SETTINGS_PATH)
 
 
@@ -77,6 +80,38 @@ func speed_index() -> int:
 func select_speed(index: int) -> void:
 	speed = SPEEDS[index]
 	save_settings()
+
+
+## Modalità manuale: l'IA si ferma a ogni decisione e aspetta il pulsante
+## «passo successivo». Il ritmo della cronaca resta quello scelto.
+func set_manual(on: bool) -> void:
+	var was_waiting := manual_waiting()
+	manual = on
+	save_settings()
+	if not on and was_waiting:
+		_schedule(0.2)
+	decision_changed.emit()
+
+
+## L'IA è ferma in attesa del prossimo passo manuale?
+func manual_waiting() -> bool:
+	if not manual or mode == Mode.ONLINE or flow == null or flow.over:
+		return false
+	if busy or paused or not _queue.is_empty():
+		return false
+	return bots.has(int(flow.pending.get("who", -1)))
+
+
+## Avanza di un solo passo dell'IA: una decisione del Bot, poi la cronaca
+## scorre al ritmo scelto fino alla prossima sosta.
+func manual_step() -> void:
+	if not manual_waiting():
+		return
+	var who := int(flow.pending["who"])
+	var bot: Bot = bots[who]
+	busy = true
+	flow.answer(bot.pick())
+	_after_engine()
 
 
 func set_sound_percent(percent: int) -> void:
@@ -222,6 +257,13 @@ func _tick() -> void:
 		return
 	var who := int(flow.pending["who"])
 	if bots.has(who):
+		if manual:
+			# Sosta manuale: nessuna scelta finché non arriva il passo.
+			busy = false
+			_sync_legacy()
+			state_changed.emit()
+			decision_changed.emit()
+			return
 		var bot: Bot = bots[who]
 		var i := bot.pick()
 		flow.answer(i)

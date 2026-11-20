@@ -121,6 +121,11 @@ func _settings() -> void:
 		pace.add_item(L10n.t(key))
 	pace.select(Game.speed_index())
 	pace.item_selected.connect(Game.select_speed)
+	var manual := CheckButton.new()
+	manual.text = L10n.t("Manual mode: advance the AI one step at a time")
+	manual.button_pressed = Game.manual
+	manual.toggled.connect(Game.set_manual)
+	column.add_child(manual)
 	var volume := _setting_picker("Sound effects volume")
 	for percent in [0, 25, 50, 75, 100]:
 		volume.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)

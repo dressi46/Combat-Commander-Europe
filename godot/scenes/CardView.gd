@@ -6,6 +6,8 @@ extends Control
 
 signal tapped(view: CardView)
 
+var press_at := Vector2.ZERO
+var tapping := false
 var card: Card = null
 var index: int = -1
 var playable: bool = false
@@ -53,14 +55,23 @@ func setup(c: Card, i: int) -> void:
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_filter = Control.MOUSE_FILTER_PASS
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		tapped.emit(self)
-		accept_event()
+	if event is InputEventMouseMotion and tapping:
+		if event.global_position.distance_to(press_at) > 8:
+			tapping = false
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			press_at = event.global_position
+			tapping = true
+		else:
+			var selected_by_tap := tapping and Rect2(Vector2.ZERO, size).has_point(event.position)
+			tapping = false
+			if selected_by_tap:
+				tapped.emit(self)
 
 
 func _line(t: String, y: float, sz: int, col: Color, bold: bool = true) -> void:

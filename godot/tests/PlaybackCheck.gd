@@ -1,4 +1,5 @@
 extends Node
+const BattleReport = preload("res://scenes/BattleReport.gd")
 ## Exercise the visible report, its pause boundary, and the movement preview.
 func _ready() -> void:
 	Game.flow = Flow.new_game(1, Flow.AX, 123)
@@ -17,9 +18,9 @@ func _ready() -> void:
 	Game.skip()
 	if not Game.paused or Game._queue.size() != 1:
 		return _fail("Skipping passed the event dialog")
-	var dialog: AcceptDialog = null
+	var dialog: BattleReport = null
 	for child in board.get_children():
-		if child is AcceptDialog:
+		if child is BattleReport:
 			dialog = child
 	if dialog == null or not dialog.visible:
 		return _fail("Missing event dialog")

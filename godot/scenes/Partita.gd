@@ -27,6 +27,8 @@ var preview: Control
 var preview_card: CardView
 var preview_lbl: Label
 var dice_box: PanelContainer
+var dice_col: VBoxContainer
+var dice_row: HBoxContainer
 var dice_a: TextureRect
 var dice_b: TextureRect
 var dice_lbl: Label
@@ -36,16 +38,25 @@ var played_lbl: Label
 var overlay: Control
 var stack_pop: PopupPanel
 var help_panel: PanelContainer
+var step_btn: Button
 var controls := MenuButton.new()
 
 var mobile_panels: Array[Control] = []
 var mobile_tabs := HBoxContainer.new()
 var mobile_page := 0
 
+const BattleReport = preload("res://scenes/BattleReport.gd")
+var active_report: BattleReport
+var side_scroll := ScrollContainer.new()
+var option_scroll := ScrollContainer.new()
+var side_column := VBoxContainer.new()
+var log_heading: Label
+var turn_banner := Label.new()
 var mobile := false
 
 func _layout_for_screen() -> void:
 	var window := get_window()
+	var changed := mobile != L10n.small_screen()
 	mobile = L10n.small_screen()
 	window.content_scale_size = Vector2i(480, 460) if mobile else Vector2i(1280, 800)
 	mobile_tabs.visible = mobile
@@ -60,6 +71,44 @@ func _layout_for_screen() -> void:
 	mobile_panels[2].size_flags_vertical = Control.SIZE_EXPAND_FILL if mobile else Control.SIZE_SHRINK_END
 	mobile_panels[0].get_parent().visible = not mobile or mobile_page != 2
 	foe_lbl.visible = not mobile
+	turn_banner.visible = mobile
+	log_heading.visible = not mobile
+	log_box.visible = not mobile
+	side_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if mobile else ScrollContainer.SCROLL_MODE_DISABLED
+	if mobile and opts_box.get_parent() == option_scroll:
+		opts_box.reparent(side_column, false)
+		side_column.move_child(opts_box, option_scroll.get_index())
+		option_scroll.hide()
+	elif not mobile and opts_box.get_parent() == side_column:
+		opts_box.reparent(option_scroll, false)
+		option_scroll.show()
+	# Dadi: su mobile la scritta va sotto i dadi (niente sovrapposizioni con
+	# la carta giocata); su desktop resta la riga unica.
+	if mobile:
+		if dice_lbl.get_parent() == dice_row:
+			dice_lbl.reparent(dice_col, false)
+		dice_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		dice_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		dice_lbl.custom_minimum_size.x = 190
+		dice_lbl.add_theme_font_size_override("font_size", 16)
+		played_card.custom_minimum_size = Vector2(110, 153)
+		played_lbl.custom_minimum_size.x = 110
+		played_lbl.add_theme_font_size_override("font_size", 13)
+		latest.add_theme_font_size_override("font_size", 14)
+	else:
+		if dice_lbl.get_parent() == dice_col:
+			dice_lbl.reparent(dice_row, false)
+		dice_row.alignment = BoxContainer.ALIGNMENT_BEGIN
+		dice_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		dice_lbl.custom_minimum_size.x = 250
+		dice_lbl.remove_theme_font_size_override("font_size")
+		played_card.custom_minimum_size = Vector2(150, 208)
+		played_lbl.custom_minimum_size.x = 150
+		played_lbl.add_theme_font_size_override("font_size", 15)
+		latest.remove_theme_font_size_override("font_size")
+	if changed:
+		_refresh.call_deferred()
+
 
 
 func _exit_tree() -> void:
@@ -134,6 +183,8 @@ func _build() -> void:
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 6)
 	root.add_child(bar)
+	root.add_child(turn_banner)
+	turn_banner.add_theme_color_override("font_color", Tema.BRASS)
 	root.add_child(mobile_tabs)
 	for caption in ["Board", "Decisions", "Hand"]:
 		var tab := _btn(L10n.t(caption))
@@ -169,7 +220,7 @@ func _build() -> void:
 	controls.about_to_popup.connect(_fill_controls)
 	controls.get_popup().id_pressed.connect(_control_action)
 	root.add_child(status_strip)
-	status_strip.inspected.connect(func(heading: String, body: String): _reading_dialog(heading, body, false))
+	status_strip.inspected.connect(func(heading: String, body: String, key: String): _reading_dialog(heading, body, false, false, key))
 
 	# ── Centro: mappa + pannello laterale ───────────────────────────────────
 	var mid := HBoxContainer.new()
@@ -192,9 +243,13 @@ func _build() -> void:
 	side.custom_minimum_size.x = SIDE_W
 	side.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	mid.add_child(side)
-	var sv := VBoxContainer.new()
+	side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	side.add_child(side_scroll)
+	var sv := side_column
+	sv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sv.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sv.add_theme_constant_override("separation", 6)
-	side.add_child(sv)
+	side_scroll.add_child(sv)
 	var gp := PanelContainer.new()
 	gp.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL_HI, Tema.BRASS, 2, 4, 8))
 	sv.add_child(gp)
@@ -212,7 +267,7 @@ func _build() -> void:
 	skip_btn = _btn(L10n.t("Mostra subito (SPAZIO)"), L10n.t("Salta l'attesa e mostra subito l'esito"))
 	skip_btn.pressed.connect(func() -> void: Game.skip())
 	gv.add_child(skip_btn)
-	var osc := ScrollContainer.new()
+	var osc := option_scroll
 	osc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	osc.custom_minimum_size.y = 40
 	osc.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -227,7 +282,8 @@ func _build() -> void:
 	info.add_theme_font_size_override("bold_font_size", 16)
 	info.add_theme_color_override("default_color", Tema.DIM.lightened(0.2))
 	sv.add_child(info)
-	sv.add_child(Tema.title(L10n.t("CRONACA"), 16))
+	log_heading = Tema.title(L10n.t("CRONACA"), 16)
+	sv.add_child(log_heading)
 	log_box = _rich(120)
 	log_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	log_box.scroll_following = true
@@ -273,10 +329,14 @@ func _build_overlays() -> void:
 	dice_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	dice_box.visible = false
 	board_holder.add_child(dice_box)
-	var dh := HBoxContainer.new()
-	dh.add_theme_constant_override("separation", 8)
-	dh.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	dice_box.add_child(dh)
+	dice_col = VBoxContainer.new()
+	dice_col.add_theme_constant_override("separation", 4)
+	dice_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dice_box.add_child(dice_col)
+	dice_row = HBoxContainer.new()
+	dice_row.add_theme_constant_override("separation", 8)
+	dice_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dice_col.add_child(dice_row)
 	dice_a = TextureRect.new()
 	dice_b = TextureRect.new()
 	for d: TextureRect in [dice_a, dice_b]:
@@ -284,14 +344,14 @@ func _build_overlays() -> void:
 		d.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		d.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		dh.add_child(d)
+		dice_row.add_child(d)
 	dice_lbl = Label.new()
 	dice_lbl.custom_minimum_size.x = 250
 	dice_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	dice_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	dice_lbl.add_theme_font_override("font", Tema.bold_font())
 	dice_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	dh.add_child(dice_lbl)
+	dice_row.add_child(dice_lbl)
 
 	# Carta appena giocata.
 	played_box = PanelContainer.new()
@@ -341,6 +401,19 @@ func _build_overlays() -> void:
 	preview_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	preview_lbl.add_theme_font_size_override("font_size", 16)
 	pvv.add_child(preview_lbl)
+
+	# Passo manuale dell'IA: resta sulla mappa, visibile anche da mobile.
+	step_btn = _btn(L10n.t("Next AI step"), L10n.t("Manual mode: advance the AI by one decision (SPACE)"))
+	step_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	step_btn.offset_right = -8
+	step_btn.offset_bottom = -8
+	step_btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	step_btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	step_btn.custom_minimum_size = Vector2(210, 52)
+	step_btn.add_theme_stylebox_override("normal", Tema.box(Tema.BRASS.darkened(0.55), Tema.BRASS, 2, 4, 8))
+	step_btn.visible = false
+	step_btn.pressed.connect(func() -> void: Game.manual_step())
+	board_holder.add_child(step_btn)
 
 	# Scelta fra più pedine/opzioni nello stesso esagono.
 	stack_pop = PopupPanel.new()
@@ -406,6 +479,8 @@ func _fill_controls() -> void:
 	if Game.mode != Game.Mode.ONLINE:
 		popup.add_item(L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()]), 3)
 		popup.add_item(L10n.t("Riprendi" if Game.paused else "Pausa"), 4)
+		popup.add_item(L10n.t("Manual AI steps"), 7)
+		popup.set_item_checked(popup.get_item_index(7), Game.manual)
 	popup.add_item(L10n.t("Come si gioca"), 5)
 	popup.add_separator()
 	popup.add_item(L10n.t("Torna al menu degli scenari"), 6)
@@ -425,6 +500,7 @@ func _control_action(id: int) -> void:
 		4: _toggle_pause()
 		5: help_panel.visible = not help_panel.visible
 		6: _exit_board()
+		7: Game.set_manual(not Game.manual)
 
 
 # ═══ Decisione corrente ══════════════════════════════════════════════════════
@@ -435,8 +511,10 @@ func _refresh() -> void:
 		return
 	var p := Game.pending()
 	for c in opts_box.get_children():
+		opts_box.remove_child(c)
 		c.queue_free()
 	skip_btn.visible = Game.busy and not fl.over
+	step_btn.visible = Game.manual_waiting()
 	if fl.over:
 		who_lbl.text = L10n.t("PARTITA FINITA")
 		guide.text = L10n.t("Vincono i [b]%s[/b].\n%s") % [fl.side_name(fl.winner), fl.end_reason]
@@ -450,6 +528,8 @@ func _refresh() -> void:
 		guide.text = L10n.t("Segui in Cronaca e sulla mappa che cosa succede.")
 		if Game.is_human(who):
 			guide.text = L10n.t("Risoluzione in corso...")
+		if Game.manual_waiting():
+			guide.text = L10n.t("Manual mode: the AI is waiting. Press «Next AI step» to see its next move.")
 	else:
 		var who2 := int(p["who"])
 		who_lbl.text = L10n.t("TOCCA A TE — %s") % fl.side_name(who2).to_upper()
@@ -461,6 +541,16 @@ func _refresh() -> void:
 		if order >= 0:
 			guide.text += "\n" + OrderNotes.describe(order)
 		_build_options(p)
+	turn_banner.text = who_lbl.text
+	if not p.is_empty() and String(p.kind) == "turn":
+		turn_banner.text += "   ·   " + L10n.t("Orders %d/%d") % [fl.orders_done, fl.orders_max[p.who]]
+	if mobile:
+		if not p.is_empty():
+			mobile_page = 1
+			side_scroll.scroll_vertical = 0
+		elif Game.busy:
+			mobile_page = 0
+		_layout_for_screen()
 	_refresh_hand(p)
 	_refresh_status()
 	board.queue_redraw()
@@ -490,23 +580,25 @@ func _build_options(p: Dictionary) -> void:
 		var o: Dictionary = opts[i]
 		# Gli esagoni si scelgono sulla mappa; le carte dalla mano (tranne le
 		# Azioni proposte in una finestra, che compaiono anche qui).
-		if o.has("hex") and not o.has("card"):
+		if not mobile and o.has("hex") and not o.has("card"):
 			continue
-		if o.has("card") and kind in ["turn", "discard"]:
+		if not mobile and o.has("card") and kind in ["turn", "discard"]:
 			continue
-		if kind == "setup" and o.has("unit"):
+		if not mobile and kind == "setup" and o.has("unit"):
 			continue
 		var b := _btn(String(o.get("label", o.get("id", "?"))))
+		if mobile and o.has("card"):
+			b.text = "#%d   %s" % [Game.flow.hand(p.who)[o.card].number, b.text]
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.custom_minimum_size = Vector2(SIDE_W - 44.0, 38)
+		b.custom_minimum_size = Vector2(SIDE_W - 44.0, 52 if mobile else 38)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var id := String(o.get("id", ""))
 		if id in ["confirm", "go", "end", "pass", "stop", "no", "stay", "keep"]:
 			b.add_theme_stylebox_override("normal", Tema.box(Tema.BRASS.darkened(0.55), Tema.BRASS, 2, 4, 8))
 		if o.has("on") and bool(o["on"]):
 			b.add_theme_color_override("font_color", Color(0.5, 1.0, 0.55))
-		b.pressed.connect(func() -> void: Game.choose(i))
+		b.pressed.connect(func() -> void: _choose_if_current.call_deferred(p, i))
 		opts_box.add_child(b)
 	if kind == "turn":
 		var blocked: Dictionary = p.get("blocked", {})
@@ -515,6 +607,11 @@ func _build_options(p: Dictionary) -> void:
 			opts_box.add_child(_hint(L10n.t("Nessuna carta è giocabile come Ordine in questo momento: scarta per pescarne di nuove.")))
 	elif kind == "discard":
 		opts_box.add_child(_hint(L10n.t("Tocca le carte in mano per segnarle da scartare.")))
+
+
+func _choose_if_current(decision: Dictionary, index: int) -> void:
+	if is_same(decision, Game.pending()):
+		Game.choose(index)
 
 
 func _hint(t: String) -> Label:
@@ -563,6 +660,28 @@ func _refresh_hand(p: Dictionary) -> void:
 
 func _on_card_tapped(v: CardView) -> void:
 	var p := Game.pending()
+	if mobile:
+		var reason := String(p.get("blocked", {}).get(v.index, ""))
+		var dialog := _reading_dialog("#%d · %s" % [v.card.number, L10n.t("Hand")], reason, false)
+		var col := dialog.contents
+		var face := CardView.new()
+		face.custom_minimum_size = Vector2(182, 254)
+		face.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		face.setup(v.card, v.index)
+		face.playable = true
+		col.add_child(face)
+		for index: int in _card_options(p, v.index):
+			var action := _btn(p.options[index].label)
+			action.custom_minimum_size.y = 52
+			action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			action.pressed.connect(func():
+				dialog.hide()
+				dialog.confirmed.emit()
+				if is_same(p, Game.pending()):
+					Game.choose(index))
+			col.add_child(action)
+			col.move_child(action, 0)
+		return
 	if not p.is_empty() and String(p["kind"]) == "discard":
 		var opts: Array = p["options"]
 		for i in opts.size():
@@ -578,9 +697,6 @@ func _on_card_tapped(v: CardView) -> void:
 			Game.choose(mine[0])
 			return
 	_select_card(v.index)
-	if mobile and _sel_card >= 0:
-		mobile_page = 0
-		_layout_for_screen()
 
 
 func _card_options(p: Dictionary, card_index: int) -> Array:
@@ -664,7 +780,8 @@ func _on_event(ev: Dictionary) -> void:
 		dice_b.texture = load("res://assets/dice/r%d.png" % clampi(int(d[1]), 1, 6))
 		dice_lbl.text = _plain(String(ev.get("text", "")))
 		dice_box.visible = true
-		_dice_until = Time.get_ticks_msec() + 2200
+		# Più tempo per leggere col ritmo lento; mai meno di ~2,6 s.
+		_dice_until = Time.get_ticks_msec() + clampi(int(3600.0 / maxf(0.55, Game.speed)), 2600, 8000)
 	if ev.has("card") and ev["card"] is Card:
 		played_card.setup(ev["card"], -1)
 		played_card.queue_redraw()
@@ -690,30 +807,94 @@ func _open_history() -> void:
 	_reading_dialog(L10n.t("CRONACA"), log_box.get_parsed_text(), false, true)
 
 
-func _reading_dialog(title: String, content: String, formatted: bool, scroll_end: bool = false) -> void:
+func _reading_dialog(title: String, content: String, formatted: bool, scroll_end: bool = false, key: String = "") -> BattleReport:
+	if is_instance_valid(active_report):
+		active_report.confirmed.emit()
 	var pause_here := Game.mode != Game.Mode.ONLINE and not Game.paused
 	if pause_here:
 		Game.set_paused(true)
-	var dialog := AcceptDialog.new()
-	dialog.title = title
-	dialog.ok_button_text = L10n.t("Continue play")
-	dialog.exclusive = true
+	var dialog := BattleReport.new()
+	active_report = dialog
+	add_child(dialog)
+	var layout := mobile_tabs.get_parent() as Control
+	layout.focus_behavior_recursive = Control.FOCUS_BEHAVIOR_DISABLED
+	dialog.setup(title)
+	var col := dialog.contents
+	_status_counters(col, key)
 	var body := RichTextLabel.new()
 	body.bbcode_enabled = formatted
-	var area := get_viewport_rect().size
-	body.custom_minimum_size = Vector2(minf(520, area.x * 0.77), minf(340, area.y * 0.47))
+	body.fit_content = true
+	body.scroll_active = false
+	body.mouse_filter = Control.MOUSE_FILTER_PASS
 	body.text = content
-	dialog.add_child(body)
+	col.add_child(body)
 	var resume := func():
+		dialog.hide()
+		active_report = null
+		layout.focus_behavior_recursive = Control.FOCUS_BEHAVIOR_INHERITED
 		if pause_here:
 			Game.set_paused(false)
 		dialog.queue_free()
 	dialog.confirmed.connect(resume)
-	dialog.canceled.connect(resume)
-	add_child(dialog)
-	dialog.popup_centered()
 	if scroll_end:
-		body.scroll_to_line.call_deferred(maxi(0, body.get_line_count() - 1))
+		dialog.scroll.set_deferred("scroll_vertical", 100000)
+	return dialog
+
+
+func _status_counters(col: VBoxContainer, key: String) -> void:
+	var s := Game.state
+	var row := HFlowContainer.new()
+	col.add_child(row)
+	match key:
+		"Clock":
+			for n in range(maxi(12, maxi(s.time_marker, s.sudden_death_space)) + 1):
+				var cell := Button.new()
+				cell.text = str(n)
+				cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				cell.focus_mode = Control.FOCUS_NONE
+				cell.custom_minimum_size = Vector2(58, 46)
+				var fill := Tema.RED.darkened(0.55) if n >= s.sudden_death_space else Tema.PANEL_HI
+				cell.add_theme_stylebox_override("normal", Tema.box(fill, Tema.BRASS if n == s.time_marker else Tema.EDGE, 3 if n == s.time_marker else 1, 0, 3))
+				if n == s.time_marker:
+					cell.icon = preload("res://assets/track/time.svg")
+					cell.add_theme_constant_override("icon_max_width", 20)
+				row.add_child(cell)
+		"Objectives":
+			var viewer := Game.viewer()
+			var private_chits := s.objective_chits.filter(func(t): return not t.revealed and int(t.owner) == viewer)
+			if private_chits.is_empty() or Game.mode == Game.Mode.DEMO:
+				return
+			col.add_child(_hint("%s (%d)" % [L10n.t("Private objectives · %s") % Game.flow.side_name(viewer), private_chits.size()]))
+			for i in private_chits.size():
+				var chit: Dictionary = private_chits[i]
+				var back := L10n.t("Inspect secret counter %d") % (i + 1)
+				var tile := _btn(back)
+				tile.icon = preload("res://assets/track/objective.svg")
+				tile.toggle_mode = true
+				tile.custom_minimum_size.y = 48
+				tile.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				tile.toggled.connect(func(open: bool):
+					tile.text = ObjectiveChits._describe(ObjectiveChits._find(chit.letter)) if open and viewer == Game.viewer() else back)
+				col.add_child(tile)
+		"Initiative":
+			_counter_image(row, preload("res://assets/track/initiative.svg"), Game.flow.side_name(s.initiative_holder))
+		"Axis losses", "Allied losses":
+			for u: Unit in s.graves:
+				if u.faction == (Flow.AX if key == "Axis losses" else Flow.AL):
+					_counter_image(row, board._counter_tex(u), L10n.unit_label(u.display_name))
+
+
+func _counter_image(row: Container, texture: Texture2D, caption: String) -> void:
+	if texture == null:
+		return
+	var pic := TextureRect.new()
+	pic.texture = texture
+	pic.tooltip_text = caption
+	pic.accessibility_name = caption
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pic.custom_minimum_size = Vector2(72, 72)
+	row.add_child(pic)
 
 
 func _plain(bb: String) -> String:
@@ -724,12 +905,20 @@ func _plain(bb: String) -> String:
 
 func _process(_d: float) -> void:
 	var now := Time.get_ticks_msec()
+	# Mentre si legge un rapporto (gioco in pausa) dadi e carta restano visibili.
+	if Game.paused:
+		if dice_box.visible:
+			_dice_until = now + 1500
+		if played_box.visible:
+			_played_until = now + 1500
 	if dice_box.visible and now > _dice_until:
 		dice_box.visible = false
 	if played_box.visible and now > _played_until:
 		played_box.visible = false
 	if skip_btn.visible != (Game.busy and not Game.flow.over):
 		skip_btn.visible = Game.busy and not Game.flow.over
+	if step_btn.visible != Game.manual_waiting():
+		step_btn.visible = Game.manual_waiting()
 
 
 # ═══ Informazioni su esagono e pedine ════════════════════════════════════════
@@ -825,8 +1014,14 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var k := event as InputEventKey
 	if k == null or not k.pressed or k.echo:
 		return
+	if is_instance_valid(active_report):
+		if k.keycode == KEY_ESCAPE:
+			active_report.confirmed.emit()
+		return
 	if k.keycode == KEY_SPACE:
-		if Game.busy:
+		if Game.manual_waiting():
+			Game.manual_step()
+		elif Game.busy:
 			Game.skip()
 		else:
 			for id in ["confirm", "go", "pass", "no", "keep"]:

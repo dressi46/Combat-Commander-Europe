@@ -1,7 +1,7 @@
 class_name BattleStatus
 extends HFlowContainer
 
-signal inspected(heading: String, content: String)
+signal inspected(heading: String, content: String, key: String)
 const NATIONS := {"german":"DE", "italian":"IT", "russian":"SU", "american":"US", "british":"GB",
 	"french":"FR", "romanian":"RO", "brazilian":"BR", "canadian":"CA", "anzac":"ANZAC",
 	"polish":"PL", "yugoslav":"YU"}
@@ -89,8 +89,8 @@ func _inspect(key: String) -> void:
 			if lines.size() == 1:
 				lines.append(L10n.t("No eliminated counters on record."))
 		"Objectives":
-			lines = _objective_lines(s, Game.viewer())
-	inspected.emit(fields[key].tooltip_text, "\n".join(lines))
+			lines = _objective_lines(s)
+	inspected.emit(fields[key].tooltip_text, "\n".join(lines), key)
 
 
 func _score_lines(s: GameState) -> PackedStringArray:
@@ -116,20 +116,13 @@ func _score_lines(s: GameState) -> PackedStringArray:
 	return lines
 
 
-func _objective_lines(s: GameState, viewer: int) -> PackedStringArray:
+func _objective_lines(s: GameState) -> PackedStringArray:
 	var lines := PackedStringArray()
-	for public_chits in [true, false]:
-		lines.append(L10n.t("Public objectives") if public_chits else L10n.t("Private objectives · %s") % Game.flow.side_name(viewer))
-		var start := lines.size()
-		for token in s.objective_chits:
-			if bool(token.revealed) != public_chits or (not public_chits and int(token.owner) != viewer):
-				continue
-			var chit := ObjectiveChits._find(token.letter)
-			if not chit.is_empty():
-				lines.append(ObjectiveChits._describe(chit))
-		if lines.size() == start:
-			lines.append(L10n.t("None assigned"))
-		lines.append("")
+	for token in s.objective_chits:
+		if token.revealed:
+			if lines.is_empty():
+				lines.append(L10n.t("Public objectives"))
+			lines.append(ObjectiveChits._describe(ObjectiveChits._find(token.letter)))
 	for obj in s.objectives:
 		var owner := L10n.t("Uncontrolled") if obj.controller < 0 else Game.flow.side_name(obj.controller)
 		lines.append("%s %d · %s · %s · %d %s" % [L10n.t("Objective"), obj.id, Game.flow.lbl(Vector2i(obj.q, obj.r)), owner, obj.vp, L10n.t("VP")])

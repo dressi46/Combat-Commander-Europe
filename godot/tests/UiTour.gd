@@ -8,6 +8,7 @@ extends Node
 var out_dir := "user://tour"
 var seen := {}
 var helper: Bot
+var board: Control
 var steps := 0
 var max_steps := 400
 var want_3d := false
@@ -27,6 +28,7 @@ func _ready() -> void:
 	helper = Bot.new(Game.flow, 2, 99)
 	var scene: PackedScene = load("res://scenes/Partita.tscn")
 	var p := scene.instantiate()
+	board = p
 	add_child(p)
 	await get_tree().create_timer(0.6).timeout
 	if want_3d:
@@ -45,6 +47,8 @@ func _loop() -> void:
 	var foe_shot := false
 	while steps < max_steps and not Game.flow.over:
 		await get_tree().create_timer(0.05).timeout
+		if is_instance_valid(board.active_report):
+			board.active_report.confirmed.emit()
 		var p := Game.pending()
 		if p.is_empty():
 			if not foe_shot and not Game.flow.pending.is_empty() and steps > 3:
