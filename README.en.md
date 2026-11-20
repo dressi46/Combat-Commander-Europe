@@ -23,6 +23,8 @@ Keep the terminal open and visit [the local game](http://localhost:8781/) in Bra
 
 Against the AI, an arrow traces each step on the map. While moving, a destination shows **cost → MP remaining**. Open the action log to review the sequence. Each event report shows its rule and outcome and waits for **Continue play**. You can disable event pauses in Settings.
 
+On the board, **Controls** groups the 3D view, centering, playback speed, pause, help and action log. Select a header indicator for the clock and sudden death, VP breakdown, initiative holder or eliminated counters by side. **Objectives** shows public chits, the viewing player’s secret chits and control of the map objectives.
+
 ## Open or export the project
 
 Open [godot/project.godot](godot/project.godot) in Godot 4.6.3 and press **F5** to play. To build the browser version, install the matching Godot export templates and run these commands from the repository root:

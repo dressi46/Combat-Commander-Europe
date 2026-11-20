@@ -316,10 +316,7 @@ static func _command_control(state: GameState, faction: int, lines: Array[String
 		if o.controller == faction:
 			n += 1
 	if n > 0:
-		if faction == Domain.Faction.GERMAN:
-			state.bonus_vp += n
-		else:
-			state.bonus_vp -= n
+		state.award_vp("COMANDO E CONTROLLO", faction, n)
 	lines.append(L10n.t("Comando e Controllo: %d obiettivi controllati -> +%d VP.") % [n, n])
 
 

@@ -87,6 +87,7 @@ static func _state_to_dict(s: GameState) -> Dictionary:
 		"global_hindrance": s.global_hindrance, "reinforcements": s.reinforcements,
 		"setup_zone": _hexlist_to_strs(s.setup_zone), "disposition": s.disposition,
 		"bot_difficulty": s.bot_difficulty,
+		"vp_sources": s.vp_sources.duplicate(), "graves": s.graves.map(_unit_to_dict),
 		"vp_tracker": s.vp_tracker, "bonus_vp": s.bonus_vp,
 		"chit_double_exit": s.chit_double_exit, "chit_double_elim": s.chit_double_elim,
 		"chit_control_all": s.chit_control_all,
@@ -149,6 +150,9 @@ static func _state_from_dict(d: Dictionary) -> GameState:
 	s.disposition = int(d.get("disposition", Domain.Disposition.OFFENSIVE))
 	s.bot_difficulty = int(d.get("bot_difficulty", Domain.BotDifficulty.GREEN))
 	s.vp_tracker = int(d.get("vp_tracker", 0)); s.bonus_vp = int(d.get("bonus_vp", 0))
+	s.vp_sources = d.get("vp_sources", {}).duplicate()
+	for item in d.get("graves", []):
+		s.graves.append(_unit_from_dict(item))
 	s.chit_double_exit = bool(d.get("chit_double_exit", false))
 	s.chit_double_elim = bool(d.get("chit_double_elim", false))
 	s.chit_control_all = bool(d.get("chit_control_all", false))

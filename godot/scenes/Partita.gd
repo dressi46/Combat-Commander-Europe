@@ -13,7 +13,7 @@ const SIDE_W := 390.0
 var board: Board2D
 var board_holder: Control
 var view3d: SubViewportContainer = null
-var track: Control
+var status_strip := BattleStatus.new()
 var who_lbl: Label
 var guide: RichTextLabel
 var opts_box: VBoxContainer
@@ -36,15 +36,12 @@ var played_lbl: Label
 var overlay: Control
 var stack_pop: PopupPanel
 var help_panel: PanelContainer
-var btn_3d: Button
-var btn_speed: Button
-var btn_pause: Button
+var controls := MenuButton.new()
 
 var mobile_panels: Array[Control] = []
 var mobile_tabs := HBoxContainer.new()
 var mobile_page := 0
-var toolbar_scroll := ScrollContainer.new()
-var track_scroll := ScrollContainer.new()
+
 var mobile := false
 
 func _layout_for_screen() -> void:
@@ -54,8 +51,9 @@ func _layout_for_screen() -> void:
 	mobile_tabs.visible = mobile
 	for i in mobile_tabs.get_child_count():
 		mobile_tabs.get_child(i).set_pressed_no_signal(i == mobile_page)
-	toolbar_scroll.custom_minimum_size.y = 52 if mobile else 42
-	track_scroll.get_parent().visible = not mobile or mobile_page == 0
+	title_lbl.visible = not mobile
+	status_strip.compact = mobile
+	status_strip.refresh()
 	for i in mobile_panels.size():
 		mobile_panels[i].visible = not mobile or i == mobile_page
 	mobile_panels[1].size_flags_horizontal = Control.SIZE_EXPAND_FILL if mobile else Control.SIZE_SHRINK_END
@@ -135,10 +133,7 @@ func _build() -> void:
 	# ── Riga 1: titolo e comandi ────────────────────────────────────────────
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 6)
-	root.add_child(toolbar_scroll)
-	toolbar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	toolbar_scroll.add_child(bar)
-	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.add_child(bar)
 	root.add_child(mobile_tabs)
 	for caption in ["Board", "Decisions", "Hand"]:
 		var tab := _btn(L10n.t(caption))
@@ -150,62 +145,31 @@ func _build() -> void:
 			mobile_page = idx
 			_layout_for_screen())
 		mobile_tabs.add_child(tab)
-	var menu := _btn(L10n.t("MENU"), L10n.t("Torna al menu degli scenari"), 70)
-	menu.pressed.connect(_exit_board)
-	bar.add_child(menu)
-	title_lbl = Tema.title("", 24)
-	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_lbl = Tema.title("", 20)
 	title_lbl.clip_text = true
-	title_lbl.custom_minimum_size.x = 200
+	title_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title_lbl.custom_minimum_size.x = 230
 	title_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	bar.add_child(title_lbl)
-	btn_3d = _btn(L10n.t("Vista 3D"), L10n.t("Passa dalla mappa 2D alla vista 3D e viceversa"), 96)
-	btn_3d.pressed.connect(_toggle_3d)
-	bar.add_child(btn_3d)
-	var recenter := _btn(L10n.t("Centra"), L10n.t("Reinquadra la mappa"), 74)
-	recenter.pressed.connect(func() -> void:
-		board.reset_view()
-		if view3d != null and view3d.visible:
-			var m3 := view3d.get_child(0).get_child(0)
-			if m3 != null and m3.has_method("_reset_camera"):
-				m3._reset_camera()
-				m3._update_camera())
-	bar.add_child(recenter)
-	btn_speed = _btn("", L10n.t("Velocità con cui scorrono le azioni"), 118)
-	btn_speed.pressed.connect(_cycle_speed)
-	bar.add_child(btn_speed)
-	btn_pause = _btn(L10n.t("Pausa"), L10n.t("Ferma lo scorrere delle azioni dell'avversario"), 78)
-	btn_pause.pressed.connect(_toggle_pause)
-	bar.add_child(btn_pause)
-	btn_pause.visible = Game.mode != Game.Mode.ONLINE
-	btn_speed.visible = Game.mode != Game.Mode.ONLINE
-	var help := _btn(L10n.t("Come si gioca"), L10n.t("Sequenza di gioco e regole speciali dello scenario"), 126)
-	help.pressed.connect(func() -> void: help_panel.visible = not help_panel.visible)
-	bar.add_child(help)
-
-	# ── Riga 2: plancia (Tempo, PV, Iniziativa, perdite) ─────────────────────
+	var dispatch := PanelContainer.new()
+	dispatch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var paper := Tema.box(Color("#302e22"), Tema.BRASS, 0, 2, 7)
+	paper.border_width_left = 3
+	dispatch.add_theme_stylebox_override("panel", paper)
+	bar.add_child(dispatch)
 	latest.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	latest.max_lines_visible = 2
+	latest.max_lines_visible = 3
 	latest.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	latest.add_theme_color_override("font_color", Tema.PAPER)
-	var history_bar := HBoxContainer.new()
-	root.add_child(history_bar)
-	latest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	history_bar.add_child(latest)
-	var history := _btn(L10n.t("CRONACA"))
-	history.pressed.connect(_open_history)
-	history_bar.add_child(history)
-	var tp := PanelContainer.new()
-	tp.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.EDGE, 2, 4, 4))
-	root.add_child(tp)
-	track = Control.new()
-	track.custom_minimum_size = Vector2(600, 46)
-	track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	track.draw.connect(_draw_track)
-	tp.add_child(track_scroll)
-	track_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	track_scroll.custom_minimum_size.y = 55
-	track_scroll.add_child(track)
+	latest.add_theme_color_override("font_color", Tema.INK)
+	dispatch.add_child(latest)
+	controls.flat = false
+	controls.text = L10n.t("Controls")
+	controls.custom_minimum_size.y = 44
+	bar.add_child(controls)
+	controls.about_to_popup.connect(_fill_controls)
+	controls.get_popup().id_pressed.connect(_control_action)
+	root.add_child(status_strip)
+	status_strip.inspected.connect(func(heading: String, body: String): _reading_dialog(heading, body, false))
 
 	# ── Centro: mappa + pannello laterale ───────────────────────────────────
 	var mid := HBoxContainer.new()
@@ -293,10 +257,10 @@ func _build() -> void:
 	hand_box.add_theme_constant_override("separation", 8)
 	hsc.add_child(hand_box)
 	mobile_panels.assign([board_holder, side, hp])
-	_set_speed_label()
 	title_lbl.text = L10n.t(Game.state.scenario_name).to_upper()
 	if Game.state.scenario_number < 1000:
 		title_lbl.text = "%d · %s" % [Game.state.scenario_number, title_lbl.text]
+	title_lbl.tooltip_text = title_lbl.text
 
 
 func _build_overlays() -> void:
@@ -429,58 +393,38 @@ func _help_text() -> String:
 
 # ═══ Plancia in alto ═════════════════════════════════════════════════════════
 
-func _draw_track() -> void:
-	var s := Game.state
-	var fl := Game.flow
-	if s == null:
-		return
-	var f := Tema.bold_font()
-	var w := track.size.x
-	var h := track.size.y
-	# Traccia del Tempo: caselle 0..12.
-	var n := 13
-	var bw := minf(34.0, (w * 0.40) / n)
-	var x0 := 62.0
-	track.draw_string(f, Vector2(4, h * 0.5 + 6), L10n.t("TEMPO"), HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Tema.BRASS)
-	for i in n:
-		var r := Rect2(x0 + i * bw, 6, bw - 3, h - 12)
-		var col := Tema.PANEL_HI
-		if i >= s.sudden_death_space:
-			col = Color(0.36, 0.14, 0.11)
-		if i == s.time_marker:
-			col = Tema.BRASS
-		track.draw_rect(r, col)
-		track.draw_rect(r, Tema.EDGE, false, 1.0)
-		var tc := Color(0.1, 0.1, 0.08) if i == s.time_marker else Tema.INK
-		var ts := f.get_string_size(str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		track.draw_string(f, Vector2(r.position.x + (r.size.x - ts) * 0.5, h * 0.5 + 6), str(i), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, tc)
-	var x := x0 + n * bw + 14
-	var seg: Array = []
-	seg.append([L10n.t("rosso = Morte Subitanea"), Color(0.85, 0.45, 0.4)])
-	var vp := s.vp_tracker
-	if vp == 0:
-		seg.append([L10n.t("PV 0 (parità)"), Tema.INK])
-	else:
-		var lead := Flow.AX if vp > 0 else Flow.AL
-		seg.append([L10n.t("PV %d %s") % [absi(vp), fl.side_name(lead)], Tema.side_color(lead)])
-	seg.append([L10n.t("Iniziativa: %s") % fl.side_name(s.initiative_holder), Tema.side_color(s.initiative_holder)])
-	for side: int in [Flow.AX, Flow.AL]:
-		var thr := int(s.surrender_threshold.get(side, 0))
-		seg.append([L10n.t("Perdite %s %d/%s") % [fl.side_name(side), int(s.casualties.get(side, 0)), str(thr) if thr > 0 else "-"], Tema.side_color(side)])
-	var total := 0.0
-	for sg in seg:
-		total += f.get_string_size(String(sg[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, 17).x + 22
-	var fs := 17
-	if total > w - x:
-		fs = maxi(12, int(17.0 * (w - x) / total))
-	for sg in seg:
-		track.draw_string(f, Vector2(x, h * 0.5 + 6), String(sg[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, sg[1])
-		x += f.get_string_size(String(sg[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x + 22.0 * fs / 17.0
-
-
 func _refresh_status() -> void:
-	if track != null:
-		track.queue_redraw()
+	status_strip.refresh()
+
+
+func _fill_controls() -> void:
+	var popup := controls.get_popup()
+	popup.clear()
+	popup.add_item(L10n.t("CRONACA"), 0)
+	popup.add_item(L10n.t("Vista 2D" if view3d != null and view3d.visible else "Vista 3D"), 1)
+	popup.add_item(L10n.t("Centra"), 2)
+	if Game.mode != Game.Mode.ONLINE:
+		popup.add_item(L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()]), 3)
+		popup.add_item(L10n.t("Riprendi" if Game.paused else "Pausa"), 4)
+	popup.add_item(L10n.t("Come si gioca"), 5)
+	popup.add_separator()
+	popup.add_item(L10n.t("Torna al menu degli scenari"), 6)
+
+
+func _control_action(id: int) -> void:
+	match id:
+		0: _open_history()
+		1: _toggle_3d()
+		2:
+			board.reset_view()
+			if view3d != null and view3d.visible:
+				var scene := view3d.get_child(0).get_child(0)
+				scene._reset_camera()
+				scene._update_camera()
+		3: _cycle_speed()
+		4: _toggle_pause()
+		5: help_panel.visible = not help_panel.visible
+		6: _exit_board()
 
 
 # ═══ Decisione corrente ══════════════════════════════════════════════════════
@@ -743,10 +687,10 @@ func _show_event_report(ev: Dictionary) -> void:
 
 
 func _open_history() -> void:
-	_reading_dialog(L10n.t("CRONACA"), log_box.get_parsed_text(), false)
+	_reading_dialog(L10n.t("CRONACA"), log_box.get_parsed_text(), false, true)
 
 
-func _reading_dialog(title: String, content: String, formatted: bool) -> void:
+func _reading_dialog(title: String, content: String, formatted: bool, scroll_end: bool = false) -> void:
 	var pause_here := Game.mode != Game.Mode.ONLINE and not Game.paused
 	if pause_here:
 		Game.set_paused(true)
@@ -768,7 +712,7 @@ func _reading_dialog(title: String, content: String, formatted: bool) -> void:
 	dialog.canceled.connect(resume)
 	add_child(dialog)
 	dialog.popup_centered()
-	if not formatted:
+	if scroll_end:
 		body.scroll_to_line.call_deferred(maxi(0, body.get_line_count() - 1))
 
 
@@ -867,21 +811,14 @@ func _toggle_3d() -> void:
 		view3d.visible = false
 	view3d.visible = not view3d.visible
 	board.visible = not view3d.visible
-	btn_3d.text = L10n.t("Vista 2D") if view3d.visible else L10n.t("Vista 3D")
-
-
-func _set_speed_label() -> void:
-	btn_speed.text = L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()])
 
 
 func _cycle_speed() -> void:
 	Game.select_speed((Game.speed_index() + 1) % Game.SPEEDS.size())
-	_set_speed_label()
 
 
 func _toggle_pause() -> void:
 	Game.set_paused(not Game.paused)
-	btn_pause.text = L10n.t("Riprendi") if Game.paused else L10n.t("Pausa")
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

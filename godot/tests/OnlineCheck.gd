@@ -78,7 +78,7 @@ func _run() -> void:
 	var av := await _next(a, "state")
 	var bv := await _next(b, "state")
 	_check(not av.board.has("russian_hand") and not bv.board.has("german_hand"), "Opponent hand exposed")
-	_check(not av.board.has("german_deck") and not bv.board.has("objective_chits"), "Hidden draw data exposed")
+	_check(not av.board.has("german_deck") and [av,bv].all(func(view): return view.board.objective_chits.all(func(c): return c.revealed or int(c.owner) == int(view.seat))), "Hidden draw data exposed")
 	_check(av.events[0].text.contains("Escenario") and bv.events[0].text.contains("Scenario"), "Locale mismatch")
 	var active: int = av.pending.who
 	var seats := [a,b]

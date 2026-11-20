@@ -145,6 +145,7 @@ var vp_tracker: int = 0  ## >0 Germania in vantaggio, <0 Russia
 ## VP non legati agli obiettivi (positivi = Germania): VP iniziali dello scenario,
 ## +1 del Tempo! al difensore e VP da eliminazione/uscita (7.1/7.2). Vengono
 ## sommati alla bilancia degli obiettivi in Game._update_objectives.
+var vp_sources := {}
 var bonus_vp: int = 0
 
 ## Chit Obiettivo "[open]" attivi (7.3.2): W = VP d'uscita raddoppiati,
@@ -401,6 +402,14 @@ func hand_size_of(faction: int) -> int:
 	return int(hand_size.get(faction, 4))
 
 
+## Preserve both sides' awards even when they cancel on the public track.
+func award_vp(source: String, side: int, points: int) -> void:
+	bonus_vp += points if side == Domain.Faction.GERMAN else -points
+	var sides: Array = vp_sources.get(source, [0, 0])
+	sides[side] += points
+	vp_sources[source] = sides
+
+
 ## Elimina un'unità dallo stato registrandola sul Casualty Track (4.2): se è un
 ## uomo (non un'arma) incrementa le perdite della sua fazione. Unico punto da cui
 ## le unità lasciano `units`, così il conteggio resa resta sempre coerente.
@@ -415,10 +424,7 @@ func eliminate_unit(uid: String) -> void:
 		if chit_double_elim:
 			v *= 2  # Chit Obiettivo X [open]: VP da eliminazione raddoppiati.
 		if v > 0:
-			if u.faction == Domain.Faction.GERMAN:
-				bonus_vp -= v  # i Russi guadagnano
-			else:
-				bonus_vp += v  # i Tedeschi guadagnano
+			award_vp("Enemy losses", Domain.Faction.RUSSIAN if u.faction == Domain.Faction.GERMAN else Domain.Faction.GERMAN, v)
 		# 11.3: un'arma trasportata segue il proprietario eliminato (eliminata anch'essa).
 		if u.is_man():
 			var w := weapon_carried_by(uid)
@@ -444,10 +450,7 @@ func exit_unit_for_vp(uid: String) -> int:
 	if chit_double_exit:
 		v *= 2  # Chit Obiettivo W [open]: VP d'uscita raddoppiati.
 	if v > 0:
-		if u.faction == Domain.Faction.GERMAN:
-			bonus_vp += v  # i Tedeschi guadagnano
-		else:
-			bonus_vp -= v  # i Russi guadagnano
+		award_vp("Map exits", u.faction, v)
 	# 7.2.1: l'unità uscita NON è persa — va sulla Traccia del Tempo e rientrerà
 	# come rinforzo (integra, con la sua arma, 11.3). La parcheggiamo in
 	# `exited_units` allo spazio successivo del Tempo.

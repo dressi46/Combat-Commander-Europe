@@ -45,6 +45,9 @@ static func side_color(f: int) -> Color:
 static func get_theme() -> Theme:
 	if _theme != null:
 		return _theme
+	var symbols := preload("res://assets/fonts/BoardSymbols.ttf")
+	for font in [body_font(), bold_font(), title_font()]:
+		font.fallbacks.assign([symbols])
 	var t := Theme.new()
 	t.default_font = body_font()
 	t.default_font_size = 18

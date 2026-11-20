@@ -4,7 +4,7 @@ extends RefCounted
 const BOARD := ["map_cols", "map_rows", "map_image", "cal_hex", "cal_ox", "cal_oy",
 	"hexes", "side_features", "scenario_number", "scenario_name", "axis_nation",
 	"allied_nation", "active_faction", "initiative_holder", "defender_faction",
-	"time_marker", "sudden_death_space", "vp_tracker", "casualties",
+	"time_marker", "sudden_death_space", "vp_tracker", "bonus_vp", "vp_sources", "graves", "casualties",
 	"surrender_threshold", "turn_number", "objectives", "units"]
 
 
@@ -13,6 +13,7 @@ static func make(flow: Flow, seat: int, revision: int, text: MatchText, catalog:
 	var board := {}
 	for key in BOARD:
 		board[key] = saved[key]
+	board["objective_chits"] = flow.s.objective_chits.filter(func(chit): return chit.revealed or int(chit.owner) == seat)
 	board["german_hand" if seat == Flow.AX else "russian_hand"] = SaveGame._cards_to(flow.hand(seat))
 	var counts := {}
 	for side in [Flow.AX, Flow.AL]:

@@ -23,6 +23,8 @@ Deja la terminal abierta y entra en [el juego local](http://localhost:8781/) des
 
 En una partida contra la IA, la flecha del tablero marca el paso de origen a destino. Al mover, cada casilla indica **coste → PM restantes**. Pulsa **Crónica** para leer la secuencia completa. El resumen de cada evento muestra la regla y su resultado, y espera a que pulses **Continuar partida**. Puedes desactivar esa pausa en Configuración.
 
+En el tablero, **Controles** reúne la vista 3D, el centrado, el ritmo, la pausa, la ayuda y el registro. Pulsa un indicador de la cabecera para consultar el tiempo y la muerte súbita, el origen de los PV, quién tiene la iniciativa o las fichas eliminadas de un bando. **Objetivos** muestra las fichas públicas, las secretas del jugador que consulta y el control de los objetivos del mapa.
+
 ## Abrir o exportar el proyecto
 
 Abre [godot/project.godot](godot/project.godot) con Godot 4.6.3 y pulsa **F5** para jugar. Para crear la versión web desde el repositorio, instala las plantillas de exportación de esa versión y ejecuta desde la raíz:

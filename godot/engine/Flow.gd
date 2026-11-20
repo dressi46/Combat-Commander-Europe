@@ -88,6 +88,7 @@ static func new_game(scenario_num: int, human: int = AX, seed_value: int = 0) ->
 		f.orders_max[AL] = int(e.get("ordini_allies", 2))
 	f.setup_zone = st.setup_zone.duplicate()
 	st.setup_zone = []
+	st.vp_sources["Scenario start"] = [maxi(0, st.bonus_vp), maxi(0, -st.bonus_vp)]
 	f.s = st
 	f._assign_carriers()
 	for u in st.units.values():
@@ -279,9 +280,9 @@ func say(text: String, kind: String = "", data: Dictionary = {}) -> void:
 func add_vp(f: int, n: int, why: String = "") -> void:
 	if n == 0:
 		return
-	s.bonus_vp += n if f == AX else -n
+	s.award_vp(why if why != "" else "Other awards", f, n)
 	update_objectives()
-	say(L10n.t("%s: %+d PV%s.") % [side_name(f), n, (" (" + why + ")") if why != "" else ""], "vp")
+	say(L10n.t("%s: %+d PV%s.") % [side_name(f), n, (" (" + L10n.t(why) + ")") if why != "" else ""], "vp")
 
 
 ## Bilancia PV dal punto di vista del lato `f` (positiva = `f` è avanti).
@@ -554,7 +555,7 @@ func hit(u: Unit, why: String = "") -> void:
 
 
 func _light_wounds(sq: Unit) -> void:
-	add_vp(sq.faction, -1, L10n.t("Ferite Leggere"))
+	add_vp(sq.faction, -1, "Ferite Leggere")
 	var t := make_team(sq.faction, "Elite" if sq.unit_class == Domain.UnitClass.ELITE else "Line", sq.q, sq.r)
 	t.activated = sq.activated
 	t.suppressed = sq.suppressed
@@ -2016,7 +2017,7 @@ func _melee(active: int, h: Vector2i) -> void:
 				[{ "id": "play", "card": hand(side).find(nq), "label": L10n.t("Gioca (+2 PV)") }, { "id": "no", "label": L10n.t("No") }], { "hex": h })
 			if a2.get("id") == "play":
 				_discard_from_hand(side, nq)
-				add_vp(side, 2, L10n.t("Lotta senza quartiere"))
+				add_vp(side, 2, "Lotta senza quartiere")
 	update_objectives()
 	check_end()
 
@@ -2268,7 +2269,7 @@ func _advance_time(f: int) -> void:
 			return
 		say(L10n.t("La partita continua."), "time")
 	if s.defender_faction == AX or s.defender_faction == AL:
-		add_vp(s.defender_faction, 1, L10n.t("il Difensore guadagna 1 PV a ogni Tempo"))
+		add_vp(s.defender_faction, 1, "il Difensore guadagna 1 PV a ogni Tempo")
 	for key in s.hexes:
 		var hd: GameState.HexData = s.hexes[key]
 		if hd.has_smoke:
