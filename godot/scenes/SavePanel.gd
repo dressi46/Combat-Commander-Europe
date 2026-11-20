@@ -17,7 +17,7 @@ func setup(p_mode: String) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(panel)
-	panel.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.BRASS, 3, 1, 16))
+	panel.add_theme_stylebox_override("panel", Tema.paper_box(Tema.PANEL, Tema.BRASS, 3, 1, 16))
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	panel.add_child(scroll)

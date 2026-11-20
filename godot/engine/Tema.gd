@@ -15,27 +15,110 @@ const RED := Color(0.80, 0.22, 0.16)
 const AXIS := Color(0.55, 0.63, 0.66)
 const ALLIES := Color(0.80, 0.60, 0.36)
 
+const PAPER_TEX := "res://assets/ui/paper.png"
+const BACKDROP_SHADER := """
+shader_type canvas_item;
+uniform sampler2D paper : hint_default_white;
+uniform vec4 tint : source_color = vec4(0.075, 0.085, 0.065, 1.0);
+uniform float texture_strength = 0.42;
+uniform float vignette_strength = 0.58;
+void fragment() {
+	vec3 p = texture(paper, UV).rgb;
+	vec2 d = UV - vec2(0.5);
+	float v = smoothstep(0.28, 0.95, length(d) * 1.32);
+	vec3 col = mix(tint.rgb, p, texture_strength);
+	col *= 1.0 - v * vignette_strength;
+	COLOR = vec4(col, 1.0);
+}
+"""
+
 static var _theme: Theme = null
+static var _backdrop: ShaderMaterial = null
+static var _title_font: Font = null
+static var _body_font: Font = null
+static var _bold_font: Font = null
+static var _type_font: Font = null
 
 
 static func title_font() -> Font:
-	return load("res://assets/fonts/BlackOpsOne-Regular.ttf")
+	if _title_font == null:
+		_title_font = load("res://assets/fonts/BlackOpsOne-Regular.ttf")
+	return _title_font
 
 static func body_font() -> Font:
-	return load("res://assets/fonts/BarlowCondensed-Medium.ttf")
+	if _body_font == null:
+		_body_font = load("res://assets/fonts/BarlowCondensed-Medium.ttf")
+	return _body_font
 
 static func bold_font() -> Font:
-	return load("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
+	if _bold_font == null:
+		_bold_font = load("res://assets/fonts/BarlowCondensed-SemiBold.ttf")
+	return _bold_font
+
+## Macchina da scrivere per cronaca e rapporti: dà il tono «documento militare».
+static func typewriter_font() -> Font:
+	if _type_font == null:
+		_type_font = load("res://assets/fonts/Typewriter.ttf")
+	return _type_font
+
+## Sfondo unico (carta + viñeta) per menú e tabellone. Viene creato una volta
+## sola e condiviso: pochi shader, nessuna copia della texture.
+static func backdrop_material() -> ShaderMaterial:
+	if _backdrop != null:
+		return _backdrop
+	var shader := Shader.new()
+	shader.code = BACKDROP_SHADER
+	_backdrop = ShaderMaterial.new()
+	_backdrop.shader = shader
+	if ResourceLoader.exists(PAPER_TEX):
+		_backdrop.set_shader_parameter("paper", load(PAPER_TEX))
+	return _backdrop
+
+## Fondo a tutta finestra su un CanvasLayer dietro l'interfaccia.
+static func attach_backdrop(parent: Node) -> CanvasLayer:
+	var layer := CanvasLayer.new()
+	layer.layer = -8
+	parent.add_child(layer)
+	var bg := ColorRect.new()
+	bg.name = "FieldBackdrop"
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg.material = backdrop_material()
+	layer.add_child(bg)
+	return layer
+
+## Dissolvenza in apertura: evita il «taglio» fra una schermata e l'altra.
+static func fade_in(node: Node, duration: float = 0.32) -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	node.add_child(layer)
+	var overlay := ColorRect.new()
+	overlay.color = Color(0.02, 0.022, 0.016, 1.0)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(overlay)
+	var tween := node.create_tween()
+	tween.tween_property(overlay, "color:a", 0.0, duration)
+	tween.tween_callback(layer.queue_free)
 
 
-static func box(bg: Color, border: Color, bw: int = 2, radius: int = 4, pad: int = 8) -> StyleBoxFlat:
+static func box(bg: Color, border: Color, bw: int = 2, radius: int = 4, pad: int = 8, shadow: bool = false) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = bg
 	sb.border_color = border
 	sb.set_border_width_all(bw)
 	sb.set_corner_radius_all(radius)
 	sb.set_content_margin_all(pad)
+	if shadow:
+		sb.shadow_color = Color(0, 0, 0, 0.38)
+		sb.shadow_size = 6
+		sb.shadow_offset = Vector2(0, 3)
 	return sb
+
+
+## Pannello «importante» con ombra: ficha de misión, informes y diálogos.
+static func paper_box(bg: Color = PANEL, border: Color = EDGE, bw: int = 2, radius: int = 4, pad: int = 8) -> StyleBoxFlat:
+	return box(bg, border, bw, radius, pad, true)
 
 
 static func side_color(f: int) -> Color:

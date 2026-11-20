@@ -11,7 +11,7 @@ var close_button := Button.new()
 func setup(caption: String) -> void:
 	color = Color(0.04, 0.05, 0.03, 0.72)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.BRASS, 3, 1, 14))
+	panel.add_theme_stylebox_override("panel", Tema.paper_box(Tema.PANEL, Tema.BRASS, 3, 1, 14))
 	add_child(panel)
 	panel.add_child(column)
 	var heading := Tema.title(caption, 23, Tema.BRASS)

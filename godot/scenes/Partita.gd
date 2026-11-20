@@ -136,6 +136,7 @@ func _ready() -> void:
 	Game.game_over.connect(_on_game_over)
 	_refresh()
 	_refresh_status()
+	Tema.fade_in(self)
 	if Game.mode == Game.Mode.ONLINE:
 		Online.show_events()
 
@@ -167,6 +168,7 @@ func _rich(min_h: float = 0.0) -> RichTextLabel:
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = Tema.BG
+	bg.material = Tema.backdrop_material()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
@@ -287,8 +289,10 @@ func _build() -> void:
 	log_box = _rich(120)
 	log_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	log_box.scroll_following = true
-	log_box.add_theme_font_size_override("normal_font_size", 16)
-	log_box.add_theme_font_size_override("bold_font_size", 16)
+	log_box.add_theme_font_override("normal_font", Tema.typewriter_font())
+	log_box.add_theme_font_override("bold_font", Tema.typewriter_font())
+	log_box.add_theme_font_size_override("normal_font_size", 15)
+	log_box.add_theme_font_size_override("bold_font_size", 15)
 	sv.add_child(log_box)
 
 	# ── In basso: la mano ───────────────────────────────────────────────────
@@ -784,6 +788,9 @@ func _on_event(ev: Dictionary) -> void:
 		dice_b.texture = load("res://assets/dice/r%d.png" % clampi(int(d[1]), 1, 6))
 		dice_lbl.text = _plain(String(ev.get("text", "")))
 		dice_box.visible = true
+		dice_box.modulate.a = 0.0
+		var tw := create_tween()
+		tw.tween_property(dice_box, "modulate:a", 1.0, 0.18)
 		# Più tempo per leggere col ritmo lento; mai meno di ~2,6 s.
 		_dice_until = Time.get_ticks_msec() + clampi(int(3600.0 / maxf(0.55, Game.speed)), 2600, 8000)
 	if ev.has("card") and ev["card"] is Card:
@@ -846,6 +853,8 @@ func _reading_dialog(title: String, content: String, formatted: bool, scroll_end
 	body.fit_content = true
 	body.scroll_active = false
 	body.mouse_filter = Control.MOUSE_FILTER_PASS
+	if not formatted:
+		body.add_theme_font_override("normal_font", Tema.typewriter_font())
 	body.text = content
 	col.add_child(body)
 	var resume := func():

@@ -19,6 +19,10 @@ var _allies_btn: Button
 var _changelog: Panel
 var _rules_panel: Panel
 var _rules_label: RichTextLabel
+var _brief: PanelContainer
+var _brief_title: Label
+var _brief_meta: Label
+var _brief_info: Label
 var _difficulty: int = Domain.BotDifficulty.GREEN
 var _mode: int = 0
 
@@ -42,6 +46,7 @@ func _ready() -> void:
 	_build_ui()
 	if _scenarios.size() > 0:
 		_select(int(_scenarios[0].get("numero", 1)))
+	Tema.fade_in(self)
 
 
 func _load_json(path: String) -> Array:
@@ -67,6 +72,7 @@ func _build_ui() -> void:
 	theme = Tema.get_theme()
 	var bg := ColorRect.new()
 	bg.color = Tema.BG
+	bg.material = Tema.backdrop_material()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
@@ -128,11 +134,31 @@ func _build_ui() -> void:
 	inner.add_theme_constant_override("separation", 10)
 	pad.add_child(inner)
 
+	# Ficha de misión: contexto histórico y militar, encima del mapa.
+	_brief = PanelContainer.new()
+	_brief.add_theme_stylebox_override("panel", Tema.paper_box(Color(0.07, 0.08, 0.055, 0.90), Tema.BRASS, 2, 4, 10))
+	inner.add_child(_brief)
+	var bv := VBoxContainer.new()
+	bv.add_theme_constant_override("separation", 3)
+	_brief.add_child(bv)
+	_brief_title = Tema.title("", 18)
+	_brief_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bv.add_child(_brief_title)
+	_brief_meta = Label.new()
+	_brief_meta.add_theme_color_override("font_color", Tema.BRASS)
+	_brief_meta.add_theme_font_size_override("font_size", 13)
+	bv.add_child(_brief_meta)
+	_brief_info = Label.new()
+	_brief_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_brief_info.add_theme_color_override("font_color", Tema.DIM.lightened(0.18))
+	_brief_info.add_theme_font_size_override("font_size", 13)
+	bv.add_child(_brief_info)
+
 	# Mappa (in alto).
 	_map_tex = TextureRect.new()
 	_map_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_map_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_map_tex.custom_minimum_size = Vector2(0, 300)
+	_map_tex.custom_minimum_size = Vector2(0, 240)
 	inner.add_child(_map_tex)
 
 	# Ordine di Battaglia (sotto la mappa): una colonna per avversario; cliccando
@@ -258,6 +284,21 @@ func _select(num: int) -> void:
 	_map_tex.texture = _load_tex("res://assets/maps_img/map%d.jpg" % num)
 	_art_tex.texture = _load_tex("res://assets/artwork/scenario_%02d.jpg" % num)
 	var cat := _catalog_entry(num)
+	var sc := {}
+	for item in _scenarios:
+		if int(item.get("numero", 0)) == num:
+			sc = item
+			break
+	if _brief_title != null:
+		_brief_title.text = "%d · %s" % [num, L10n.t(sc.get("titolo", ""))]
+		_brief_meta.text = "%s · %s" % [L10n.t(sc.get("luogo", "")), L10n.t(sc.get("data", ""))]
+		var axis_nation := String(cat.get("fazione_axis", "german"))
+		var allies_nation := String(cat.get("fazione_allies", "russian"))
+		_brief_info.text = "%s · %s\n%s · %s" % [
+			L10n.t(NATION_LABEL.get(axis_nation, axis_nation)),
+			L10n.t("workshop/" + String(cat.get("posture_axis", "recon"))),
+			L10n.t(NATION_LABEL.get(allies_nation, allies_nation)),
+			L10n.t("workshop/" + String(cat.get("posture_allies", "recon")))]
 	_fill_ob(_axis_btn, _ob_axis, String(cat.get("fazione_axis", "german")), cat.get("forze_axis", []), Domain.Faction.GERMAN)
 	_fill_ob(_allies_btn, _ob_allies, String(cat.get("fazione_allies", "russian")), cat.get("forze_allies", []), Domain.Faction.RUSSIAN)
 	if _rules_label != null:

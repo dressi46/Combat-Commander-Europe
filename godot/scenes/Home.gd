@@ -13,13 +13,14 @@ func _ready() -> void:
 	L10n.scale_menu()
 	get_window().size_changed.connect(_scale)
 	theme = Tema.get_theme()
+	Tema.attach_backdrop(self)
 	horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	var center := CenterContainer.new()
 	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.EDGE, 1, 3, 0))
+	panel.add_theme_stylebox_override("panel", Tema.paper_box(Tema.PANEL, Tema.EDGE, 1, 3, 0))
 	center.add_child(panel)
 	panel.add_child(layout)
 	layout.add_theme_constant_override("separation", 0)
@@ -46,6 +47,7 @@ func _ready() -> void:
 			get_tree().change_scene_to_file.call_deferred("res://scenes/Partita.tscn")
 			return
 	_home()
+	Tema.fade_in(self)
 
 
 func _page(title: String) -> void:
