@@ -35,6 +35,7 @@ var difficulty: int = 1
 const SPEEDS := [0.55, 1.0, 2.2]
 const SPEED_LABELS := ["lento", "normale", "veloce"]
 var sound_percent := 100
+var music_percent := 50
 var speed: float = 1.0            ## moltiplicatore del ritmo (1 = normale)
 var paused: bool = false
 var busy: bool = false            ## cronaca in riproduzione / IA al lavoro
@@ -59,6 +60,7 @@ func _ready() -> void:
 		speed = float(cfg.get_value("ui", "speed", 1.0))
 		manual = bool(cfg.get_value("ui", "manual", false))
 		sound_percent = clampi(int(cfg.get_value("audio", "percent", 100)), 0, 100)
+		music_percent = clampi(int(cfg.get_value("audio", "music", 50)), 0, 100)
 	_apply_sound()
 
 
@@ -66,6 +68,7 @@ func save_settings() -> void:
 	var cfg := ConfigFile.new()
 	cfg.load(SETTINGS_PATH)
 	cfg.set_value("audio", "percent", sound_percent)
+	cfg.set_value("audio", "music", music_percent)
 	cfg.set_value("ui", "tutorial", tutorial_enabled)
 	cfg.set_value("ui", "speed", speed)
 	cfg.set_value("ui", "manual", manual)
@@ -121,10 +124,15 @@ func set_sound_percent(percent: int) -> void:
 	save_settings()
 
 
+func set_music_percent(percent: int) -> void:
+	music_percent = clampi(percent, 0, 100)
+	_apply_sound()
+	save_settings()
+
+
 func _apply_sound() -> void:
-	AudioServer.set_bus_mute(0, sound_percent == 0)
-	if sound_percent > 0:
-		AudioServer.set_bus_volume_db(0, linear_to_db(sound_percent / 100.0))
+	if Audio != null and Audio.has_method("apply_volumes"):
+		Audio.apply_volumes()
 
 
 func set_tutorial(on: bool) -> void:

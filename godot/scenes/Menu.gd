@@ -43,6 +43,7 @@ func _ready() -> void:
 	_catalog = _load_json("res://assets/scenarios/catalog.json")
 	_briefings = _load_briefings()
 	L10n.scale_menu()
+	Audio.play_music("menu")
 	if L10n.small_screen():
 		_build_phone_menu()
 		return

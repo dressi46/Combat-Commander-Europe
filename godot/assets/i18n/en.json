@@ -824,6 +824,7 @@
   "Muovi %s da sola": "Move %s alone",
   "Muovi insieme: %s + %d": "Move together: %s + %d",
   "Muovi le tue unità verso gli obiettivi. Ogni unità ha dei Punti Movimento; entrare in un esagono costa secondo il terreno (e l'altura). Un Leader può attivare e muovere insieme tutte le unità entro il suo raggio di Comando.": "Each unit has Movement Points; entering a hexagon coasts according to the ground (and height). A Leader can activate and move all units together within its command radius.",
+  "Music volume": "Music volume",
   "Muted": "Muted",
   "NEBBIA DI GUERRA": "FOG OF WAR",
   "NEBBIA: a causa di una fitta nebbia mattutina, c'è un Ostacolo (Hindrance) di -3 in ogni esagono della mappa, indipendentemente dall'elevazione. Questo Ostacolo da nebbia è cumulativo con gli Ostacoli normali, ad esempio Frutteto o Fumo. Riducete l'Ostacolo da nebbia di 1 ogni volta che si verifica un Evento Brezza (Breeze) (a \"-2\", poi \"-1\", poi \"0\"). Segnate il livello di nebbia collocando un segnalino inutilizzato sullo spazio \"3\" della Tabella del Tempo, poi spostatelo di uno spazio a sinistra dopo ogni Evento Brezza.": "Fog. Every hex has a −3 fog hindrance regardless of elevation. Add it to other hindrances, including orchards and smoke. Each Breeze event reduces the penalty by one, to −2, −1 and finally 0. Track it with a spare marker starting on time space 3, moving left one space per Breeze event.",

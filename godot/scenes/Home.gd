@@ -14,6 +14,7 @@ func _ready() -> void:
 	get_window().size_changed.connect(_scale)
 	theme = Tema.get_theme()
 	Tema.attach_backdrop(self)
+	Audio.play_music("menu")
 	horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	var center := CenterContainer.new()
 	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -150,6 +151,11 @@ func _settings() -> void:
 	manual.button_pressed = Game.manual
 	manual.toggled.connect(Game.set_manual)
 	column.add_child(manual)
+	var music := _setting_picker("Music volume")
+	for percent in [0, 25, 50, 75, 100]:
+		music.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)
+	music.select(music.get_item_index(Game.music_percent))
+	music.item_selected.connect(func(index: int): Game.set_music_percent(music.get_item_id(index)))
 	var volume := _setting_picker("Sound effects volume")
 	for percent in [0, 25, 50, 75, 100]:
 		volume.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)

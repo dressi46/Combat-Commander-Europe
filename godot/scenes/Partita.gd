@@ -137,6 +137,7 @@ func _ready() -> void:
 	_refresh()
 	_refresh_status()
 	Tema.fade_in(self)
+	Audio.play_music("battle")
 	if Game.mode == Game.Mode.ONLINE:
 		Online.show_events()
 

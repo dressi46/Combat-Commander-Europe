@@ -824,6 +824,7 @@
   "Muovi %s da sola": "Mover solo a %s",
   "Muovi insieme: %s + %d": "Mover en grupo: %s + %d",
   "Muovi le tue unità verso gli obiettivi. Ogni unità ha dei Punti Movimento; entrare in un esagono costa secondo il terreno (e l'altura). Un Leader può attivare e muovere insieme tutte le unità entro il suo raggio di Comando.": "Cada unidad tiene Puntos de Movimiento; entrando en una costa hexágono según el suelo (y la altura). Un Líder puede activar y mover todas las unidades juntas dentro de su radio de comandos.",
+  "Music volume": "Volumen de la música",
   "Muted": "Silencio",
   "NEBBIA DI GUERRA": "NIEBLA DE GUERRA",
   "NEBBIA: a causa di una fitta nebbia mattutina, c'è un Ostacolo (Hindrance) di -3 in ogni esagono della mappa, indipendentemente dall'elevazione. Questo Ostacolo da nebbia è cumulativo con gli Ostacoli normali, ad esempio Frutteto o Fumo. Riducete l'Ostacolo da nebbia di 1 ogni volta che si verifica un Evento Brezza (Breeze) (a \"-2\", poi \"-1\", poi \"0\"). Segnate il livello di nebbia collocando un segnalino inutilizzato sullo spazio \"3\" della Tabella del Tempo, poi spostatelo di uno spazio a sinistra dopo ogni Evento Brezza.": "Niebla. Cada hexágono tiene un estorbo de −3 por niebla, con independencia de la elevación. Se acumula con otros estorbos, como los huertos o el humo. Cada evento Brisa reduce la penalización en uno: pasa a −2, luego a −1 y por último a 0. Coloca un marcador auxiliar en la casilla de tiempo 3 y muévelo una casilla a la izquierda por cada Brisa.",
