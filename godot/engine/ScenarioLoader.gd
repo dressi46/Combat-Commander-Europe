@@ -72,7 +72,7 @@ static func _zone_spec(num: int, side: String) -> Dictionary:
 
 
 ## Popola lo stato con lo scenario `num`. Restituisce true se riuscito.
-static func setup(state: GameState, num: int) -> bool:
+static func setup(state: GameState, num: int, rng: RandomNumberGenerator = null) -> bool:
 	var e := entry(num)
 	if e.is_empty():
 		push_error("Scenario %d non nel catalogo" % num)
@@ -93,8 +93,9 @@ static func setup(state: GameState, num: int) -> bool:
 		"axis": e.get("chit_axis", ["?"]),
 		"allies": e.get("chit_allies", ["?"]),
 	}
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
 	for line in ObjectiveChits.setup(state, spec, rng, ScenarioEffects.exclude_chits(num)):
 		state.add_log(String(line))
 

@@ -39,6 +39,7 @@ var speed: float = 1.0            ## moltiplicatore del ritmo (1 = normale)
 var paused: bool = false
 var busy: bool = false            ## cronaca in riproduzione / IA al lavoro
 var manual: bool = false          ## modalità manuale: l'IA aspetta un passo alla volta
+var autosave_enabled: bool = true  ## i test lo disattivano per non toccare i salvataggi reali
 
 const SETTINGS_PATH := "user://settings.cfg"
 var tutorial_enabled: bool = true
@@ -156,6 +157,46 @@ func start_new_game(human_faction: int = Flow.AX, scenario_num: int = 1,
 	_after_engine()
 
 
+## Tras ogni decisione (punto sicuro) salva la partita in corso.
+func _autosave() -> void:
+	if not autosave_enabled or flow == null or mode == Mode.ONLINE or flow.s == null:
+		return
+	SaveGame.save_game(flow, mode, difficulty, SaveGame.auto_path())
+
+
+func has_autosave() -> bool:
+	return SaveGame.has_save(SaveGame.auto_path())
+
+
+## Carica una partita salvata: ricostruisce il motore ripetendo le decisioni
+## registrate e ripristina modalità, difficoltà e avversari.
+func load_game(path: String) -> bool:
+	var data := SaveGame.read_game(path)
+	if data.is_empty():
+		return false
+	mode = int(data.get("mode", Mode.VS_AI))
+	human = int(data.get("human", Flow.AX))
+	difficulty = int(data.get("difficulty", 1))
+	flow = Flow.replay(int(data.get("scenario", 1)), human, int(data.get("seed", 0)),
+		data.get("history", []), mode == Mode.VS_AI, mode == Mode.VS_AI)
+	bots.clear()
+	match mode:
+		Mode.VS_AI:
+			bots[flow.opp(human)] = Bot.new(flow, difficulty)
+		Mode.DEMO:
+			bots[Flow.AX] = Bot.new(flow, difficulty)
+			bots[Flow.AL] = Bot.new(flow, difficulty)
+	_timer.stop()
+	_timer.paused = false
+	_queue.clear()
+	paused = false
+	busy = false
+	_sync_legacy()
+	state_changed.emit()
+	decision_changed.emit()
+	return true
+
+
 ## Il lato indicato è giocato da una persona?
 func is_human(f: int) -> bool:
 	return f == human if mode == Mode.ONLINE else not bots.has(f)
@@ -192,6 +233,7 @@ func _after_engine() -> void:
 	state_changed.emit()
 	busy = true
 	decision_changed.emit()
+	_autosave()
 	_schedule(0.8 if mode == Mode.VS_AI and bots.has(flow.pending.get("who", -1)) else 0.01)
 
 

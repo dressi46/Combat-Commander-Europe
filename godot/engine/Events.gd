@@ -12,7 +12,7 @@ extends RefCounted
 
 ## Applica l'evento della carta per la fazione che pesca. Muta lo stato e
 ## restituisce le righe di log.
-static func fire(state: GameState, card: Card, faction: int) -> Array[String]:
+static func fire(state: GameState, card: Card, faction: int, rng: RandomNumberGenerator = null) -> Array[String]:
 	var lines: Array[String] = []
 	match card.event_name:
 		"SUPPORTO AEREO":          _air_support(state, card, lines)
@@ -36,9 +36,9 @@ static func fire(state: GameState, card: Card, faction: int) -> Array[String]:
 		"PRIGIONIERI DI GUERRA":   _prisoners(state, faction, lines)
 		"POLVERE":                 _dust(state, card, lines)
 		"INCENDIO":                _blaze(state, card, lines)
-		"OBIETTIVO DELLA MISSIONE": _draw_objective_chit(state, lines, L10n.t("Obiettivo della missione"))
-		"OBIETTIVO STRATEGICO":    _draw_objective_chit(state, lines, L10n.t("Obiettivo strategico"))
-		"RICOGNIZIONE":            _recon(state, faction, lines)
+		"OBIETTIVO DELLA MISSIONE": _draw_objective_chit(state, lines, L10n.t("Obiettivo della missione"), rng)
+		"OBIETTIVO STRATEGICO":    _draw_objective_chit(state, lines, L10n.t("Obiettivo strategico"), rng)
+		"RICOGNIZIONE":            _recon(state, faction, lines, rng)
 		"ZAPPATORI":
 			lines.append(L10n.t("Zappatori: nessuna mina o filo spinato da rimuovere."))
 		"SCONTRO SENZA PERDITE":
@@ -419,7 +419,7 @@ static func _dust(state: GameState, card: Card, lines: Array[String]) -> void:
 
 ## E67 Ricognizione: l'AVVERSARIO di chi innesca deve rivelare un chit
 ## Obiettivo segreto (scelto a caso fra i suoi non ancora rivelati).
-static func _recon(state: GameState, faction: int, lines: Array[String]) -> void:
+static func _recon(state: GameState, faction: int, lines: Array[String], rng: RandomNumberGenerator = null) -> void:
 	var opp := Domain.Faction.RUSSIAN if faction == Domain.Faction.GERMAN else Domain.Faction.GERMAN
 	var hidden: Array = []
 	for e in state.objective_chits:
@@ -428,7 +428,7 @@ static func _recon(state: GameState, faction: int, lines: Array[String]) -> void
 	if hidden.is_empty():
 		lines.append(L10n.t("Ricognizione: %s non ha chit segreti da rivelare.") % L10n.t(Domain.FACTION_NAMES.get(opp, "?")))
 		return
-	var pick: Dictionary = hidden[randi() % hidden.size()]
+	var pick: Dictionary = hidden[rng.randi_range(0, hidden.size() - 1) if rng != null else randi() % hidden.size()]
 	pick["revealed"] = true
 	ObjectiveChits.recompute(state)
 	var chit := ObjectiveChits._find(String(pick["letter"]))
@@ -440,12 +440,13 @@ static func _recon(state: GameState, faction: int, lines: Array[String]) -> void
 ## E65 Obiettivo della missione / E74 Obiettivo strategico: si estrae un chit
 ## aggiuntivo e lo si somma (cumulativo, 7.3.2) ad un obiettivo casuale; i VP
 ## fluiscono al controllore corrente tramite il normale calcolo.
-static func _draw_objective_chit(state: GameState, lines: Array[String], label: String) -> void:
+static func _draw_objective_chit(state: GameState, lines: Array[String], label: String, rng: RandomNumberGenerator = null) -> void:
 	if state.objectives.is_empty():
 		lines.append(L10n.t("%s: nessun obiettivo sulla mappa.") % label)
 		return
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
 	var letter := ObjectiveChits.draw_one(state, rng, lines)
 	lines.append(L10n.t("%s: estratto chit %s.") % [label, letter])
 

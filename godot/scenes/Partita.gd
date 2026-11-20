@@ -482,6 +482,8 @@ func _fill_controls() -> void:
 		popup.add_item(L10n.t("Manual AI steps"), 7)
 		popup.set_item_checked(popup.get_item_index(7), Game.manual)
 	popup.add_item(L10n.t("Come si gioca"), 5)
+	popup.add_item(L10n.t("Save game"), 8)
+	popup.add_item(L10n.t("Load game"), 9)
 	popup.add_separator()
 	popup.add_item(L10n.t("Torna al menu degli scenari"), 6)
 
@@ -501,6 +503,8 @@ func _control_action(id: int) -> void:
 		5: help_panel.visible = not help_panel.visible
 		6: _exit_board()
 		7: Game.set_manual(not Game.manual)
+		8: _open_save_panel("save")
+		9: _open_save_panel("load")
 
 
 # ═══ Decisione corrente ══════════════════════════════════════════════════════
@@ -805,6 +809,22 @@ func _show_event_report(ev: Dictionary) -> void:
 
 func _open_history() -> void:
 	_reading_dialog(L10n.t("CRONACA"), log_box.get_parsed_text(), false, true)
+
+
+## Apre il pannello delle ranure. In «load» ricarica la scena con la partita
+## scelta; in «save» resta sulla partita e riprende da dove era.
+func _open_save_panel(p_mode: String) -> void:
+	var panel: Control = preload("res://scenes/SavePanel.tscn").instantiate()
+	add_child(panel)
+	panel.setup(p_mode)
+	var was_paused := Game.paused
+	Game.set_paused(true)
+	panel.done.connect(func(path: String) -> void:
+		panel.queue_free()
+		if p_mode == "load" and path != "" and Game.load_game(path):
+			get_tree().reload_current_scene()
+			return
+		Game.set_paused(was_paused))
 
 
 func _reading_dialog(title: String, content: String, formatted: bool, scroll_end: bool = false, key: String = "") -> BattleReport:

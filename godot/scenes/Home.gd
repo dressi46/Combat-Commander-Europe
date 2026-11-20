@@ -75,10 +75,32 @@ func _button(key: String, action: Callable) -> Button:
 
 func _home() -> void:
 	_page("Combat Commander\nEurope")
-	_button("Single player", _scenarios.bind(false)).grab_focus()
+	var first := true
+	if Game.has_autosave():
+		_button("Continue last game", _continue)
+		first = false
+	var single := _button("Single player", _scenarios.bind(false))
+	if first:
+		single.grab_focus()
 	_button("Multiplayer", _multiplayer_menu)
+	_button("Load game", _load_dialog)
 	_button("Mission and card workshop", _workshop)
 	_button("Settings", _settings)
+
+
+func _continue() -> void:
+	if Game.load_game(SaveGame.auto_path()):
+		get_tree().change_scene_to_file("res://scenes/Partita.tscn")
+
+
+func _load_dialog() -> void:
+	var panel: Control = preload("res://scenes/SavePanel.tscn").instantiate()
+	get_tree().root.add_child(panel)
+	panel.setup("load")
+	panel.done.connect(func(path: String) -> void:
+		panel.queue_free()
+		if path != "" and Game.load_game(path):
+			get_tree().change_scene_to_file("res://scenes/Partita.tscn"))
 
 
 func _workshop() -> void:

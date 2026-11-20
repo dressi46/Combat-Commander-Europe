@@ -24,6 +24,7 @@ func _ready() -> void:
 	want_3d = args.size() > 3
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	Game.speed = 30.0
+	Game.autosave_enabled = false
 	Game.start_new_game(Flow.AX, scen, 2, Game.Mode.VS_AI, 4242)
 	helper = Bot.new(Game.flow, 2, 99)
 	var scene: PackedScene = load("res://scenes/Partita.tscn")

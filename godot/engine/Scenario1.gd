@@ -190,7 +190,7 @@ static func _u(
 
 
 ## Popola uno GameState con i dati dello scenario.
-static func setup(state: GameState) -> void:
+static func setup(state: GameState, rng: RandomNumberGenerator = null) -> void:
 	# Mappa, terreno, lati e obiettivi dai dati recuperati (dipinti a mano)
 	if not MapLoader.load_into(state, "res://assets/maps/map1.json"):
 		# Ripiego: griglia minima
@@ -205,8 +205,9 @@ static func setup(state: GameState) -> void:
 	# Chit Obiettivo dalla scheda di «Fat Lipki» (7.3.2): 1 aperto casuale +
 	# 1 segreto per lato; controllo iniziale: nessuno (ricognizione contro
 	# ricognizione). Gli obiettivi valgono 0 VP finché un chit non li valorizza.
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
 	for line in ObjectiveChits.setup(state, { "open": ["?"], "axis": ["?"], "allies": ["?"] }, rng):
 		state.add_log(String(line))
 	state.units = build_units()

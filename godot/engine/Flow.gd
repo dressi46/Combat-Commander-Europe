@@ -42,6 +42,8 @@ var turn_count: int = 1
 var _answer: Dictionary = {}
 var _pending_time: Array = []       ## lati che hanno innescato un avanzamento del Tempo
 var _rng := RandomNumberGenerator.new()
+var seed_value: int = 0          ## seme della partita (per salvataggi e replay)
+var history: Array = []          ## decisioni già prese: { who, kind, index }
 var _moving_ids: Array = []         ## unità attualmente «attivate a Muovere»
 var _opfire_ids: Array = []         ## unità attivate per il Fuoco di Opportunità in questa Mossa
 var _team_seq: int = 0
@@ -70,12 +72,14 @@ static func new_game(scenario_num: int, human: int = AX, seed_value: int = 0) ->
 		f._rng.seed = seed_value
 		seed(seed_value)
 	else:
-		f._rng.randomize()
+		seed_value = int(Time.get_unix_time_from_system() * 1000.0) ^ int(Time.get_ticks_usec())
+		f._rng.seed = seed_value
+	f.seed_value = seed_value
 	var st := GameState.new()
 	st.human_faction = human
-	if scenario_num <= 1 or not ScenarioLoader.setup(st, scenario_num):
+	if scenario_num <= 1 or not ScenarioLoader.setup(st, scenario_num, f._rng):
 		st.edge_mode = 1
-		Scenario1.setup(st)
+		Scenario1.setup(st, f._rng)
 		st.scenario_number = 1
 		st.scenario_name = "Fat Lipki"
 		f.orders_max[AX] = int(Scenario1.SETUP["german_orders"])
@@ -109,6 +113,25 @@ static func new_game(scenario_num: int, human: int = AX, seed_value: int = 0) ->
 func start() -> void:
 	say(L10n.t("[b]Scenario %d — %s[/b]") % [s.scenario_number, L10n.t(s.scenario_name)], "turn")
 	_run()
+
+
+## Ricostruisce una partita da seme + sequenza di decisioni. È la base del
+## salvataggio: la pila delle coroutine non è serializzabile, ma il motore è
+## deterministico, quindi ripetere le stesse scelte ridà lo stesso stato.
+static func replay(scenario_num: int, human: int, seed_value: int, saved_history: Array,
+		p_manual_setup: bool = false, p_explain_events: bool = false) -> Flow:
+	var f := Flow.new_game(scenario_num, human, seed_value)
+	f.manual_setup = p_manual_setup
+	f.explain_events = p_explain_events
+	f.start()
+	f.events.clear()
+	for entry in saved_history:
+		if f.pending.is_empty():
+			break
+		f.answer(int(entry.get("index", 0)))
+		f.events.clear()
+	f.events.clear()
+	return f
 
 
 func _run() -> void:
@@ -176,6 +199,7 @@ func answer(index: int) -> void:
 	var opts: Array = pending["options"]
 	if index < 0 or index >= opts.size():
 		return
+	history.append({ "who": int(pending["who"]), "kind": String(pending["kind"]), "index": index })
 	_answer = opts[index]
 	pending = {}
 	_answered.emit()
@@ -511,7 +535,7 @@ func _resolve_event_card(c: Card, f: int) -> void:
 		check_end()
 		return
 	var before := s.units.size()
-	for line in Events.fire(s, c, f):
+	for line in Events.fire(s, c, f, _rng):
 		say("   " + String(line), "fate")
 	# Unità create dagli eventi (Eroe, Soldato semplice): dotale del lato rotto.
 	if s.units.size() != before:

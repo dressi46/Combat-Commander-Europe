@@ -6,7 +6,7 @@ Abre el juego y entra en **Multijugador → Sala de juego en línea**. Conecta c
 
 El servidor ejecuta el motor de reglas de la versión individual y usa el despliegue automático del modo para dos jugadores. Cada movimiento se valida contra el bando, la decisión y las opciones actuales. Cada participante recibe la mano propia y el número de cartas del adversario. Las identidades de las cartas que quedan en los mazos se quedan en el servidor.
 
-Una desconexión pausa la partida durante cinco minutos. Pulsa **Conectar** de nuevo desde la misma instancia del juego para recuperar tu asiento. Mantén abierta la pestaña o aplicación. Salir expresamente de la sala termina la partida para ambos. Las salas viven en memoria y caducan si se reinicia el servidor.
+Una desconexión pausa la partida. El servidor guarda cada sala y la partida (semilla y decisiones) en disco, así que puedes cerrar el navegador o reiniciar el servidor y volver con tu token desde la misma instalación; las salas se conservan siete días. Pulsa **Conectar** de nuevo para recuperar tu asiento. Salir expresamente de la sala termina la partida para ambos.
 
 ## Probar en Ubuntu
 

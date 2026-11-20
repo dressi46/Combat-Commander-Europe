@@ -10,12 +10,99 @@ extends RefCounted
 
 const SAVE_PATH := "user://savegame.json"
 const VERSION := 1
+const SAVE_DIR := "user://saves/"
+const GAME_VERSION := 2
 
 
 # ─── API ──────────────────────────────────────────────────────────────────────
 
 static func has_save(path: String = SAVE_PATH) -> bool:
 	return FileAccess.file_exists(path)
+
+
+# ─── Partita completa (stato + semi + decisioni) ─────────────────────────────
+
+static func saves_dir() -> String:
+	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	return SAVE_DIR
+
+
+static func auto_path() -> String:
+	return SAVE_DIR + "auto.json"
+
+
+static func slot_path(slot: int) -> String:
+	return SAVE_DIR + "slot%d.json" % slot
+
+
+## Serializza una partita intera: scenario, lato umano, modalità, difficoltà,
+## seme e tutte le decisioni già prese. Lo stato è incluso per l'anteprima e
+## come rete di sicurezza, ma il ripristino usa il replay deterministico.
+static func game_dict(flow: Flow, mode: int, difficulty: int) -> Dictionary:
+	return {
+		"version": GAME_VERSION,
+		"saved_at": int(Time.get_unix_time_from_system()),
+		"scenario": flow.s.scenario_number,
+		"scenario_name": String(flow.s.scenario_name),
+		"human": flow.s.human_faction,
+		"mode": mode,
+		"difficulty": difficulty,
+		"seed": flow.seed_value,
+		"history": flow.history.duplicate(true),
+		"state": _state_to_dict(flow.s),
+	}
+
+
+static func save_game(flow: Flow, mode: int, difficulty: int, path: String) -> bool:
+	if flow == null or flow.s == null:
+		return false
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		push_error("Salvataggio: impossibile aprire %s" % path)
+		return false
+	file.store_string(JSON.stringify(game_dict(flow, mode, difficulty)))
+	file.close()
+	return true
+
+
+## Legge i metadati di un salvataggio (senza ricostruire la partita).
+static func read_game(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {}
+	var data: Variant = JSON.parse_string(file.get_as_text())
+	file.close()
+	if not (data is Dictionary) or int(data.get("version", 0)) < 2:
+		return {}
+	if not (data.get("history") is Array):
+		return {}
+	return data
+
+
+## Elenco de las ranuras (auto + 1..3) con metadatos, para los menús.
+static func list_games() -> Array:
+	var out: Array = []
+	var paths: Array = [auto_path()]
+	for slot in range(1, 4):
+		paths.append(slot_path(slot))
+	for path in paths:
+		var data := read_game(path)
+		if data.is_empty():
+			continue
+		out.append({
+			"path": path,
+			"slot": 0 if path == auto_path() else int(path.get_file().trim_prefix("slot").trim_suffix(".json")),
+			"scenario": int(data.get("scenario", 0)),
+			"scenario_name": String(data.get("scenario_name", "")),
+			"human": int(data.get("human", 0)),
+			"mode": int(data.get("mode", 0)),
+			"difficulty": int(data.get("difficulty", 1)),
+			"saved_at": int(data.get("saved_at", 0)),
+			"decisions": (data.get("history", []) as Array).size(),
+		})
+	return out
 
 
 ## Salva lo stato su `path`. Restituisce true se riuscito.

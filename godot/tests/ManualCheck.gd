@@ -9,6 +9,7 @@ var answers := 0
 func _ready() -> void:
 	var was_manual := Game.manual
 	var was_speed := Game.speed
+	Game.autosave_enabled = false
 	get_window().size = Vector2i(1280, 800)
 	Game.speed = 30.0
 	Game.manual = true

@@ -1,6 +1,7 @@
 extends Node
 ## Dedicated lobby. Each connection owns at most one seat, each room one Flow.
-const GRACE_MS := 300000
+const GRACE_SECONDS := 604800  # 7 giorni: si può riprendere anche dopo molto tempo
+const ROOM_DIR := "user://rooms/"
 const MAX_CLIENTS := 80
 const MAX_ROOMS := 32
 var listener := TCPServer.new()
@@ -21,6 +22,7 @@ func _ready() -> void:
 		push_error("Cannot listen on port %d" % port)
 		get_tree().quit(1)
 		return
+	_load_rooms()
 	print("Lobby listening on port %d" % port)
 
 
@@ -62,8 +64,72 @@ func _process(_delta: float) -> void:
 				_request(id, msg)
 	for code in rooms.keys():
 		var r: Dictionary = rooms[code]
-		if r.expires > 0 and now >= r.expires:
+		if int(r.get("expires_at", 0)) > 0 and Time.get_unix_time_from_system() >= int(r.expires_at):
 			_end_room(code, "Room expired")
+
+
+func _room_path(code: String) -> String:
+	return ROOM_DIR + code + ".json"
+
+
+## Salva la stanza e la partita (seme + decisioni) su disco, così il server
+## può ripartire senza perdere le partite in corso.
+func _save_room(r: Dictionary) -> void:
+	DirAccess.make_dir_recursive_absolute(ROOM_DIR)
+	var data := {
+		"version": 1,
+		"code": r.code,
+		"scenario": int(r.scenario),
+		"host_side": int(r.host_side),
+		"open": bool(r.open),
+		"revision": int(r.revision),
+		"tokens": r.tokens,
+		"expires_at": int(r.get("expires_at", 0)),
+		"seed": r.flow.seed_value if r.flow != null else 0,
+		"history": r.flow.history if r.flow != null else [],
+	}
+	var file := FileAccess.open(_room_path(String(r.code)), FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify(data))
+	file.close()
+
+
+func _load_rooms() -> void:
+	DirAccess.make_dir_recursive_absolute(ROOM_DIR)
+	var dir := DirAccess.open(ROOM_DIR)
+	if dir == null:
+		return
+	for file_name in dir.get_files():
+		if not file_name.ends_with(".json"):
+			continue
+		var file := FileAccess.open(ROOM_DIR + file_name, FileAccess.READ)
+		if file == null:
+			continue
+		var data: Variant = JSON.parse_string(file.get_as_text())
+		file.close()
+		if not (data is Dictionary):
+			continue
+		var code := String(data.get("code", ""))
+		if code == "":
+			continue
+		var tokens: Variant = data.get("tokens", ["", ""])
+		var r := {
+			"code": code,
+			"scenario": int(data.get("scenario", 1)),
+			"host_side": int(data.get("host_side", 0)),
+			"open": bool(data.get("open", false)),
+			"ids": [0, 0],
+			"tokens": tokens if tokens is Array and (tokens as Array).size() == 2 else ["", ""],
+			"flow": null,
+			"revision": int(data.get("revision", 0)),
+			"expires_at": int(data.get("expires_at", 0)),
+		}
+		var saved_history: Variant = data.get("history", [])
+		if saved_history is Array and not (saved_history as Array).is_empty():
+			r.flow = Flow.replay(int(r.scenario), int(r.host_side), int(data.get("seed", 0)), saved_history, false, false)
+		rooms[code] = r
+	print("Rooms restored: %d" % rooms.size())
 
 
 func _send(id: int, msg: Dictionary) -> void:
@@ -154,9 +220,10 @@ func _request(id: int, msg: Dictionary) -> void:
 			return
 		var code := crypto.generate_random_bytes(12).hex_encode()
 		var r := {"code": code, "scenario": int(n), "host_side": int(msg.side), "open": msg.open,
-			"ids": [id, 0], "tokens": [_token(), ""], "flow": null, "revision": 0, "expires": 0}
+			"ids": [id, 0], "tokens": [_token(), ""], "flow": null, "revision": 0, "expires_at": 0}
 		rooms[code] = r
 		_seat(id, r, 0)
+		_save_room(r)
 		_refresh_lobby()
 	elif op == "join" and p.room == "":
 		var r: Dictionary = rooms.get(msg.get("code"), {})
@@ -170,6 +237,7 @@ func _request(id: int, msg: Dictionary) -> void:
 		r.flow.start()
 		L10n.match_text = null
 		_publish(r)
+		_save_room(r)
 		_refresh_lobby()
 	elif op == "resume" and p.room == "":
 		var r: Dictionary = rooms.get(msg.get("code"), {})
@@ -182,10 +250,10 @@ func _request(id: int, msg: Dictionary) -> void:
 			_error(id, "Seat still connected")
 			return
 		_seat(id, r, slot)
-		if not r.ids.has(0) or (r.flow == null and slot == 0):
-			r.expires = 0
+		r.expires_at = 0
 		if r.flow != null:
 			_publish(r)
+		_save_room(r)
 		_refresh_lobby()
 	elif op == "leave" and p.room != "":
 		_end_room(p.room, "Player left the room")
@@ -225,6 +293,7 @@ func _publish(r: Dictionary) -> void:
 			view.paused = r.ids.has(0)
 			_send(id, view)
 	r.flow.events.clear()
+	_save_room(r)
 
 
 func _disconnect(id: int) -> void:
@@ -233,15 +302,17 @@ func _disconnect(id: int) -> void:
 	if rooms.has(p.room):
 		var r: Dictionary = rooms[p.room]
 		r.ids[r.ids.find(id)] = 0
-		r.expires = Time.get_ticks_msec() + GRACE_MS
+		r.expires_at = int(Time.get_unix_time_from_system()) + GRACE_SECONDS
 		if r.flow != null:
 			_publish(r)
+		_save_room(r)
 		_refresh_lobby()
 
 
 func _end_room(code: String, reason: String) -> void:
 	var r: Dictionary = rooms[code]
 	rooms.erase(code)
+	DirAccess.remove_absolute(_room_path(code))
 	for id in r.ids:
 		if peers.has(id):
 			peers[id].room = ""

@@ -3,6 +3,7 @@ extends Node
 signal changed
 const LOBBY := "res://online/Lobby.tscn"
 const BOARD := "res://scenes/Partita.tscn"
+const SESSION := "user://session.cfg"
 const PUBLIC_URL := "wss://lobby.dressi.es"
 var nickname := ""
 var proof := ""
@@ -28,6 +29,10 @@ func _ready() -> void:
 	var config := ConfigFile.new()
 	if config.load("user://lobby.cfg") == OK:
 		endpoint = config.get_value("network", "endpoint", PUBLIC_URL)
+	var session := ConfigFile.new()
+	if session.load(SESSION) == OK:
+		code = String(session.get_value("match", "code", ""))
+		token = String(session.get_value("match", "token", ""))
 	if OS.has_feature("web") and endpoint == PUBLIC_URL:
 		var loc = JavaScriptBridge.get_interface("window").location
 		if loc.protocol == "https:":
@@ -115,6 +120,7 @@ func _receive(msg: Dictionary) -> void:
 			code = msg.code
 			token = msg.token
 			status = "Waiting for another player"
+			_save_session()
 		"state":
 			var first := not in_match
 			in_match = true
@@ -202,9 +208,18 @@ func exit_lobby() -> void:
 	get_tree().change_scene_to_file("res://scenes/Home.tscn")
 
 
+func _save_session() -> void:
+	var cfg := ConfigFile.new()
+	if token != "":
+		cfg.set_value("match", "code", code)
+		cfg.set_value("match", "token", token)
+	cfg.save(SESSION)
+
+
 func _clear_seat() -> void:
 	code = ""
 	token = ""
 	revision = -1
 	waiting = false
+	_save_session()
 	recent = []
