@@ -273,6 +273,9 @@ static func _interdiction(state: GameState, lines: Array[String]) -> void:
 ## E55 Trinceramento: il giocatore posa una buca su un esagono occupato da una
 ## sua unità, privo di buca e di fortificazioni.
 static func _entrench_event(state: GameState, faction: int, lines: Array[String]) -> void:
+	if ScenarioEffects.fortifications_locked(state.scenario_number):
+		lines.append(L10n.t("Confusione di Comando: le fortificazioni non possono più entrare in gioco."))
+		return
 	for u in state.units_of(faction):
 		if not u.is_man():
 			continue

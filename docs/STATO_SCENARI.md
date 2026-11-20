@@ -2,6 +2,20 @@
 
 Legenda: ✅ automatizzato dal motore · 👁️ mostrato nelle «Regole scenario» ma non ancora automatizzato.
 
+> **Fase 1 — primer lote automatizado** (`tests/ScenarioRulesCheck.gd`, 21 comprobaciones):
+> - **2 · Bocage**: cruzar una siepe cuesta +2 PM (la cobertura +1 sigue pendiente).
+> - **5 · Gelo profondo**: fortificaciones bloqueadas tras el inicio.
+> - **7 · Nessuna pietà**: las salidas eliminan y no dan PV.
+> - **8 · Acción nocturna**: descarte del Eje = 1, fuego −distancia y salidas rusas eliminadas.
+> - **10 · Commandos**: +1 al cuerpo a cuerpo aliado.
+> - **12 · Cuevas**: cecchinos del Eje a 2 hexágonos.
+> - **13 · Salidas alemanas**: eliminadas; solo los Aliados puntúan por salida.
+> - **20 · Incursión**: salida del Eje bloqueada mientras haya un arma aliada en juego.
+> - **22 · Fuego de fijación**: escuadras británicas empiezan suprimidas; crepúsculo = marcador de Tiempo.
+> - **23 · Minas**: fuerza 7.
+>
+> El resto de reglas marcadas 👁️ sigue pendiente.
+
 Tutte le **regole speciali** dei 24 scenari sono visibili in gioco (menu «Regole scenario» e pulsante «Regole»).
 
 

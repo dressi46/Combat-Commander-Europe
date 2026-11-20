@@ -41,6 +41,24 @@
 
 ## 4. Lagunas concretas
 
+### 4.0 Progreso de la Fase 1 (primer lote)
+
+Ya aplicadas y cubiertas por `tests/ScenarioRulesCheck.gd` (21 comprobaciones):
+
+- Escenario 2: coste de siepe +2 PM (Bocage).
+- Escenario 5: fortificaciones bloqueadas tras el inicio.
+- Escenarios 7, 8, 13: salidas que eliminan en vez de dar PV.
+- Escenario 8: descarte del Eje = 1 y penalización nocturna por distancia.
+- Escenario 10: +1 al cuerpo a cuerpo aliado.
+- Escenario 12: cecchinos del Eje a 2 hexágonos.
+- Escenario 20: salida del Eje bloqueada mientras haya un arma aliada.
+- Escenario 22: escuadras británicas suprimidas y crepúsculo = marcador de Tiempo.
+- Escenario 23: minas de fuerza 7.
+
+Quedan ~80 reglas 👁️ por automatizar (nieve 1½, partisanos, camuflaje invernal, niebla variable por Brezza, defensa fanática, camino hundido, Sissu, Motti, despliegues ocultos, observador avanzado, artillería negada, etc.).
+
+**Estabilidad tras el lote:** suite completa en verde y `SelfPlay` **48/48 partidas, 0 fallos**.
+
 ### 4.1 Reglas especiales de escenario (crítico)
 
 `docs/STATO_SCENARI.md` marca **90 reglas especiales como 👁️ “mostradas pero no automatizadas”** y solo 58 elementos de setup como ✅. Ejemplos:

@@ -193,6 +193,8 @@ const SMOKE_HINDRANCE := 3   ## modello a fumo booleano: valore rappresentativo
 
 static func los_hindrance(q1: int, r1: int, q2: int, r2: int, state: GameState) -> int:
 	var best := 0
+	if ScenarioEffects.twilight(state.scenario_number):
+		best = maxi(best, state.time_marker)
 	for p in [Vector2i(q1, r1), Vector2i(q2, r2)]:
 		var ehd: GameState.HexData = state.hex_at(p.x, p.y)
 		if ehd != null and ehd.has_smoke:
@@ -219,6 +221,8 @@ static func los_hindrance(q1: int, r1: int, q2: int, r2: int, state: GameState) 
 		if state.side_feature_between(a, b) == Domain.HexsideFeature.FENCE \
 				and maxi(elev_of(state, a.x, a.y), elev_of(state, b.x, b.y)) >= hi:
 			best = maxi(best, 1)
+	if ScenarioEffects.twilight(state.scenario_number):
+		best = maxi(best, state.time_marker)
 	return best
 
 
@@ -252,6 +256,9 @@ static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int, deta
 		if details != null:
 			details.crossing = true
 		base += 1  # Terrain Chart: Recinzione/Siepe/Muro costano +1 PM
+	# Bocage (scenario 2): le siepi costano un ulteriore +1 PM.
+	if feat == Domain.HexsideFeature.BOCAGE or feat == Domain.HexsideFeature.HEDGE:
+		base += ScenarioEffects.hedge_move_extra(state.scenario_number)
 	# Salita (T88.1): +1 PM per entrare in un esagono a quota SUPERIORE. La quota è
 	# il campo `elevation`, con un minimo implicito dal terreno collina (HILL1/2).
 	var to_elev: int = maxi(hd.elevation, _terrain_elevation(hd.terrain))

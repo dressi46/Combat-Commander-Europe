@@ -33,6 +33,9 @@ static func play(state: GameState, card: Card, faction: int) -> Array[String]:
 ## propria unità che non ne ha già una. Versione semplificata della posa
 ## «nascosta» (A35): qui è giocabile come azione normale, non solo allo scarto.
 static func _place_fort(state: GameState, faction: int, fort: int, lines: Array[String]) -> void:
+	if ScenarioEffects.fortifications_locked(state.scenario_number):
+		lines.append(L10n.t("Confusione di Comando: le fortificazioni non possono più entrare in gioco."))
+		return
 	for u in state.units_of(faction):
 		if not u.is_man():
 			continue

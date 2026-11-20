@@ -239,6 +239,9 @@ func pile(f: int) -> Array[Card]:
 	return s.german_discard if f == AX else s.russian_discard
 
 func discard_limit(f: int) -> int:
+	var imposed := ScenarioEffects.discard_limit(s.scenario_number, f)
+	if imposed >= 0:
+		return imposed
 	return int(DISCARD_LIMIT.get(Cards.DECK_FILE.get(nation(f), "german"), 4))
 
 func is_defender(f: int) -> bool:
@@ -500,7 +503,7 @@ func _sniper(f: int) -> void:
 	var h := random_hex(f)
 	var cands: Array = []
 	for u in s.units.values():
-		if u.is_man() and u.faction != f and HexGrid.distance(h.x, h.y, u.q, u.r) <= 1:
+		if u.is_man() and u.faction != f and HexGrid.distance(h.x, h.y, u.q, u.r) <= ScenarioEffects.sniper_range(s.scenario_number, f):
 			cands.append(u)
 	if cands.is_empty():
 		say(L10n.t("Cecchino in %s: nessun nemico a tiro.") % lbl(h), "fate", { "hex": h, "fx": "sniper" })
@@ -1250,7 +1253,7 @@ func _move_stack(f: int, stack: Array) -> bool:
 				var remaining := left - c + bonus
 				opts.append({"id": "step", "hex": nb, "cost": c, "remaining": remaining,
 					"road_gain": bonus, "label": L10n.t("%s · %d MP → %d left") % [lbl(nb), c, remaining]})
-		if left >= 1 and at_edge(opp(f), u.pos()):
+		if left >= 1 and at_edge(opp(f), u.pos()) and not ScenarioEffects.exit_blocked(s, f):
 			var v := 0
 			for m: Unit in stack:
 				v += GameState.elimination_vp(m) * (2 if s.chit_double_exit else 1)
@@ -1323,8 +1326,16 @@ func _move_stack(f: int, stack: Array) -> bool:
 func _exit_unit(f: int, u: Unit) -> void:
 	var from := u.pos()
 	var nm := u.display_name
-	var v := s.exit_unit_for_vp(u.id)
 	_moving_ids.erase(u.id)
+	if ScenarioEffects.exit_eliminates(s.scenario_number, f):
+		s.eliminate_unit(u.id)
+		say(L10n.t("%s esce dalla mappa e viene ELIMINATA (nessun PV di Uscita).") % nm, "kill", { "hex": from, "who": f })
+		update_objectives()
+		check_end()
+		if s.men_of(f).is_empty():
+			_finish_on_points(L10n.t("L'ultima unità dei %s ha lasciato la mappa.") % side_name(f))
+		return
+	var v := s.exit_unit_for_vp(u.id)
 	say(L10n.t("%s esce dalla mappa: +%d PV ai %s. Rientrerà come rinforzo.") % [nm, v, side_name(f)], "vp", { "hex": from, "who": f })
 	update_objectives()
 	if s.men_of(f).is_empty():
@@ -1383,7 +1394,7 @@ func _mine_attack(u: Unit, h: Vector2i) -> void:
 	var atk := await roll(opp(own), L10n.t("l'attacco delle Mine in %s") % lbl(h), func(t: int) -> int: return own if t >= 8 else -1)
 	if not s.units.has(u.id):
 		return
-	var total: int = 6 + int(atk["sum"])
+	var total: int = ScenarioEffects.mine_strength(s.scenario_number) + int(atk["sum"])
 	var m := morale_of(u)
 	var dr := await roll(own, L10n.t("la difesa di %s dalle Mine") % u.display_name,
 		func(t: int) -> int: return own if m + t <= total else opp(own))
@@ -1408,7 +1419,7 @@ func _react_to_entry(f: int, units: Array, h: Vector2i, kind: String) -> void:
 			return
 		var hd: GameState.HexData = s.hex_at(h.x, h.y)
 		var opts: Array = []
-		if is_defender(d) and not hd.has_foxhole and hd.fortification == Domain.Fort.NONE and not Rules.is_water_hex(s, h.x, h.y):
+		if is_defender(d) and not ScenarioEffects.fortifications_locked(s.scenario_number) and not hd.has_foxhole and hd.fortification == Domain.Fort.NONE and not Rules.is_water_hex(s, h.x, h.y):
 			var mc := find_action(d, "MINE NASCOSTE")
 			if mc != null:
 				opts.append({ "id": "mines", "card": hand(d).find(mc), "label": L10n.t("Azione: Mine Nascoste in %s") % lbl(h) })
@@ -1741,6 +1752,14 @@ func _fire_mods(f: int, pieces: Array, hexes: Array, opts: Dictionary) -> Array:
 	return out
 
 
+## Distanza dall'esagono di fuoco più vicino (per l'azione notturna, SSR 8).
+static func night_penalty(pieces: Array, h: Vector2i) -> int:
+	var near := 99
+	for p in pieces:
+		near = mini(near, HexGrid.distance(p.q, p.r, h.x, h.y))
+	return 0 if near == 99 else near
+
+
 ## Risoluzione completa di un attacco di fuoco (O20.2–O20.3.4).
 func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 	var d := opp(f)
@@ -1798,6 +1817,11 @@ func _fire_attack(f: int, pieces: Array, h: Vector2i, opts: Dictionary) -> void:
 	if over:
 		return
 	var total: int = fp + bonus + int(ar["sum"])
+	if ScenarioEffects.night_fire(s.scenario_number):
+		var near := night_penalty(pieces, h)
+		if near > 0:
+			total -= near
+			say(L10n.t("Azione notturna: -%d al totale (distanza %d).") % [near, near], "fire")
 	if sustained and int(ar["a"]) == int(ar["b"]):
 		for w: Unit in weapons:
 			if w.unit_class == Domain.UnitClass.MG or w.unit_class == Domain.UnitClass.MORTAR:
@@ -1850,7 +1874,7 @@ func _defense_actions(d: int, hexes: Array, total: int, vs_ord: bool) -> int:
 		var c1 := find_action(d, "MIMETIZZAZIONE")
 		if c1 != null and cov > 0:
 			o.append({ "id": "conceal", "card": hand(d).find(c1), "label": L10n.t("Azione: Mimetizzazione (−%d all'attacco)") % cov })
-		if is_defender(d):
+		if is_defender(d) and not ScenarioEffects.fortifications_locked(s.scenario_number):
 			for hx: Vector2i in hexes:
 				var hd: GameState.HexData = s.hex_at(hx.x, hx.y)
 				if hd.has_foxhole or hd.fortification != Domain.Fort.NONE or Rules.is_water_hex(s, hx.x, hx.y):
@@ -1924,7 +1948,7 @@ func _order_advance(f: int) -> void:
 		for nb in HexGrid.neighbors(u2.q, u2.r):
 			if can_advance(u2, nb):
 				o2.append({ "id": "hex", "hex": nb, "melee": enemy_in(nb, f), "label": "%s%s" % [lbl(nb), L10n.t(" — CORPO A CORPO") if enemy_in(nb, f) else ""] })
-		if at_edge(opp(f), u2.pos()):
+		if at_edge(opp(f), u2.pos()) and not ScenarioEffects.exit_blocked(s, f):
 			o2.append({ "id": "exit", "label": L10n.t("Esci dalla mappa (+PV)") })
 		o2.append({ "id": "stay", "label": L10n.t("%s resta ferma") % u2.display_name })
 		var b := await ask(f, "advance", L10n.t("AVANZATA · %s: tocca l'esagono adiacente in cui avanzare.") % u2.display_name, o2, { "unit": u2.id })
@@ -2391,6 +2415,9 @@ func _reinforcements() -> void:
 func _event_native(c: Card, f: int) -> bool:
 	match c.event_name:
 		"CRATERI", "TRAPPOLA ESPLOSIVA":
+			if ScenarioEffects.fortifications_locked(s.scenario_number):
+				say(L10n.t("   Confusione di Comando: l'evento non può portare fortificazioni in gioco."), "bad")
+				return true
 			var h := random_hex(f)
 			var hd: GameState.HexData = s.hex_at(h.x, h.y)
 			if hd == null or hd.has_blaze or hd.has_foxhole or hd.fortification != Domain.Fort.NONE or Rules.is_water_hex(s, h.x, h.y):

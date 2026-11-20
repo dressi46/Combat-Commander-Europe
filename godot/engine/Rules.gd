@@ -329,6 +329,9 @@ static func resolve_melee(
 	res.def_dice = def_dice
 	res.atk_total = _melee_strength(attackers) + atk_dice.x + atk_dice.y
 	res.def_total = _melee_strength(defenders) + def_dice.x + def_dice.y
+	# SSR (scenario 10): l'Alleato aggiunge +1 ai suoi tiri di Mischia.
+	res.atk_total += ScenarioEffects.melee_bonus(state.scenario_number, atk_faction)
+	res.def_total += ScenarioEffects.melee_bonus(state.scenario_number, def_faction)
 
 	var losers: Array = []
 	if res.atk_total > res.def_total:

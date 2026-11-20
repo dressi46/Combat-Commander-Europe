@@ -175,6 +175,7 @@ static func setup(state: GameState, num: int, rng: RandomNumberGenerator = null)
 	state.reinforcements.clear()
 	_place_side(state, e, "axis", Domain.Faction.GERMAN)
 	_place_side(state, e, "allies", Domain.Faction.RUSSIAN)
+	ScenarioEffects.apply_initial_state(state)
 	return true
 
 

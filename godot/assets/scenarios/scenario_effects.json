@@ -1,69 +1,116 @@
 {
- "3": {
-  "exclude_chits": [
-   "V",
-   "W",
-   "X"
-  ],
-  "opening_cards": {
-   "axis": [
-    "G-65"
-   ]
+  "3": {
+    "exclude_chits": [
+      "V",
+      "W",
+      "X"
+    ],
+    "opening_cards": {
+      "axis": [
+        "G-65"
+      ]
+    }
+  },
+  "5": {
+    "exclude_chits": [
+      "R",
+      "V",
+      "X"
+    ],
+    "fortifications_locked": true
+  },
+  "6": {
+    "exclude_chits": [
+      "W"
+    ]
+  },
+  "7": {
+    "exclude_chits": [
+      "R",
+      "W"
+    ],
+    "opening_cards": {
+      "allies": [
+        "R-31"
+      ]
+    },
+    "exit_eliminates": {
+      "axis": true,
+      "allies": true
+    }
+  },
+  "17": {
+    "opening_cards": {
+      "axis": [
+        "G-32"
+      ]
+    }
+  },
+  "20": {
+    "exclude_chits": [
+      "R",
+      "V",
+      "W"
+    ],
+    "exit_block_allies_weapon": true
+  },
+  "21": {
+    "opening_cards": {
+      "axis": [
+        "I-32"
+      ]
+    }
+  },
+  "24": {
+    "exclude_chits": [
+      "R"
+    ],
+    "opening_cards": {
+      "axis": [
+        "I-33",
+        "I-34"
+      ]
+    }
+  },
+  "2": {
+    "hedge_move_extra": 1
+  },
+  "8": {
+    "discard_limit": {
+      "axis": 1
+    },
+    "night_fire": true,
+    "exit_eliminates": {
+      "axis": false,
+      "allies": true
+    }
+  },
+  "10": {
+    "melee_bonus": {
+      "axis": 0,
+      "allies": 1
+    }
+  },
+  "12": {
+    "sniper_range": {
+      "axis": 2,
+      "allies": 1
+    }
+  },
+  "13": {
+    "exit_eliminates": {
+      "axis": true,
+      "allies": false
+    }
+  },
+  "22": {
+    "initial_suppressed": {
+      "axis": false,
+      "allies": true
+    },
+    "twilight": true
+  },
+  "23": {
+    "mine_strength": 7
   }
- },
- "5": {
-  "exclude_chits": [
-   "R",
-   "V",
-   "X"
-  ]
- },
- "6": {
-  "exclude_chits": [
-   "W"
-  ]
- },
- "7": {
-  "exclude_chits": [
-   "R",
-   "W"
-  ],
-  "opening_cards": {
-   "allies": [
-    "R-31"
-   ]
-  }
- },
- "17": {
-  "opening_cards": {
-   "axis": [
-    "G-32"
-   ]
-  }
- },
- "20": {
-  "exclude_chits": [
-   "R",
-   "V",
-   "W"
-  ]
- },
- "21": {
-  "opening_cards": {
-   "axis": [
-    "I-32"
-   ]
-  }
- },
- "24": {
-  "exclude_chits": [
-   "R"
-  ],
-  "opening_cards": {
-   "axis": [
-    "I-33",
-    "I-34"
-   ]
-  }
- }
 }
