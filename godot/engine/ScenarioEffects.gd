@@ -213,6 +213,11 @@ static func sissu(num: int) -> bool:
 	return bool(entry(num).get("sissu", false))
 
 
+## Motti (scenario 20): Alleati solo su Strada, Asse solo su Bosco senza Strada.
+static func motti(num: int) -> bool:
+	return bool(entry(num).get("motti", false))
+
+
 ## Applica gli effetti di stato iniziale dopo che le forze sono piazzate.
 static func apply_initial_state(state: GameState) -> void:
 	var n := state.scenario_number

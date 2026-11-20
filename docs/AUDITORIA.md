@@ -53,11 +53,13 @@ Ya aplicadas y cubiertas por `tests/ScenarioRulesCheck.gd` (32 comprobaciones):
 - Escenario 10: +1 al cuerpo a cuerpo aliado.
 - Escenario 12: cecchinos del Eje a 2 hexágonos y niebla reducida por Brezza.
 - Escenario 16: defensa fanática y camino hundido.
-- Escenario 20: salida del Eje bloqueada y Sissu.
+- Escenario 20: salida del Eje bloqueada, Sissu y Motti.
 - Escenario 22: escuadras británicas suprimidas y crepúsculo = marcador de Tiempo.
 - Escenario 23: minas de fuerza 7.
 
-Quedan ~75 reglas 👁️ por automatizar (nieve 1½, despliegues ocultos, observador avanzado, Motti, artillería negada, humo de la Radio italiana, etc.).
+Quedan ~75 reglas 👁️ por automatizar (nieve 1½, despliegues ocultos, observador avanzado, artillería negada, humo de la Radio italiana, etc.).
+
+**Fase 3 iniciada:** `docs/CONFORMANCE.md` y `tests/ConformanceCheck.tscn` con la matriz (11 implementadas, 5 parciales, 4 ausentes) y modo `--strict` como puerta de calidad.
 
 **Estabilidad tras el lote:** suite completa en verde y `SelfPlay` **48/48 partidas, 0 fallos**.
 

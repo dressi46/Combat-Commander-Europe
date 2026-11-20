@@ -11,7 +11,7 @@ Legenda: ✅ automatizzato dal motore · 👁️ mostrato nelle «Regole scenari
 > - **12 · Cuevas**: cecchinos del Eje a 2 hexágonos; **cada Brezza reduce la niebla** en 1.
 > - **13 · Salidas alemanas**: eliminadas; solo los Aliados puntúan por salida.
 > - **16 · Blitzkrieg detenido**: **defensa fanática** (recuperar o Veterano tras una salida alemana) y **camino hundido** (LOS libre entre fosas y D5/M10).
-> - **20 · Incursión**: salida del Eje bloqueada mientras haya un arma aliada; **Sissu** (descarte de 1 carta tras los órdenes).
+> - **20 · Incursión**: salida del Eje bloqueada mientras haya un arma aliada; **Sissu** (descarte de 1 carta tras los órdenes); **Motti** (aliados solo en carretera, Eje solo en bosque sin carretera).
 > - **22 · Fuego de fijación**: escuadras británicas empiezan suprimidas; crepúsculo = marcador de Tiempo.
 > - **23 · Minas**: fuerza 7.
 >

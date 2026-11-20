@@ -558,13 +558,13 @@ static func _setup_hexes(state: GameState, e: Dictionary, side: String, depth_ov
 					for r in state.map_rows:
 						if HexGrid.distance(qr.x, qr.y, q, r) <= depth_override:
 							_add_hex(state, out, seen, q, r)
-			return out
+			return _motti_filter(state, out, side)
 		for lbl in anchors:
 			var qr := Domain.label_to_qr(String(lbl))
 			_add_hex(state, out, seen, qr.x, qr.y)
 			for d in _dirs(qr.x):
 				_add_hex(state, out, seen, qr.x + d.x, qr.y + d.y)
-		return out
+		return _motti_filter(state, out, side)
 	# Bordo: Axis a Est (colonne destre), Allied a Ovest (colonne sinistre).
 	# Profondità della zona di schieramento per lato (dalle schede scenario).
 	var depth := depth_override if depth_override > 0 else maxi(1, int(spec.get("depth", e.get("setup_%s_depth" % side, 3))))
@@ -582,7 +582,25 @@ static func _setup_hexes(state: GameState, e: Dictionary, side: String, depth_ov
 		for q in mini(depth, state.map_cols):
 			for r in state.map_rows:
 				_add_hex(state, out, seen, q, r)
-	return out
+	return _motti_filter(state, out, side)
+
+
+## Motti (SSR 20): limita la zona di schieramento al tipo di esagono imposto.
+static func _motti_filter(state: GameState, hexes: Array, side: String) -> Array:
+	if not ScenarioEffects.motti(state.scenario_number):
+		return hexes
+	var allowed: Array = []
+	for h in hexes:
+		var hd: GameState.HexData = state.hex_at(h.x, h.y)
+		if hd == null:
+			continue
+		if side == "allies":
+			if hd.has_road or hd.terrain == Domain.TerrainType.ROAD:
+				allowed.append(h)
+		else:
+			if hd.terrain == Domain.TerrainType.WOODS and not hd.has_road:
+				allowed.append(h)
+	return allowed if not allowed.is_empty() else hexes
 
 
 static func _add_hex(state: GameState, out: Array, seen: Dictionary, q: int, r: int) -> void:

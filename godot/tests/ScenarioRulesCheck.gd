@@ -126,5 +126,25 @@ func _ready() -> void:
 	# ── 20 · Sissu ────────────────────────────────────────────────────────
 	ok(ScenarioEffects.sissu(20), "escenario 20: Sissu activo")
 
+	# ── 20 · Motti: aliados en carretera, Eje en bosque sin carretera ─────
+	ok(ScenarioEffects.motti(20), "escenario 20: Motti activo")
+	var f20 := Flow.new_game(20, Flow.AX, 1)
+	var allies_ok := true
+	var axis_ok := true
+	for u in f20.s.units.values():
+		if not u.is_man():
+			continue
+		var hd: GameState.HexData = f20.s.hex_at(u.q, u.r)
+		if hd == null:
+			continue
+		if u.faction == Flow.AL:
+			if not (hd.has_road or hd.terrain == Domain.TerrainType.ROAD):
+				allies_ok = false
+		else:
+			if not (hd.terrain == Domain.TerrainType.WOODS and not hd.has_road):
+				axis_ok = false
+	ok(allies_ok, "escenario 20: aliados desplegados solo en carretera")
+	ok(axis_ok, "escenario 20: Eje desplegado solo en bosque sin carretera")
+
 	print("SCENARIO_RULES_RESULT: %s (%d controlli, %d falliti)" % ["PASS" if fails == 0 else "FAIL", total, fails])
 	get_tree().quit(0 if fails == 0 else 1)
