@@ -1275,6 +1275,18 @@ func _move_stack(f: int, stack: Array) -> bool:
 		var af := find_action(f, "FUOCO D'ASSALTO")
 		if af != null and not _assault_pieces(u).is_empty():
 			opts.append({ "id": "assault", "card": hand(f).find(af), "label": L10n.t("Azione: Fuoco d'Assalto") })
+		# O21.1.1: cedere un'arma a un'unità amica nello stesso esagono (1 PM).
+		if left >= 1:
+			for m: Unit in stack:
+				if s.weapon_carried_by(m.id) == null:
+					continue
+				var receivers: Array = []
+				for other: Unit in s.men_at(m.q, m.r):
+					if other.faction == f and other.id != m.id and s.weapon_carried_by(other.id) == null:
+						receivers.append(other)
+				if not receivers.is_empty():
+					opts.append({ "id": "transfer", "unit": m.id, "label": L10n.t("Cedi l'arma a un'unità nello stesso esagono (1 PM)") })
+					break
 		if opts.is_empty():
 			break
 		var who := u.display_name
@@ -1286,6 +1298,22 @@ func _move_stack(f: int, stack: Array) -> bool:
 		var a := await ask(f, "move", L10n.t("MOSSA · %s: %d PM rimasti. Tocca un esagono adiacente evidenziato per avanzare di un passo.") % [who, maxi(left, 0)],
 			opts, { "order": Domain.OrderType.MOVE, "unit": u.id, "left": left, "selected": stack.map(func(x: Unit) -> String: return x.id) })
 		match String(a.get("id", "stop")):
+			"transfer":
+				var carrier := s.unit_by_id(String(a.get("unit", "")))
+				if carrier != null:
+					var w := s.weapon_carried_by(carrier.id)
+					if w != null:
+						var ropts: Array = []
+						for other: Unit in s.men_at(carrier.q, carrier.r):
+							if other.faction == f and other.id != carrier.id and s.weapon_carried_by(other.id) == null:
+								ropts.append({ "id": "unit", "unit": other.id, "label": other.display_name })
+						ropts.append({ "id": "no", "label": L10n.t("Annulla") })
+						var b := await ask(f, "transfer", L10n.t("TRASPASSO · scegli chi riceve %s.") % w.display_name, ropts, { "unit": carrier.id })
+						if b.get("id") == "unit":
+							var recv := s.unit_by_id(String(b["unit"]))
+							if recv != null and s.transfer_weapon(carrier.id, recv.id):
+								spent += 1
+								say(L10n.t("%s cede %s a %s (1 PM).") % [carrier.display_name, w.display_name, recv.display_name], "order", { "who": f })
 			"step":
 				var to: Vector2i = a["hex"]
 				var from := u.pos()

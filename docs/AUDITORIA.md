@@ -56,6 +56,7 @@ Ya aplicadas y cubiertas por `tests/ScenarioRulesCheck.gd` (32 comprobaciones):
 - Escenario 20: salida del Eje bloqueada, Sissu y Motti.
 - Escenario 22: escuadras británicas suprimidas y crepúsculo = marcador de Tiempo.
 - Escenario 23: minas de fuerza 7.
+- Núcleo: traspaso de armas O21.1.1 implementado y probado.
 
 Quedan ~75 reglas 👁️ por automatizar (nieve 1½, despliegues ocultos, observador avanzado, artillería negada, humo de la Radio italiana, etc.).
 

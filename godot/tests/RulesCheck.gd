@@ -69,5 +69,15 @@ func _ready() -> void:
 		ok((Flow.support_data().get(nat, []) as Array).size() >= 20, "tabella %s presente" % nat)
 	var u := fl._spawn_support(Flow.AX, fl.support_items(Flow.AX, 6, false).filter(func(i: Dictionary) -> bool: return String(i["tipo"]) == "team")[0], Vector2i(7, 9))
 	ok(u != null and fl.s.weapon_carried_by(u.id) != null and u.has_sides, "il Team di supporto arriva con la sua arma e il lato rotto")
+	# O21.1.1: traspaso de arma entre unidades amigas en el mismo hexágono.
+	var st := GameState.new()
+	var a := Unit.new("a", Flow.AX, Domain.UnitType.SQUAD, Domain.UnitClass.RIFLE, "A")
+	var b := Unit.new("b", Flow.AX, Domain.UnitType.SQUAD, Domain.UnitClass.RIFLE, "B")
+	var w := Unit.new("w", Flow.AX, Domain.UnitType.WEAPON, Domain.UnitClass.MG, "MG")
+	a.q = 0; a.r = 0; b.q = 0; b.r = 0; w.q = 0; w.r = 0; w.carrier_id = "a"
+	st.units = { "a": a, "b": b, "w": w }
+	ok(st.transfer_weapon("a", "b"), "traspaso de arma permitido")
+	ok(st.weapon_carried_by("b") == w and st.weapon_carried_by("a") == null, "arma transferida al receptor")
+	ok(not st.transfer_weapon("a", "b"), "no se puede transferir un arma que ya no se lleva")
 	print("RULES_RESULT: %s (%d controlli, %d falliti)" % ["PASS" if fails == 0 else "FAIL", total, fails])
 	get_tree().quit(0 if fails == 0 else 1)

@@ -337,6 +337,29 @@ func weapon_carried_by(man_id: String) -> Unit:
 	return null
 
 
+## O21.1.1: cede l'arma a un'unità amica nello stesso esagono che non ne ha una.
+## Il costo di 1 PM è a carico del flusso di movimento; qui si cambia solo il
+## proprietario e la posizione dell'arma.
+func transfer_weapon(from_id: String, to_id: String) -> bool:
+	if from_id == to_id:
+		return false
+	var carrier: Unit = units.get(from_id)
+	var recv: Unit = units.get(to_id)
+	var w := weapon_carried_by(from_id)
+	if carrier == null or recv == null or w == null:
+		return false
+	if not recv.is_man() or recv.faction != carrier.faction:
+		return false
+	if weapon_carried_by(to_id) != null:
+		return false
+	if recv.q != w.q or recv.r != w.r:
+		return false
+	w.carrier_id = to_id
+	w.q = recv.q
+	w.r = recv.r
+	return true
+
+
 ## Sposta un'unità in (q,r) portando con sé l'eventuale arma trasportata (11.1).
 ## Unico punto da usare per muovere le pedine, così l'arma resta sempre col
 ## proprietario (mossa umana, avanzata, IA).

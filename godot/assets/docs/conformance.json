@@ -1,22 +1,102 @@
 [
-  {"area": "Turn sequence and orders", "status": "IMPLEMENTED", "evidence": "Flow._turn / _discard_turn"},
-  {"area": "Activation (single unit and leader)", "status": "IMPLEMENTED", "evidence": "Flow._choose_activation"},
-  {"area": "Movement, MP, roads and wire", "status": "IMPLEMENTED", "evidence": "HexGrid.step_cost / Flow._move_stack"},
-  {"area": "Fire combat and fire actions", "status": "IMPLEMENTED", "evidence": "Flow._fire_attack / _fire_mods"},
-  {"area": "Melee and advance", "status": "IMPLEMENTED", "evidence": "Rules.resolve_melee / Flow advance"},
-  {"area": "Recover and rout", "status": "IMPLEMENTED", "evidence": "Flow recover and rout orders"},
-  {"area": "Artillery request, denied and smoke", "status": "PARTIAL", "evidence": "core implemented; SSR 24 radio smoke restriction pending"},
-  {"area": "Fate triggers (time, sniper, event, jam)", "status": "IMPLEMENTED", "evidence": "Flow.roll and _apply_trigger"},
-  {"area": "Objectives, VP, exit, surrender and sudden death", "status": "IMPLEMENTED", "evidence": "Flow and GameState"},
-  {"area": "LOS, terrain, hills and smoke", "status": "PARTIAL", "evidence": "hill crest per hex; variable smoke pending"},
-  {"area": "Weapons carried and broken", "status": "PARTIAL", "evidence": "repair/elimination 11.4 and transfer O21.1.1 pending"},
-  {"area": "Support tables", "status": "PARTIAL", "evidence": "Finnish/Belgian/Polish exceptions and flamethrower/satchel rules pending"},
-  {"area": "Scenario special rules", "status": "PARTIAL", "evidence": "22 automated; around 75 shown-only rules pending"},
-  {"area": "Hidden and deferred deployments", "status": "MISSING", "evidence": "scenarios 2, 3, 15, 18 and 21"},
-  {"area": "Snow 1.5 movement cost", "status": "MISSING", "evidence": "requires fractional PM refactor"},
-  {"area": "Motti deployment", "status": "IMPLEMENTED", "evidence": "ScenarioLoader._motti_filter"},
-  {"area": "Scenario 23 sniper group and artillery denial", "status": "MISSING", "evidence": "pending"},
-  {"area": "Scenario 24 radio smoke restriction", "status": "MISSING", "evidence": "pending"},
-  {"area": "Online rooms and reconnection", "status": "IMPLEMENTED", "evidence": "Server.gd / Online.gd"},
-  {"area": "Save and replay determinism", "status": "IMPLEMENTED", "evidence": "ReplayCheck / SaveCheck"}
+  {
+    "area": "Turn sequence and orders",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow._turn / _discard_turn"
+  },
+  {
+    "area": "Activation (single unit and leader)",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow._choose_activation"
+  },
+  {
+    "area": "Movement, MP, roads and wire",
+    "status": "IMPLEMENTED",
+    "evidence": "HexGrid.step_cost / Flow._move_stack"
+  },
+  {
+    "area": "Fire combat and fire actions",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow._fire_attack / _fire_mods"
+  },
+  {
+    "area": "Melee and advance",
+    "status": "IMPLEMENTED",
+    "evidence": "Rules.resolve_melee / Flow advance"
+  },
+  {
+    "area": "Recover and rout",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow recover and rout orders"
+  },
+  {
+    "area": "Artillery request, denied and smoke",
+    "status": "PARTIAL",
+    "evidence": "core implemented; SSR 24 radio smoke restriction pending"
+  },
+  {
+    "area": "Fate triggers (time, sniper, event, jam)",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow.roll and _apply_trigger"
+  },
+  {
+    "area": "Objectives, VP, exit, surrender and sudden death",
+    "status": "IMPLEMENTED",
+    "evidence": "Flow and GameState"
+  },
+  {
+    "area": "LOS, terrain, hills and smoke",
+    "status": "PARTIAL",
+    "evidence": "hill crest per hex; variable smoke pending"
+  },
+  {
+    "area": "Weapons carried and broken",
+    "status": "PARTIAL",
+    "evidence": "transfer O21.1.1 implemented; 11.4 Fix/Elim ranges pending"
+  },
+  {
+    "area": "Support tables",
+    "status": "PARTIAL",
+    "evidence": "Finnish/Belgian/Polish exceptions and flamethrower/satchel rules pending"
+  },
+  {
+    "area": "Scenario special rules",
+    "status": "PARTIAL",
+    "evidence": "22 automated; around 75 shown-only rules pending"
+  },
+  {
+    "area": "Hidden and deferred deployments",
+    "status": "MISSING",
+    "evidence": "scenarios 2, 3, 15, 18 and 21"
+  },
+  {
+    "area": "Snow 1.5 movement cost",
+    "status": "MISSING",
+    "evidence": "requires fractional PM refactor"
+  },
+  {
+    "area": "Motti deployment",
+    "status": "IMPLEMENTED",
+    "evidence": "ScenarioLoader._motti_filter"
+  },
+  {
+    "area": "Scenario 23 sniper group and artillery denial",
+    "status": "MISSING",
+    "evidence": "pending"
+  },
+  {
+    "area": "Scenario 24 radio smoke restriction",
+    "status": "MISSING",
+    "evidence": "pending"
+  },
+  {
+    "area": "Online rooms and reconnection",
+    "status": "IMPLEMENTED",
+    "evidence": "Server.gd / Online.gd"
+  },
+  {
+    "area": "Save and replay determinism",
+    "status": "IMPLEMENTED",
+    "evidence": "ReplayCheck / SaveCheck"
+  }
 ]
