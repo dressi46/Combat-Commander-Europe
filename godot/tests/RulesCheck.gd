@@ -79,5 +79,24 @@ func _ready() -> void:
 	ok(st.transfer_weapon("a", "b"), "traspaso de arma permitido")
 	ok(st.weapon_carried_by("b") == w and st.weapon_carried_by("a") == null, "arma transferida al receptor")
 	ok(not st.transfer_weapon("a", "b"), "no se puede transferir un arma que ya no se lleva")
+	# 11.4: Fix/Elim de armas averiadas al comprobar un Hexágono Aleatorio.
+	var stf := GameState.new()
+	var wf := Unit.new("wf", Flow.AX, Domain.UnitType.WEAPON, Domain.UnitClass.MG, "Light MG")
+	wf.efficient = false
+	stf.units = { "wf": wf }
+	Rules.check_broken_weapons(stf, 2)
+	ok(wf.efficient, "11.4: Fix 2 repara la Light MG")
+	var ste := GameState.new()
+	var we := Unit.new("we", Flow.AX, Domain.UnitType.WEAPON, Domain.UnitClass.MG, "Light MG")
+	we.efficient = false
+	ste.units = { "we": we }
+	Rules.check_broken_weapons(ste, 8)
+	ok(not ste.units.has("we"), "11.4: Elim 8 elimina la Light MG")
+	var stn := GameState.new()
+	var wn := Unit.new("wn", Flow.AX, Domain.UnitType.WEAPON, Domain.UnitClass.MG, "Medium MG")
+	wn.efficient = false
+	stn.units = { "wn": wn }
+	Rules.check_broken_weapons(stn, 5)
+	ok(not wn.efficient and stn.units.has("wn"), "11.4: un número fuera de rango no cambia el arma")
 	print("RULES_RESULT: %s (%d controlli, %d falliti)" % ["PASS" if fails == 0 else "FAIL", total, fails])
 	get_tree().quit(0 if fails == 0 else 1)

@@ -31,7 +31,7 @@ godot --headless --path godot res://tests/ConformanceCheck.tscn -- --strict
 | Innescos del Fato (tiempo, cecchino, evento, inceppamento) | IMPLEMENTED | `Flow.roll`, `_apply_trigger` |
 | Objetivos, PV, salida, rendición y muerte súbita | IMPLEMENTED | `Flow`, `GameState` |
 | LOS, terreno, colinas y humo | PARTIAL | cresta por hexágono; humo variable pendiente |
-| Armas portadas y averiadas | PARTIAL | traspaso O21.1.1 implementado; faltan rangos Fix/Elim 11.4 |
+| Armas portadas y averiadas | PARTIAL | traspaso O21.1.1 y 11.4 para armas comunes; faltan armas específicas y radios A.R./A.D. |
 | Tablas de Apoyo | PARTIAL | faltan excepciones finlandesas/belgas/polacas y lanzallamas/carga |
 | Reglas especiales de escenario | PARTIAL | 22 automatizadas; ~75 solo mostradas |
 | Despliegues ocultos/diferidos | MISSING | escenarios 2, 3, 15, 18, 21 |

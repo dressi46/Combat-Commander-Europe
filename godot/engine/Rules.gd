@@ -284,6 +284,66 @@ static func artillery_fort_vulnerability(fp: int) -> int:
 	return 20 - fp
 
 
+# ─── Armi: Fix/Elim (11.4) ───────────────────────────────────────────────────
+
+const WEAPONS_PATH := "res://assets/units/weapons.json"
+static var _weapons: Dictionary = {}
+static var _weapons_loaded := false
+
+
+static func _ensure_weapons() -> void:
+	if _weapons_loaded:
+		return
+	_weapons_loaded = true
+	var f := FileAccess.open(WEAPONS_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var d: Variant = JSON.parse_string(f.get_as_text())
+	f.close()
+	if d is Dictionary:
+		_weapons = d
+
+
+## Profilo Fix/Elim del tipo di arma (per nome, con fallback per sottostringa).
+static func weapon_profile(name: String) -> Dictionary:
+	_ensure_weapons()
+	if _weapons.has(name):
+		return _weapons[name]
+	var best := ""
+	for key in _weapons:
+		if name.contains(String(key)) and String(key).length() > best.length():
+			best = String(key)
+	return _weapons[best] if best != "" else {}
+
+
+## 11.4: prima di applicare un Esagono Casuale, confronta il numero con ogni
+## arma guasta in gioco. Fix → riparata; Elim → eliminata; altrimenti resta.
+static func check_broken_weapons(state: GameState, value: int) -> Array[String]:
+	var lines: Array[String] = []
+	var ids: Array = []
+	for w in state.units.values():
+		if w.is_weapon() and not w.efficient:
+			ids.append(w.id)
+	for id in ids:
+		var w: Unit = state.units.get(id)
+		if w == null:
+			continue
+		var prof := weapon_profile(w.unit_name)
+		if prof.is_empty():
+			continue
+		var fix: Array = prof.get("fix", [])
+		var elim: Array = prof.get("elim", [])
+		if fix.size() == 2 and value >= int(fix[0]) and value <= int(fix[1]):
+			w.efficient = true
+			lines.append(L10n.t("%s riparata (Fix %d).") % [w.display_name, value])
+		elif elim.size() == 2 and value >= int(elim[0]) and value <= int(elim[1]):
+			state.units.erase(w.id)
+			if not w.unit_name.contains("Radio"):
+				state.graves.append(w)
+			lines.append(L10n.t("%s eliminata (Elim %d).") % [w.display_name, value])
+	return lines
+
+
 # ─── Corpo a corpo / Avanzata (O21) ──────────────────────────────────────────
 
 class MeleeResult:

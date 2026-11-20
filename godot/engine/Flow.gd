@@ -498,6 +498,9 @@ func random_hex(f: int) -> Vector2i:
 	var c := draw_card(f)
 	if c == null:
 		return Vector2i(_rng.randi_range(0, s.map_cols - 1), _rng.randi_range(0, s.map_rows - 1))
+	# 11.4: prima dell'effetto, ripara/elimina le armi guaste in base al numero.
+	for line in Rules.check_broken_weapons(s, int(c.random_hex_value)):
+		say("   " + String(line), "bad" if String(line).contains(L10n.t("eliminata")) else "good")
 	var h := Domain.label_to_qr(c.random_hex_label)
 	if not in_map(h):
 		h = Vector2i(clampi(h.x, 0, s.map_cols - 1), clampi(h.y, 0, s.map_rows - 1))

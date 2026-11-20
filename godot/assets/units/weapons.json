@@ -1,0 +1,13 @@
+{
+  "Light MG": {"fix": [1, 2], "elim": [7, 10]},
+  "Medium MG": {"fix": [1, 4], "elim": [7, 10]},
+  "Heavy MG": {"fix": [1, 6], "elim": [9, 10]},
+  ".50cal MG": {"fix": [1, 4], "elim": [9, 10]},
+  "50cal MG": {"fix": [1, 4], "elim": [9, 10]},
+  "Light Mortar": {"fix": [1, 2], "elim": [9, 10]},
+  "Medium Mortar": {"fix": [1, 2], "elim": [9, 10]},
+  "Infantry Gun": {"fix": [1, 2], "elim": [9, 10]},
+  "Pack Howitzer": {"fix": [1, 2], "elim": [9, 10]},
+  "Flamethrower": {"fix": [1, 2], "elim": [9, 10]},
+  "Satchel Charge": {"fix": [1, 2], "elim": [9, 10]}
+}

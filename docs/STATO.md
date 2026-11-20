@@ -27,7 +27,7 @@
 2. **Salvataggio** della partita: non ancora collegato al nuovo motore.
 3. **Tabelle di Supporto**: i comandanti arrivano con i valori del loro grado (non quelli stampati sul singolo counter); le voci «solo OB finlandese» e i mortai «solo belgi/polacchi» sono escluse; Lanciafiamme e Carica esplosiva sono armi semplici (FP 11 e 12, gittata 1) senza le loro regole particolari.
 4. **Colline**: le quote sono per esagono intero (le mappe non registrano la linea di cresta dentro l'esagono), quindi la cresta coincide col bordo dell'esagono.
-5. **Armi guaste**: non si riparano/eliminano con l'Esagono Casuale (11.4). Il trasferimento arma (O21.1.1) è implementato.
+5. **Armi guaste**: la 11.4 è implementata per le armi con range numerici (Light/Medium/Heavy MG, .50cal, mortai leggeri/medi, Infantry Gun, Pack Howitzer, Flamethrower, Satchel). Mancano le armi specifiche e le Radio (A.R./A.D.). Il trasferimento arma (O21.1.1) è implementato.
 6. **Terreno**: obiettivi su edifici di più esagoni, fumo a valore variabile (ora vale sempre 3).
 7. **Regole speciali di scenario**: valgono quelle già presenti nei dati; le altre sono solo descritte in «Come si gioca».
 8. **Carte illustrate** per Britannici, Italiani e Francesi: per ora disegnate dal gioco.
