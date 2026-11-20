@@ -69,5 +69,24 @@ regla 11.4. Las armas específicas (50mm/60mm/81mm, Brandt, Brixia, IG 18/33,
 - [x] Regla 11.4 aplicada en `Flow.random_hex`.
 - [x] Las 14 caras originales copiadas a `assets/counters_20th/sheets/`.
 - [x] Herramienta de troceado `tools/cut_counters.py`.
+- [x] Marcador de minas real (`assets/markers/Mines.png`).
 - [ ] Troceado físico de las caras que faltan (reversos de armas y naciones menores).
 - [ ] Manifiesto completo y sustitución de la arte stand-in.
+
+## Naciones menores que siguen en stand-in
+
+| Escenario | Nación real | Stand-in actual |
+|---|---|---|
+| 12 | Brasileña | US |
+| 13 | ANZAC | GB |
+| 14 | Polaca | FR |
+| 15 | Rumana | IT |
+| 17 | Canadiense | GB |
+| 18 | Yugoslava | FR |
+| 19 | Griega | catálogo: `french` |
+| 20 | Finlandesa | catálogo: `italian` |
+
+Las cartas ilustradas solo existen para alemanes, rusos y americanos
+(`assets/cards_it/`); británicos, italianos y franceses se dibujan por código.
+Las losas no incluyen cartas, así que eso queda fuera del troceado de fichas.
+
