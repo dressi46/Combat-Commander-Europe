@@ -25,8 +25,8 @@ func _ready() -> void:
 	panel.add_child(layout)
 	layout.add_theme_constant_override("separation", 0)
 	var crop := AtlasTexture.new()
-	crop.atlas = preload("res://assets/artwork/scenario_01.jpg")
-	crop.region = Rect2(22, 180, 461, 415)
+	crop.atlas = preload("res://assets/posters/scenario_01.jpg")
+	crop.region = Rect2(60, 300, 600, 540)
 	art.texture = crop
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED

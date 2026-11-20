@@ -7,10 +7,12 @@ extends Control
 
 var _scenarios: Array = []     ## scenari.json (numero, titolo, luogo, data)
 var _catalog: Array = []       ## catalog.json (forze_axis/allies, fazioni…)
+var _briefings: Dictionary = {} ## briefings.json (título inglés + textos)
 var _selected_num: int = 0
 
 var _list: VBoxContainer
 var _map_tex: TextureRect
+var _poster: VBoxContainer
 var _art_tex: TextureRect
 var _ob_axis: VBoxContainer
 var _ob_allies: VBoxContainer
@@ -39,6 +41,7 @@ const NATION_LABEL := {
 func _ready() -> void:
 	_scenarios = _load_json("res://assets/scenari.json")
 	_catalog = _load_json("res://assets/scenarios/catalog.json")
+	_briefings = _load_briefings()
 	L10n.scale_menu()
 	if L10n.small_screen():
 		_build_phone_menu()
@@ -63,6 +66,13 @@ func _catalog_entry(num: int) -> Dictionary:
 		if int(s.get("numero", 0)) == num:
 			return s
 	return {}
+
+
+func _load_briefings() -> Dictionary:
+	var out := {}
+	for item in _load_json("res://assets/scenarios/briefings.json"):
+		out[int(item.get("numero", 0))] = item
+	return out
 
 
 # ─── Costruzione UI ───────────────────────────────────────────────────────────
@@ -100,19 +110,60 @@ func _build_ui() -> void:
 	scroll.add_child(_list)
 	_build_list()
 
-	# ARTWORK al centro, a PIENA ALTEZZA: l'elemento dominante (cambia con lo scenario).
+	# Póster: ilustración sin texto + ficha beige generada por la interfaz.
+	_poster = VBoxContainer.new()
+	_poster.anchor_left = 0.0
+	_poster.anchor_right = 1.0
+	_poster.anchor_top = 0.0
+	_poster.anchor_bottom = 1.0
+	_poster.offset_left = 272
+	_poster.offset_right = -492
+	_poster.offset_top = 12
+	_poster.offset_bottom = -58
+	_poster.add_theme_constant_override("separation", 0)
+	add_child(_poster)
 	_art_tex = TextureRect.new()
 	_art_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_art_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_art_tex.anchor_left = 0.0
-	_art_tex.anchor_right = 1.0
-	_art_tex.anchor_top = 0.0
-	_art_tex.anchor_bottom = 1.0
-	_art_tex.offset_left = 272
-	_art_tex.offset_right = -492
-	_art_tex.offset_top = 12
-	_art_tex.offset_bottom = -58
-	add_child(_art_tex)
+	_art_tex.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_art_tex.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_poster.add_child(_art_tex)
+
+	# Ficha beige del póster: alineada con la ilustración, texto traducible.
+	var brief_center := CenterContainer.new()
+	brief_center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_poster.add_child(brief_center)
+	_brief = PanelContainer.new()
+	_brief.custom_minimum_size = Vector2(380, 200)
+	_brief.add_theme_stylebox_override("panel", Tema.box(Color(0.84, 0.80, 0.67), Color(0.23, 0.20, 0.15), 1, 0, 14))
+	brief_center.add_child(_brief)
+	var bv := VBoxContainer.new()
+	bv.add_theme_constant_override("separation", 5)
+	_brief.add_child(bv)
+	_brief_title = Tema.title("", 26, Color(0.15, 0.14, 0.11))
+	_brief_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bv.add_child(_brief_title)
+	_brief_meta = Label.new()
+	_brief_meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_brief_meta.add_theme_color_override("font_color", Color(0.55, 0.12, 0.08))
+	_brief_meta.add_theme_font_override("font", Tema.bold_font())
+	_brief_meta.add_theme_font_size_override("font_size", 14)
+	bv.add_child(_brief_meta)
+	_brief_info = RichTextLabel.new()
+	_brief_info.bbcode_enabled = false
+	_brief_info.fit_content = true
+	_brief_info.scroll_active = false
+	_brief_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_brief_info.custom_minimum_size = Vector2(0, 80)
+	_brief_info.add_theme_font_override("normal_font", Tema.body_font())
+	_brief_info.add_theme_font_size_override("normal_font_size", 15)
+	_brief_info.add_theme_color_override("default_color", Color(0.17, 0.16, 0.12))
+	bv.add_child(_brief_info)
+	var footer := Label.new()
+	footer.text = "COMBAT COMMANDER"
+	footer.add_theme_color_override("font_color", Color(0.38, 0.35, 0.26))
+	footer.add_theme_font_size_override("font_size", 11)
+	bv.add_child(footer)
 
 	# Colonna destra: MAPPA in alto (affiancata all'artwork) e, SOTTO, l'ORDINE DI
 	# BATTAGLIA su due colonne. Anch'essi cambiano con lo scenario selezionato.
@@ -134,34 +185,11 @@ func _build_ui() -> void:
 	inner.add_theme_constant_override("separation", 10)
 	pad.add_child(inner)
 
-	# Ficha de misión: contexto histórico y militar, encima del mapa.
-	_brief = PanelContainer.new()
-	_brief.add_theme_stylebox_override("panel", Tema.paper_box(Color(0.07, 0.08, 0.055, 0.90), Tema.BRASS, 2, 4, 10))
-	inner.add_child(_brief)
-	var bv := VBoxContainer.new()
-	bv.add_theme_constant_override("separation", 3)
-	_brief.add_child(bv)
-	_brief_title = Tema.title("", 18)
-	_brief_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	bv.add_child(_brief_title)
-	_brief_meta = Label.new()
-	_brief_meta.add_theme_color_override("font_color", Tema.BRASS)
-	_brief_meta.add_theme_font_size_override("font_size", 13)
-	bv.add_child(_brief_meta)
-	_brief_info = RichTextLabel.new()
-	_brief_info.bbcode_enabled = true
-	_brief_info.fit_content = true
-	_brief_info.scroll_active = false
-	_brief_info.custom_minimum_size = Vector2(0, 42)
-	_brief_info.add_theme_font_size_override("normal_font_size", 13)
-	_brief_info.add_theme_color_override("default_color", Tema.DIM.lightened(0.18))
-	bv.add_child(_brief_info)
-
 	# Mappa (in alto).
 	_map_tex = TextureRect.new()
 	_map_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_map_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_map_tex.custom_minimum_size = Vector2(0, 240)
+	_map_tex.custom_minimum_size = Vector2(0, 300)
 	inner.add_child(_map_tex)
 
 	# Ordine di Battaglia (sotto la mappa): una colonna per avversario; cliccando
@@ -268,14 +296,16 @@ func _build_list() -> void:
 		child.queue_free()
 	for sc in _scenarios:
 		var num := int(sc.get("numero", 0))
-		var titolo: String = sc.get("titolo", "—")
+		var br: Dictionary = _briefings.get(num, {})
+		var title := String(br.get("title", sc.get("titolo", "—")))
+		var place := String(br.get("place", sc.get("luogo", "")))
 		var btn := Button.new()
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.custom_minimum_size = Vector2(0, 34)
 		btn.add_theme_font_size_override("font_size", 16)
 		btn.clip_text = true
-		btn.text = "%2d.  %s" % [num, L10n.t(titolo)]
-		btn.tooltip_text = "%s — %s" % [L10n.t(sc.get("luogo", "")), L10n.t(sc.get("data", ""))]
+		btn.text = "%2d.  %s" % [num, title]
+		btn.tooltip_text = place
 		btn.pressed.connect(_select.bind(num))
 		_list.add_child(btn)
 
@@ -285,23 +315,22 @@ func _build_list() -> void:
 func _select(num: int) -> void:
 	_selected_num = num
 	_map_tex.texture = _load_tex("res://assets/maps_img/map%d.jpg" % num)
-	_art_tex.texture = _load_tex("res://assets/artwork/scenario_%02d.jpg" % num)
+	_art_tex.texture = _load_tex("res://assets/posters/scenario_%02d.jpg" % num)
 	var cat := _catalog_entry(num)
 	var sc := {}
 	for item in _scenarios:
 		if int(item.get("numero", 0)) == num:
 			sc = item
 			break
+	var br: Dictionary = _briefings.get(num, {})
 	if _brief_title != null:
-		_brief_title.text = "%d · %s" % [num, L10n.t(sc.get("titolo", ""))]
-		_brief_meta.text = "%s · %s" % [L10n.t(sc.get("luogo", "")), L10n.t(sc.get("data", ""))]
-		var axis_nation := String(cat.get("fazione_axis", "german"))
-		var allies_nation := String(cat.get("fazione_allies", "russian"))
-		_brief_info.text = "[img=24x16]res://assets/flags/%s.svg[/img] %s · %s\n[img=24x16]res://assets/flags/%s.svg[/img] %s · %s" % [
-			axis_nation, L10n.t(NATION_LABEL.get(axis_nation, axis_nation)),
-			L10n.t("workshop/" + String(cat.get("posture_axis", "recon"))),
-			allies_nation, L10n.t(NATION_LABEL.get(allies_nation, allies_nation)),
-			L10n.t("workshop/" + String(cat.get("posture_allies", "recon")))]
+		var title := String(br.get("title", sc.get("titolo", "")))
+		var place := String(br.get("place", sc.get("luogo", "")))
+		var lang := L10n.base_language(L10n.locale)
+		var situation := String(br.get(lang, br.get("en", "")))
+		_brief_title.text = "%d · %s" % [num, title]
+		_brief_meta.text = place
+		_brief_info.text = situation
 	_fill_ob(_axis_btn, _ob_axis, String(cat.get("fazione_axis", "german")), cat.get("forze_axis", []), Domain.Faction.GERMAN)
 	_fill_ob(_allies_btn, _ob_allies, String(cat.get("fazione_allies", "russian")), cat.get("forze_allies", []), Domain.Faction.RUSSIAN)
 	if _rules_label != null:
@@ -467,6 +496,7 @@ func _start(faction: int) -> void:
 
 func _build_phone_menu() -> void:
 	theme = Tema.get_theme()
+	Tema.attach_backdrop(self)
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(scroll)
@@ -481,7 +511,10 @@ func _build_phone_menu() -> void:
 	col.add_child(back)
 	var picker := OptionButton.new()
 	for s in _scenarios:
-		picker.add_item("%d · %s" % [s.numero, L10n.t(s.titolo)], s.numero)
+		var num := int(s.get("numero", 0))
+		var br: Dictionary = _briefings.get(num, {})
+		var title := String(br.get("title", s.get("titolo", "")))
+		picker.add_item("%d · %s" % [num, title], num)
 	picker.custom_minimum_size.y = 48
 	col.add_child(picker)
 	var full := Button.new()
