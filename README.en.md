@@ -21,6 +21,8 @@ Keep the terminal open and visit [the local game](http://localhost:8781/) in Bra
 - **Mission and card workshop** lets you edit and generate scenarios, attach documents and play custom missions against the AI. Import card illustrations by language, deck and card number. For PDF sheets, choose a page and grid cell. Your browser stores the files on your device.
 - **Settings** saves your language, action playback speed and sound effects volume. Slow playback gives you more time to read the action log.
 
+Against the AI, an arrow traces each step on the map. While moving, a destination shows **cost → MP remaining**. Open the action log to review the sequence. Each event report shows its rule and outcome and waits for **Continue play**. You can disable event pauses in Settings.
+
 ## Open or export the project
 
 Open [godot/project.godot](godot/project.godot) in Godot 4.6.3 and press **F5** to play. To build the browser version, install the matching Godot export templates and run these commands from the repository root:

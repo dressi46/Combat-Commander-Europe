@@ -20,7 +20,7 @@ static func make(flow: Flow, seat: int, revision: int, text: MatchText, catalog:
 	var events := []
 	for ev in flow.events:
 		var visible := {"kind": ev.kind, "text": text.render(ev.text, catalog)}
-		for key in ["who", "dice", "hex", "from", "to", "fx", "unit"]:
+		for key in ["who", "dice", "hex", "from", "to", "fx", "unit", "order", "rule"]:
 			if ev.has(key):
 				visible[key] = ev[key]
 		if ev.get("card") is Card:
@@ -48,7 +48,7 @@ static func _decision(p: Dictionary, seat: int, text: MatchText, catalog: Dictio
 			view.blocked[i] = text.render(p.blocked[i], catalog)
 	for option in p.options:
 		var entry := {"label": text.render(option.get("label", ""), catalog)}
-		for key in ["id", "hex", "unit", "card", "on", "cost", "melee"]:
+		for key in ["id", "hex", "unit", "card", "on", "cost", "remaining", "road_gain", "melee"]:
 			if option.has(key):
 				entry[key] = option[key]
 		view.options.append(entry)

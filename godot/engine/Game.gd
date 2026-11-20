@@ -111,8 +111,11 @@ func start_new_game(human_faction: int = Flow.AX, scenario_num: int = 1,
 		Mode.DEMO:
 			bots[Flow.AX] = Bot.new(flow, difficulty)
 			bots[Flow.AL] = Bot.new(flow, difficulty)
+	_timer.stop()
+	_timer.paused = false
 	_queue.clear()
 	paused = false
+	flow.explain_events = mode == Mode.VS_AI
 	flow.manual_setup = mode == Mode.VS_AI
 	flow.start()
 	_after_engine()
@@ -154,7 +157,7 @@ func _after_engine() -> void:
 	state_changed.emit()
 	busy = true
 	decision_changed.emit()
-	_schedule(0.01)
+	_schedule(0.8 if mode == Mode.VS_AI and bots.has(flow.pending.get("who", -1)) else 0.01)
 
 
 func _schedule(t: float) -> void:
@@ -165,13 +168,16 @@ func _schedule(t: float) -> void:
 
 func set_paused(p: bool) -> void:
 	paused = p
-	if not p and busy:
+	_timer.paused = p
+	if not p and busy and _timer.is_stopped():
 		_schedule(0.05)
 
 
 ## Salta l'attesa: mostra subito tutta la cronaca in coda.
 func skip() -> void:
-	while not _queue.is_empty():
+	if paused:
+		return
+	while not paused and not _queue.is_empty():
 		_play_event(_queue.pop_front())
 	_timer.stop()
 	_tick()
@@ -189,14 +195,20 @@ func _event_delay(ev: Dictionary) -> float:
 
 
 func _tick() -> void:
-	if flow == null:
+	if flow == null or paused:
 		return
 	if not _queue.is_empty():
 		var ev: Dictionary = _queue.pop_front()
 		_play_event(ev)
 		# Le azioni proprie scorrono più svelte di quelle dell'avversario.
-		var own := is_human(int(ev.get("who", -1))) and mode == Mode.VS_AI
-		_schedule(_event_delay(ev) * (0.55 if own else 1.0))
+		var delay := _event_delay(ev)
+		if mode == Mode.VS_AI:
+			var actor := int(ev.get("who", flow.s.active_faction))
+			if bots.has(actor):
+				delay = maxf(2.4 if ev.get("kind") == "move" else 1.6, delay)
+			else:
+				delay *= 0.75
+		_schedule(delay)
 		return
 	if flow.over:
 		busy = false

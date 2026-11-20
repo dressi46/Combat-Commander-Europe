@@ -72,6 +72,7 @@ var _sel_card := -1
 var _dice_until := 0
 var _played_until := 0
 var _log_lines := 0
+var latest := Label.new()
 
 
 func _ready() -> void:
@@ -183,6 +184,17 @@ func _build() -> void:
 	bar.add_child(help)
 
 	# ── Riga 2: plancia (Tempo, PV, Iniziativa, perdite) ─────────────────────
+	latest.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	latest.max_lines_visible = 2
+	latest.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	latest.add_theme_color_override("font_color", Tema.PAPER)
+	var history_bar := HBoxContainer.new()
+	root.add_child(history_bar)
+	latest.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	history_bar.add_child(latest)
+	var history := _btn(L10n.t("CRONACA"))
+	history.pressed.connect(_open_history)
+	history_bar.add_child(history)
 	var tp := PanelContainer.new()
 	tp.add_theme_stylebox_override("panel", Tema.box(Tema.PANEL, Tema.EDGE, 2, 4, 4))
 	root.add_child(tp)
@@ -501,6 +513,9 @@ func _refresh() -> void:
 			who_lbl.text = L10n.t("REAGISCI — %s") % fl.side_name(who2).to_upper()
 		who_lbl.add_theme_color_override("font_color", Tema.side_color(who2))
 		guide.text = String(p["title"])
+		var order := int(p.get("order", OrderNotes.DECISIONS.get(p.kind, -1)))
+		if order >= 0:
+			guide.text += "\n" + OrderNotes.describe(order)
 		_build_options(p)
 	_refresh_hand(p)
 	_refresh_status()
@@ -517,7 +532,13 @@ func _build_options(p: Dictionary) -> void:
 			hex_n += 1
 		elif o.has("unit"):
 			unit_n += 1
-	if hex_n > 0:
+	if kind == "move":
+		opts_box.add_child(_hint(L10n.t("O21 · Each hex shows MP cost → MP left after entry.")))
+		if hex_n == 1:
+			for option: Dictionary in opts:
+				if option.get("id") == "step":
+					opts_box.add_child(_hint(String(option.label)))
+	elif hex_n > 0:
 		opts_box.add_child(_hint(L10n.t("Tocca sulla mappa uno degli esagoni evidenziati (%d).") % hex_n))
 	if unit_n > 0 and kind in ["activate", "pick_mover", "sniper", "ambush_victim", "spotter", "deploy", "setup"]:
 		opts_box.add_child(_hint(L10n.t("Tocca sulla mappa una delle pedine col bordo dorato, oppure scegli dall'elenco.")))
@@ -675,10 +696,23 @@ const KIND_COL := {
 
 func _on_event(ev: Dictionary) -> void:
 	var kind := String(ev.get("kind", ""))
+	if kind == "event_report":
+		if Game.tutorial_enabled and Game.mode == Game.Mode.VS_AI:
+			_show_event_report(ev)
+		return
 	var col := String(KIND_COL.get(kind, "#c8c8b8"))
+	var line := String(ev.get("text", ""))
+	if ev.has("order"):
+		line += " · " + OrderNotes.describe(int(ev.order))
+	elif ev.has("rule"):
+		line += " · " + str(ev.rule)
+	if kind == "move":
+		line += " · O21"
+	latest.text = _plain(line)
+	latest.tooltip_text = latest.text
 	if kind == "turn":
 		log_box.append_text("\n")
-	log_box.append_text("[color=%s]%s[/color]\n" % [col, String(ev.get("text", ""))])
+	log_box.append_text("[color=#aba99b]%d[/color]  [color=%s]%s[/color]\n" % [_log_lines + 1, col, line])
 	_log_lines += 1
 	if kind == "roll" and ev.has("dice"):
 		var d: Array = ev["dice"]
@@ -694,6 +728,48 @@ func _on_event(ev: Dictionary) -> void:
 		played_lbl.text = L10n.t("%s: carta giocata") % (Game.flow.side_name(who) if who >= 0 else "")
 		played_box.visible = true
 		_played_until = Time.get_ticks_msec() + 2600
+
+
+func _show_event_report(ev: Dictionary) -> void:
+	var title := L10n.t(String(ev.name)).capitalize()
+	var note: Array = OrderNotes.EVENT_RULES.get(ev.name, ["E42", "E42 · The Event trigger reveals the event on the next Fate card."])
+	var details := PackedStringArray(ev.outcomes)
+	if details.is_empty():
+		details.append(L10n.t("No further effect was recorded."))
+	var description := "[b]%s · %s[/b]\n%s\n\n%s\n\n%s" % [note[0], title,
+		Game.flow.side_name(int(ev.who)), L10n.t(note[1]),
+		"\n".join(details)]
+	_reading_dialog(L10n.t("Event resolution"), description, true)
+
+
+func _open_history() -> void:
+	_reading_dialog(L10n.t("CRONACA"), log_box.get_parsed_text(), false)
+
+
+func _reading_dialog(title: String, content: String, formatted: bool) -> void:
+	var pause_here := Game.mode != Game.Mode.ONLINE and not Game.paused
+	if pause_here:
+		Game.set_paused(true)
+	var dialog := AcceptDialog.new()
+	dialog.title = title
+	dialog.ok_button_text = L10n.t("Continue play")
+	dialog.exclusive = true
+	var body := RichTextLabel.new()
+	body.bbcode_enabled = formatted
+	var area := get_viewport_rect().size
+	body.custom_minimum_size = Vector2(minf(520, area.x * 0.77), minf(340, area.y * 0.47))
+	body.text = content
+	dialog.add_child(body)
+	var resume := func():
+		if pause_here:
+			Game.set_paused(false)
+		dialog.queue_free()
+	dialog.confirmed.connect(resume)
+	dialog.canceled.connect(resume)
+	add_child(dialog)
+	dialog.popup_centered()
+	if not formatted:
+		body.scroll_to_line.call_deferred(maxi(0, body.get_line_count() - 1))
 
 
 func _plain(bb: String) -> String:

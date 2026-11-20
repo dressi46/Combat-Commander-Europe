@@ -112,7 +112,12 @@ func _on_event(ev: Dictionary) -> void:
 				_fx.append({ "kind": "line", "a": ev["from"], "b": ev["to"], "t0": now, "dur": 1500 })
 		"move":
 			if ev.has("to"):
-				_fx.append({ "kind": "ring", "a": ev["to"], "t0": now, "dur": 600, "col": Color(1, 1, 1) })
+				var duration := 700
+				if Game.mode == Game.Mode.VS_AI and Game.bots.has(ev.get("who", -1)):
+					duration = int(2400.0 / maxf(0.25, Game.speed))
+				if ev.has("from"):
+					_fx.append({"kind": "path", "a": ev.from, "b": ev.to, "t0": now, "dur": duration})
+				_fx.append({ "kind": "ring", "a": ev["to"], "t0": now, "dur": duration, "col": Color.WHITE })
 	if ev.has("hex") and String(ev.get("kind", "")) != "fire":
 		var col := Color(1.0, 0.5, 0.1)
 		if String(ev.get("kind", "")) == "vp":
@@ -232,13 +237,17 @@ func _draw() -> void:
 		col.a *= 0.75 + 0.25 * pulse
 		draw_colored_polygon(_corners(h.x, h.y, 0.96), col)
 		draw_polyline(_closed(_corners(h.x, h.y, 0.96)), Color(col.r, col.g, col.b, 0.95), 2.5)
-		if o.has("cost"):
-			_txt(L10n.t("%d PM") % int(o["cost"]), hex_center(h.x, h.y) + Vector2(0, _hs() * 0.55), _hs() * 0.30, Color(1, 1, 1))
+
 	# Esagono di riferimento della decisione (bersaglio / esagono entrato).
 	if p.has("hex"):
 		var ph: Vector2i = p["hex"]
 		draw_polyline(_closed(_corners(ph.x, ph.y, 1.0)), Color(1.0, 0.25, 0.2, 0.6 + 0.4 * pulse), 4.0)
 	_draw_units(s, p, unit_opts, pulse)
+	for option: Dictionary in hex_opts.values():
+		if option.has("cost"):
+			var h: Vector2i = option.hex
+			var caption := "%d → %d" % [option.cost, option.remaining] if option.has("remaining") else L10n.t("%d PM") % int(option.cost)
+			_txt(caption, hex_center(h.x, h.y) + Vector2(0, _hs() * 0.55), _hs() * 0.30, Color.WHITE)
 	_draw_fx()
 	if _hover.x >= 0:
 		draw_polyline(_closed(_corners(_hover.x, _hover.y, 1.0)), Color(1, 1, 1, 0.35), 1.5)
@@ -404,6 +413,16 @@ func _draw_fx() -> void:
 	for e: Dictionary in _fx:
 		var k := clampf(float(now - int(e["t0"])) / float(e["dur"]), 0.0, 1.0)
 		match String(e["kind"]):
+			"path":
+				var origin := hex_center(e.a.x, e.a.y)
+				var target := hex_center(e.b.x, e.b.y)
+				var direction := origin.direction_to(target)
+				var tip := origin.lerp(target, minf(0.85, k * 3.0))
+				var tail := tip - direction * hs * 0.24
+				var wing := direction.orthogonal() * hs * 0.12
+				draw_line(origin, tip, Color.BLACK, 5.0)
+				draw_line(origin, tip, Tema.PAPER, 2.5)
+				draw_colored_polygon(PackedVector2Array([tip, tail + wing, tail - wing]), Tema.PAPER)
 			"line":
 				var a := hex_center(e["a"].x, e["a"].y)
 				var b := hex_center(e["b"].x, e["b"].y)

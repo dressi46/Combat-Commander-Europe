@@ -28,6 +28,8 @@ signal _never
 var s: GameState
 var pending: Dictionary = {}
 var events: Array = []
+var explain_events := false
+var _event_reports: Array = []
 var over: bool = false
 var winner: int = -1
 var end_reason: String = ""
@@ -269,6 +271,8 @@ func say(text: String, kind: String = "", data: Dictionary = {}) -> void:
 	var ev := { "text": text, "kind": kind }
 	ev.merge(data)
 	events.append(ev)
+	if not _event_reports.is_empty():
+		_event_reports.back().append(text.strip_edges())
 	s.add_log(text, "", kind)
 
 
@@ -493,6 +497,15 @@ func _event(f: int) -> void:
 	if c == null:
 		return
 	say(L10n.t("[b]Evento — %s[/b] (per %s)") % [L10n.t(c.event_name).capitalize(), side_name(f)], "fate")
+	if explain_events:
+		_event_reports.append([])
+	await _resolve_event_card(c, f)
+	if explain_events:
+		var outcomes: Array = _event_reports.pop_back()
+		events.append({"kind": "event_report", "name": c.event_name, "who": f, "outcomes": outcomes})
+
+
+func _resolve_event_card(c: Card, f: int) -> void:
 	if await _event_native(c, f):
 		check_end()
 		return
@@ -732,7 +745,7 @@ func order_block(f: int, c: Card) -> String:
 
 func _play_order(f: int, c: Card) -> void:
 	_discard_from_hand(f, c)
-	say(L10n.t("[b]%s: ordine di %s[/b]") % [side_name(f), L10n.t(Domain.ORDER_LABELS.get(c.order, "?")).to_upper()], "order", { "card": c, "who": f })
+	say(L10n.t("[b]%s: ordine di %s[/b]") % [side_name(f), L10n.t(Domain.ORDER_LABELS.get(c.order, "?")).to_upper()], "order", { "order": c.order, "card": c, "who": f })
 	match c.order:
 		Domain.OrderType.MOVE: await _order_move(f)
 		Domain.OrderType.FIRE: await _order_fire(f)
@@ -774,7 +787,7 @@ func _discard_turn(f: int) -> void:
 		cards.append(hand(f)[i])
 	for c: Card in cards:
 		_discard_from_hand(f, c)
-	say(L10n.t("%s passano e scartano %d carte.") % [side_name(f), cards.size()], "order", { "who": f })
+	say(L10n.t("%s passano e scartano %d carte.") % [side_name(f), cards.size()], "order", { "rule": "O15", "who": f })
 	if cards.is_empty():
 		return
 	# Reazioni dell'avversario allo scarto: Unità Nascosta (A35.4), Demolizioni (A31).
@@ -1208,7 +1221,10 @@ func _move_stack(f: int, stack: Array) -> bool:
 					break
 				c = maxi(c, cm)
 			if c >= 0:
-				opts.append({ "id": "step", "hex": nb, "cost": c, "label": L10n.t("%s (%d PM)") % [lbl(nb), c] })
+				var bonus := 1 if road_bonus == 0 and s.hex_at(nb.x, nb.y).has_road else 0
+				var remaining := left - c + bonus
+				opts.append({"id": "step", "hex": nb, "cost": c, "remaining": remaining,
+					"road_gain": bonus, "label": L10n.t("%s · %d MP → %d left") % [lbl(nb), c, remaining]})
 		if left >= 1 and at_edge(opp(f), u.pos()):
 			var v := 0
 			for m: Unit in stack:
@@ -1232,7 +1248,7 @@ func _move_stack(f: int, stack: Array) -> bool:
 			who = L10n.t("%s con altre %d unità") % [u.display_name, stack.size() - 1]
 		opts.append({ "id": "stop", "label": L10n.t("Ferma qui %s") % who })
 		var a := await ask(f, "move", L10n.t("MOSSA · %s: %d PM rimasti. Tocca un esagono adiacente evidenziato per avanzare di un passo.") % [who, maxi(left, 0)],
-			opts, { "unit": u.id, "left": left, "selected": stack.map(func(x: Unit) -> String: return x.id) })
+			opts, { "order": Domain.OrderType.MOVE, "unit": u.id, "left": left, "selected": stack.map(func(x: Unit) -> String: return x.id) })
 		match String(a.get("id", "stop")):
 			"step":
 				var to: Vector2i = a["hex"]
@@ -1242,9 +1258,20 @@ func _move_stack(f: int, stack: Array) -> bool:
 					s.set_unit_pos(m, to.x, to.y)
 				moved = true
 				# T93: +1 al Movimento da quando si entra in un esagono con Strada.
-				if road_bonus == 0 and s.hex_at(to.x, to.y).has_road:
-					road_bonus = 1
-				say(L10n.t("%s muove in %s (%d PM spesi).") % [who, lbl(to), spent], "move", { "unit": u.id, "from": from, "to": to, "who": f })
+				road_bonus += int(a["road_gain"])
+				var step := L10n.t("%s: %s → %s · %d MP, %d left.") % [who, lbl(from), lbl(to), a.cost, a.remaining]
+				var breakdown := {}
+				HexGrid.step_cost(s, from.x, from.y, to.x, to.y, breakdown)
+				step += " " + L10n.t("%s · entry %d MP.") % [L10n.t(Domain.TERRAIN_NAMES[s.hex_at(to.x, to.y).terrain]), breakdown.base]
+				if breakdown.has("crossing"):
+					step += " " + L10n.t("Hexside +1 MP.")
+				if breakdown.has("uphill"):
+					step += " " + L10n.t("Uphill +1 MP (T88.1).")
+				if s.hex_at(from.x, from.y).fortification == Domain.Fort.WIRE:
+					step += " " + L10n.t("Leaving wire spends the available MP (F106).")
+				if int(a.road_gain) > 0:
+					step += " " + L10n.t("Road bonus +1 MP (T93).")
+				say(step, "move", { "unit": u.id, "from": from, "to": to, "who": f })
 				update_objectives()
 				for m: Unit in stack:
 					if s.units.has(m.id):

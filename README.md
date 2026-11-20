@@ -21,6 +21,8 @@ Deja la terminal abierta y entra en [el juego local](http://localhost:8781/) des
 - **Taller de misiones y cartas** permite editar y generar escenarios, adjuntar documentos y jugar misiones personalizadas contra la IA. Para importar una carta, elige su idioma, mazo y número. En un PDF también puedes elegir página y casilla. El navegador guarda los archivos en el dispositivo.
 - **Configuración** guarda el idioma, el ritmo de las acciones y el volumen de los efectos. El ritmo lento da más tiempo para leer la crónica.
 
+En una partida contra la IA, la flecha del tablero marca el paso de origen a destino. Al mover, cada casilla indica **coste → PM restantes**. Pulsa **Crónica** para leer la secuencia completa. El resumen de cada evento muestra la regla y su resultado, y espera a que pulses **Continuar partida**. Puedes desactivar esa pausa en Configuración.
+
 ## Abrir o exportar el proyecto
 
 Abre [godot/project.godot](godot/project.godot) con Godot 4.6.3 y pulsa **F5** para jugar. Para crear la versión web desde el repositorio, instala las plantillas de exportación de esa versión y ejecuta desde la raíz:

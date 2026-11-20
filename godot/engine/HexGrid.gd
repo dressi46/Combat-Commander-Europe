@@ -227,7 +227,7 @@ static func los_hindrance(q1: int, r1: int, q2: int, r2: int, state: GameState) 
 ## Costo per entrare in (tq,tr) venendo da (fq,fr): terreno + attraversamento
 ## del lato (muro/siepe/bocage/torrente = +1, dirupo = impassabile) e tariffa
 ## strada (1 PM se entrambi gli esagoni sono su strada). -1 se impraticabile.
-static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int) -> int:
+static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int, details: Variant = null) -> int:
 	var hd: GameState.HexData = state.hex_at(tq, tr)
 	if hd == null:
 		return -1
@@ -241,18 +241,24 @@ static func step_cost(state: GameState, fq: int, fr: int, tq: int, tr: int) -> i
 			or (hd.has_trail and fhd.has_trail) \
 			or (hd.has_railway and fhd.has_railway)):
 		base = 1  # tariffa strada lungo strada/sentiero/ferrovia
+	if details != null:
+		details.base = base
 	var feat := state.side_feature_between(Vector2i(fq, fr), Vector2i(tq, tr))
 	if feat == Domain.HexsideFeature.CLIFF:
 		return -1
 	if feat == Domain.HexsideFeature.WALL or feat == Domain.HexsideFeature.BOCAGE \
 			or feat == Domain.HexsideFeature.HEDGE or feat == Domain.HexsideFeature.STREAM_SIDE \
 			or feat == Domain.HexsideFeature.FENCE:
+		if details != null:
+			details.crossing = true
 		base += 1  # Terrain Chart: Recinzione/Siepe/Muro costano +1 PM
 	# Salita (T88.1): +1 PM per entrare in un esagono a quota SUPERIORE. La quota è
 	# il campo `elevation`, con un minimo implicito dal terreno collina (HILL1/2).
 	var to_elev: int = maxi(hd.elevation, _terrain_elevation(hd.terrain))
 	var from_elev: int = maxi(fhd.elevation, _terrain_elevation(fhd.terrain)) if fhd != null else 0
 	if to_elev > from_elev:
+		if details != null:
+			details.uphill = true
 		base += 1
 	return base
 

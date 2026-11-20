@@ -126,6 +126,11 @@ func _settings() -> void:
 		volume.add_item(L10n.t("Muted") if percent == 0 else "%d%%" % percent, percent)
 	volume.select(volume.get_item_index(Game.sound_percent))
 	volume.item_selected.connect(func(index: int): Game.set_sound_percent(volume.get_item_id(index)))
+	var reports := CheckButton.new()
+	reports.text = L10n.t("Pause to explain events against the AI")
+	reports.button_pressed = Game.tutorial_enabled
+	reports.toggled.connect(Game.set_tutorial)
+	column.add_child(reports)
 	_button("Quick translation", _translation)
 	_button("Back", _home)
 
