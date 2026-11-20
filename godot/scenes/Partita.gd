@@ -477,19 +477,19 @@ func _refresh_status() -> void:
 func _fill_controls() -> void:
 	var popup := controls.get_popup()
 	popup.clear()
-	popup.add_item(L10n.t("CRONACA"), 0)
-	popup.add_item(L10n.t("Vista 2D" if view3d != null and view3d.visible else "Vista 3D"), 1)
-	popup.add_item(L10n.t("Centra"), 2)
+	popup.add_icon_item(preload("res://assets/track/history.svg"), L10n.t("CRONACA"), 0)
+	popup.add_icon_item(preload("res://assets/track/los.svg"), L10n.t("Vista 2D" if view3d != null and view3d.visible else "Vista 3D"), 1)
+	popup.add_icon_item(preload("res://assets/track/center.svg"), L10n.t("Centra"), 2)
 	if Game.mode != Game.Mode.ONLINE:
-		popup.add_item(L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()]), 3)
-		popup.add_item(L10n.t("Riprendi" if Game.paused else "Pausa"), 4)
-		popup.add_item(L10n.t("Manual AI steps"), 7)
+		popup.add_icon_item(preload("res://assets/track/time.svg"), L10n.t("Ritmo: %s") % L10n.t(Game.SPEED_LABELS[Game.speed_index()]), 3)
+		popup.add_icon_item(preload("res://assets/track/pause.svg"), L10n.t("Riprendi" if Game.paused else "Pausa"), 4)
+		popup.add_icon_item(preload("res://assets/track/orders.svg"), L10n.t("Manual AI steps"), 7)
 		popup.set_item_checked(popup.get_item_index(7), Game.manual)
-	popup.add_item(L10n.t("Come si gioca"), 5)
-	popup.add_item(L10n.t("Save game"), 8)
-	popup.add_item(L10n.t("Load game"), 9)
+	popup.add_icon_item(preload("res://assets/track/help.svg"), L10n.t("Come si gioca"), 5)
+	popup.add_icon_item(preload("res://assets/track/save.svg"), L10n.t("Save game"), 8)
+	popup.add_icon_item(preload("res://assets/track/load.svg"), L10n.t("Load game"), 9)
 	popup.add_separator()
-	popup.add_item(L10n.t("Torna al menu degli scenari"), 6)
+	popup.add_icon_item(preload("res://assets/track/exit.svg"), L10n.t("Torna al menu degli scenari"), 6)
 
 
 func _control_action(id: int) -> void:

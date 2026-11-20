@@ -22,7 +22,7 @@ var _rules_label: RichTextLabel
 var _brief: PanelContainer
 var _brief_title: Label
 var _brief_meta: Label
-var _brief_info: Label
+var _brief_info: RichTextLabel
 var _difficulty: int = Domain.BotDifficulty.GREEN
 var _mode: int = 0
 
@@ -148,10 +148,13 @@ func _build_ui() -> void:
 	_brief_meta.add_theme_color_override("font_color", Tema.BRASS)
 	_brief_meta.add_theme_font_size_override("font_size", 13)
 	bv.add_child(_brief_meta)
-	_brief_info = Label.new()
-	_brief_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_brief_info.add_theme_color_override("font_color", Tema.DIM.lightened(0.18))
-	_brief_info.add_theme_font_size_override("font_size", 13)
+	_brief_info = RichTextLabel.new()
+	_brief_info.bbcode_enabled = true
+	_brief_info.fit_content = true
+	_brief_info.scroll_active = false
+	_brief_info.custom_minimum_size = Vector2(0, 42)
+	_brief_info.add_theme_font_size_override("normal_font_size", 13)
+	_brief_info.add_theme_color_override("default_color", Tema.DIM.lightened(0.18))
 	bv.add_child(_brief_info)
 
 	# Mappa (in alto).
@@ -294,10 +297,10 @@ func _select(num: int) -> void:
 		_brief_meta.text = "%s · %s" % [L10n.t(sc.get("luogo", "")), L10n.t(sc.get("data", ""))]
 		var axis_nation := String(cat.get("fazione_axis", "german"))
 		var allies_nation := String(cat.get("fazione_allies", "russian"))
-		_brief_info.text = "%s · %s\n%s · %s" % [
-			L10n.t(NATION_LABEL.get(axis_nation, axis_nation)),
+		_brief_info.text = "[img=24x16]res://assets/flags/%s.svg[/img] %s · %s\n[img=24x16]res://assets/flags/%s.svg[/img] %s · %s" % [
+			axis_nation, L10n.t(NATION_LABEL.get(axis_nation, axis_nation)),
 			L10n.t("workshop/" + String(cat.get("posture_axis", "recon"))),
-			L10n.t(NATION_LABEL.get(allies_nation, allies_nation)),
+			allies_nation, L10n.t(NATION_LABEL.get(allies_nation, allies_nation)),
 			L10n.t("workshop/" + String(cat.get("posture_allies", "recon")))]
 	_fill_ob(_axis_btn, _ob_axis, String(cat.get("fazione_axis", "german")), cat.get("forze_axis", []), Domain.Faction.GERMAN)
 	_fill_ob(_allies_btn, _ob_allies, String(cat.get("fazione_allies", "russian")), cat.get("forze_allies", []), Domain.Faction.RUSSIAN)
@@ -311,6 +314,11 @@ func _fill_ob(btn: Button, forces: VBoxContainer, nation: String, forze: Array, 
 	if btn == null:
 		return
 	btn.text = L10n.t("GIOCA CON: %s") % L10n.t(NATION_LABEL.get(nation, nation.capitalize())).to_upper()
+	var flag := Tema.flag(nation)
+	if flag != null:
+		btn.icon = flag
+		btn.expand_icon = true
+		btn.add_theme_constant_override("icon_max_width", 30)
 	for child in forces.get_children():
 		child.queue_free()
 	var nat := UnitChart.nation_code(nation)

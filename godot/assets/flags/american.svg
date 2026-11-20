@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 40">
+<rect width="60" height="40" fill="#FFFFFF"/>
+<g fill="#B22234">
+<rect y="0" width="60" height="3.08"/><rect y="6.15" width="60" height="3.08"/>
+<rect y="12.31" width="60" height="3.08"/><rect y="18.46" width="60" height="3.08"/>
+<rect y="24.62" width="60" height="3.08"/><rect y="30.77" width="60" height="3.08"/>
+<rect y="36.92" width="60" height="3.08"/>
+</g>
+<rect width="24" height="20" fill="#3C3B6E"/>
+<g fill="#FFFFFF"><circle cx="1.6" cy="1.6" r="0.65"/><circle cx="4.5" cy="1.6" r="0.65"/><circle cx="7.4" cy="1.6" r="0.65"/><circle cx="10.3" cy="1.6" r="0.65"/><circle cx="13.2" cy="1.6" r="0.65"/><circle cx="16.1" cy="1.6" r="0.65"/><circle cx="19.0" cy="1.6" r="0.65"/><circle cx="21.9" cy="1.6" r="0.65"/><circle cx="1.6" cy="4.7" r="0.65"/><circle cx="4.5" cy="4.7" r="0.65"/><circle cx="7.4" cy="4.7" r="0.65"/><circle cx="10.3" cy="4.7" r="0.65"/><circle cx="13.2" cy="4.7" r="0.65"/><circle cx="16.1" cy="4.7" r="0.65"/><circle cx="19.0" cy="4.7" r="0.65"/><circle cx="21.9" cy="4.7" r="0.65"/><circle cx="1.6" cy="7.8" r="0.65"/><circle cx="4.5" cy="7.8" r="0.65"/><circle cx="7.4" cy="7.8" r="0.65"/><circle cx="10.3" cy="7.8" r="0.65"/><circle cx="13.2" cy="7.8" r="0.65"/><circle cx="16.1" cy="7.8" r="0.65"/><circle cx="19.0" cy="7.8" r="0.65"/><circle cx="21.9" cy="7.8" r="0.65"/><circle cx="1.6" cy="10.9" r="0.65"/><circle cx="4.5" cy="10.9" r="0.65"/><circle cx="7.4" cy="10.9" r="0.65"/><circle cx="10.3" cy="10.9" r="0.65"/><circle cx="13.2" cy="10.9" r="0.65"/><circle cx="16.1" cy="10.9" r="0.65"/><circle cx="19.0" cy="10.9" r="0.65"/><circle cx="21.9" cy="10.9" r="0.65"/><circle cx="1.6" cy="14.0" r="0.65"/><circle cx="4.5" cy="14.0" r="0.65"/><circle cx="7.4" cy="14.0" r="0.65"/><circle cx="10.3" cy="14.0" r="0.65"/><circle cx="13.2" cy="14.0" r="0.65"/><circle cx="16.1" cy="14.0" r="0.65"/><circle cx="19.0" cy="14.0" r="0.65"/><circle cx="21.9" cy="14.0" r="0.65"/><circle cx="1.6" cy="17.1" r="0.65"/><circle cx="4.5" cy="17.1" r="0.65"/><circle cx="7.4" cy="17.1" r="0.65"/><circle cx="10.3" cy="17.1" r="0.65"/><circle cx="13.2" cy="17.1" r="0.65"/><circle cx="16.1" cy="17.1" r="0.65"/><circle cx="19.0" cy="17.1" r="0.65"/><circle cx="21.9" cy="17.1" r="0.65"/></g>
+</svg>

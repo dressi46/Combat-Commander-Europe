@@ -125,6 +125,13 @@ static func side_color(f: int) -> Color:
 	return AXIS if f == Flow.AX else ALLIES
 
 
+## Bandera histórica de la nación (1936–1946). Alemania usa el Balkenkreuz,
+## no la bandera oficial con la esvástica.
+static func flag(nation: String) -> Texture2D:
+	var path := "res://assets/flags/%s.svg" % nation
+	return load(path) if ResourceLoader.exists(path) else null
+
+
 static func get_theme() -> Theme:
 	if _theme != null:
 		return _theme
